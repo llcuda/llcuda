@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2024-12-26
+
+### Changed
+- **Converted to pure Python package** - No longer requires C++ compilation!
+- Removed C++ extension dependencies (CMake, pybind11, CUDA headers)
+- Now installs instantly with `pip install llcuda` on all platforms
+- Uses HTTP client to communicate with llama-server backend via requests library
+
+### Added
+- Added `requests>=2.20.0` as a dependency
+
+### Fixed
+- **Fixed PyPI installation failure** - Package now installs without compilation errors
+- Works on Kaggle, Colab, Windows, Linux, macOS without build tools
+- No more "Failed building wheel" errors
+
+### Removed
+- C++ extension build system
+- CMake requirement
+- pybind11 requirement
+- CUDA development headers requirement
+
 ## [0.1.0] - 2024-12-26
 
 ### Added
