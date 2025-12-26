@@ -38,16 +38,27 @@ pip install llcuda
 
 You need llama-server executable with CUDA support. Choose one option:
 
-#### Option A: Use Existing Installation (Recommended for You)
+#### Option A: Download Pre-built Binary (Recommended for Ubuntu 22.04)
 
-If you already have llama-cpp-cuda installed:
+**Fastest and easiest method** - Uses the same binary that llcuda was developed and tested with:
 
 ```bash
-# Set environment variable to your llama-cpp-cuda directory
-export LLAMA_CPP_DIR="/media/waqasm86/External1/Project-Nvidia/llama-cpp-cuda"
+# Download pre-built llama.cpp with CUDA support (290 MB)
+wget https://github.com/waqasm86/Ubuntu-Cuda-Llama.cpp-Executable/releases/download/v0.1.0/llama.cpp-733c851f-bin-ubuntu-cuda-x64.tar.xz
+
+# Extract
+tar -xf llama.cpp-733c851f-bin-ubuntu-cuda-x64.tar.xz
+
+# Set environment variable
+export LLAMA_SERVER_PATH=$PWD/bin/llama-server
+
+# Or add to your PATH
+export PATH=$PWD/bin:$PATH
 ```
 
-Add this to your `~/.bashrc` or `~/.profile` to make it permanent.
+**Requirements**: Ubuntu 22.04, NVIDIA GPU with CUDA 11.7+ or 12.x
+
+**Verified working on**: GeForce 940M (1GB VRAM) to RTX 4090
 
 #### Option B: Build from Source
 
@@ -59,9 +70,14 @@ cmake .. -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=50  # Adjust for your GPU
 cmake --build . --config Release -j$(nproc)
 ```
 
-#### Option C: Download Pre-built Binary
+#### Option C: Use Existing Installation
 
-Check [llama.cpp releases](https://github.com/ggerganov/llama.cpp/releases) for pre-built binaries.
+If you already have llama-cpp-cuda installed:
+
+```bash
+# Set environment variable to your llama-cpp-cuda directory
+export LLAMA_CPP_DIR="/path/to/your/llama-cpp-cuda"
+```
 
 ## Quick Start
 
