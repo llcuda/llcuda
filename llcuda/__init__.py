@@ -1,8 +1,25 @@
 """
-llcuda - CUDA-Accelerated LLM Inference for Python (Pure Python Version)
+llcuda - CUDA-Accelerated LLM Inference for Python
 
 This module provides a Pythonic interface for CUDA-accelerated LLM inference
-via llama-server backend.
+via llama-server backend with automatic server management.
+
+Examples:
+    Basic usage with auto-start:
+    >>> import llcuda
+    >>> engine = llcuda.InferenceEngine()
+    >>> engine.load_model("/path/to/model.gguf", auto_start=True)
+    >>> result = engine.infer("What is AI?", max_tokens=100)
+    >>> print(result.text)
+
+    Manual server management:
+    >>> from llcuda import ServerManager
+    >>> manager = ServerManager()
+    >>> manager.start_server("/path/to/model.gguf", gpu_layers=99)
+    >>> # Server is now running
+    >>> engine = llcuda.InferenceEngine()
+    >>> result = engine.infer("Hello!")
+    >>> manager.stop_server()
 """
 
 from typing import Optional, List, Dict, Any
@@ -11,12 +28,31 @@ import subprocess
 import requests
 import time
 
-__version__ = "0.1.2"
+from .server import ServerManager
+from .utils import (
+    detect_cuda,
+    get_llama_cpp_cuda_path,
+    setup_environment,
+    find_gguf_models,
+    print_system_info,
+    load_config,
+    create_config_file,
+    get_recommended_gpu_layers,
+    validate_model_path
+)
+
+__version__ = "0.2.0"
 __all__ = [
     'InferenceEngine',
     'InferResult',
+    'ServerManager',
     'check_cuda_available',
-    'get_cuda_device_info'
+    'get_cuda_device_info',
+    'detect_cuda',
+    'setup_environment',
+    'find_gguf_models',
+    'print_system_info',
+    'get_llama_cpp_cuda_path',
 ]
 
 
@@ -24,11 +60,26 @@ class InferenceEngine:
     """
     High-level Python interface for LLM inference with CUDA acceleration.
 
+    This class provides an easy-to-use API for running LLM inference with
+    automatic server management. It can automatically find and start
+    llama-server, or connect to an existing server instance.
+
     Examples:
+        Auto-start mode (easiest):
         >>> engine = InferenceEngine()
-        >>> # Assumes llama-server is running on http://127.0.0.1:8090
+        >>> engine.load_model("model.gguf", auto_start=True, gpu_layers=99)
         >>> result = engine.infer("What is AI?", max_tokens=100)
         >>> print(result.text)
+
+        Connect to existing server:
+        >>> engine = InferenceEngine(server_url="http://127.0.0.1:8090")
+        >>> result = engine.infer("What is AI?", max_tokens=100)
+        >>> print(result.text)
+
+        With context manager (auto-cleanup):
+        >>> with InferenceEngine() as engine:
+        ...     engine.load_model("model.gguf", auto_start=True)
+        ...     result = engine.infer("Hello!")
     """
 
     def __init__(self, server_url: str = "http://127.0.0.1:8090"):
@@ -40,6 +91,7 @@ class InferenceEngine:
         """
         self.server_url = server_url
         self._model_loaded = False
+        self._server_manager: Optional[ServerManager] = None
         self._metrics = {
             'requests': 0,
             'total_tokens': 0,
@@ -63,31 +115,77 @@ class InferenceEngine:
     def load_model(
         self,
         model_path: str,
-        gpu_layers: int = 0,
+        gpu_layers: int = 99,
         ctx_size: int = 2048,
-        batch_size: int = 512,
-        threads: int = 4
+        auto_start: bool = False,
+        n_parallel: int = 1,
+        verbose: bool = True,
+        **kwargs
     ) -> bool:
         """
-        Check if model is loaded on llama-server.
+        Load a GGUF model for inference.
 
-        Note: This is a compatibility method. In pure Python mode,
-        the model should already be loaded on llama-server.
+        If auto_start=True and server is not running, it will automatically
+        start llama-server with the specified model and configuration.
 
         Args:
-            model_path: Path to the GGUF model file (informational)
-            gpu_layers: Number of layers to offload to GPU (informational)
-            ctx_size: Context size (informational)
-            batch_size: Batch size (informational)
-            threads: Number of CPU threads (informational)
+            model_path: Path to the GGUF model file
+            gpu_layers: Number of layers to offload to GPU (default: 99 = all)
+            ctx_size: Context size (default: 2048)
+            auto_start: Automatically start server if not running (default: False)
+            n_parallel: Number of parallel sequences (default: 1)
+            verbose: Print status messages (default: True)
+            **kwargs: Additional server parameters
 
         Returns:
-            True if server is accessible, False otherwise
+            True if model loaded successfully, False otherwise
+
+        Raises:
+            FileNotFoundError: If model file not found
+            ConnectionError: If server not running and auto_start=False
+            RuntimeError: If server fails to start
         """
-        if self.check_server():
-            self._model_loaded = True
-            return True
-        return False
+        # Validate model path
+        if not validate_model_path(model_path):
+            raise FileNotFoundError(f"Model file not found or invalid: {model_path}")
+
+        # Check if server is running
+        if not self.check_server():
+            if auto_start:
+                if verbose:
+                    print(f"Starting llama-server with model: {model_path}")
+
+                # Create server manager and start server
+                self._server_manager = ServerManager(server_url=self.server_url)
+
+                # Extract port from server URL
+                port = int(self.server_url.split(':')[-1].split('/')[0])
+
+                success = self._server_manager.start_server(
+                    model_path=model_path,
+                    port=port,
+                    gpu_layers=gpu_layers,
+                    ctx_size=ctx_size,
+                    n_parallel=n_parallel,
+                    verbose=verbose,
+                    **kwargs
+                )
+
+                if not success:
+                    raise RuntimeError("Failed to start llama-server")
+
+            else:
+                raise ConnectionError(
+                    f"llama-server not running at {self.server_url}. "
+                    "Set auto_start=True to start automatically, or start the server manually."
+                )
+
+        self._model_loaded = True
+
+        if verbose:
+            print(f"✓ Model loaded and ready for inference")
+
+        return True
 
     def infer(
         self,
@@ -282,13 +380,29 @@ class InferenceEngine:
         }
 
     def unload_model(self):
-        """Unload the current model."""
+        """Unload the current model and stop server if managed by this instance."""
+        if self._server_manager is not None:
+            self._server_manager.stop_server()
+            self._server_manager = None
         self._model_loaded = False
 
     @property
     def is_loaded(self) -> bool:
         """Check if a model is currently loaded."""
         return self._model_loaded
+
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit: cleanup server."""
+        self.unload_model()
+        return False
+
+    def __del__(self):
+        """Cleanup when object is destroyed."""
+        self.unload_model()
 
 
 class InferResult:
@@ -375,13 +489,8 @@ def check_cuda_available() -> bool:
     Returns:
         True if CUDA is available, False otherwise
     """
-    try:
-        result = subprocess.run(['nvidia-smi'],
-                              capture_output=True,
-                              timeout=5)
-        return result.returncode == 0
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        return False
+    cuda_info = detect_cuda()
+    return cuda_info['available']
 
 
 def get_cuda_device_info() -> Optional[Dict[str, Any]]:
@@ -391,47 +500,43 @@ def get_cuda_device_info() -> Optional[Dict[str, Any]]:
     Returns:
         Dictionary with GPU info or None if CUDA unavailable
     """
-    if not check_cuda_available():
+    cuda_info = detect_cuda()
+    if not cuda_info['available']:
         return None
 
-    try:
-        result = subprocess.run([
-            'nvidia-smi',
-            '--query-gpu=name,driver_version,memory.total',
-            '--format=csv,noheader'
-        ], capture_output=True, text=True, timeout=5)
-
-        if result.returncode == 0:
-            parts = result.stdout.strip().split(',')
-            if len(parts) >= 3:
-                return {
-                    'name': parts[0].strip(),
-                    'driver_version': parts[1].strip(),
-                    'memory_total': parts[2].strip()
-                }
-    except Exception:
-        pass
-
-    return None
+    return {
+        'cuda_version': cuda_info['version'],
+        'gpus': cuda_info['gpus']
+    }
 
 
 # Convenience function
 def quick_infer(
     prompt: str,
+    model_path: Optional[str] = None,
     max_tokens: int = 128,
-    server_url: str = "http://127.0.0.1:8090"
+    server_url: str = "http://127.0.0.1:8090",
+    auto_start: bool = True
 ) -> str:
     """
     Quick inference with minimal setup.
 
     Args:
         prompt: Input prompt
+        model_path: Path to GGUF model (required if auto_start=True)
         max_tokens: Maximum tokens to generate
         server_url: llama-server URL
+        auto_start: Automatically start server if needed
 
     Returns:
         Generated text
     """
     engine = InferenceEngine(server_url=server_url)
+
+    if auto_start and model_path:
+        engine.load_model(model_path, auto_start=True, verbose=False)
+    elif not engine.check_server():
+        return "Error: Server not running and no model path provided"
+
     result = engine.infer(prompt, max_tokens=max_tokens)
     return result.text if result.success else f"Error: {result.error_message}"

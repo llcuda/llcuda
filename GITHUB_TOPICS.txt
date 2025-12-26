@@ -1,1 +1,1 @@
-python llm cuda gpu inference deep-learning machine-learning llama kaggle colab nvidia t4 llama-cpp gguf pytorch transformers ai artificial-intelligence
+llm cuda gpu inference deep-learning llama python machine-learning ai natural-language-processing gguf llama-cpp jupyter jupyterlab nvidia pytorch tensorflow gemma

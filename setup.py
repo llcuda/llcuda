@@ -16,10 +16,10 @@ def read_long_description():
 
 setup(
     name='llcuda',
-    version='0.1.2',
+    version='0.2.0',
     author='Waqas Muhammad',
     author_email='waqasm86@gmail.com',
-    description='CUDA-accelerated LLM inference for Python',
+    description='CUDA-accelerated LLM inference for Python with automatic server management',
     long_description=read_long_description(),
     long_description_content_type='text/markdown',
     url='https://github.com/waqasm86/llcuda',

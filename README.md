@@ -1,174 +1,228 @@
 # llcuda - CUDA-Accelerated LLM Inference for Python
 
-High-performance Python package for running LLM inference with CUDA acceleration. Designed for NVIDIA T4 GPUs in Kaggle and Google Colab environments.
+High-performance Python package for running LLM inference with CUDA acceleration and **automatic server management**. Designed for ease of use in JupyterLab, notebooks, and production environments.
+
+[![PyPI version](https://badge.fury.io/py/llcuda.svg)](https://pypi.org/project/llcuda/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## ✨ What's New in v0.2.0
+
+- 🚀 **Automatic Server Management** - No manual server setup required!
+- 🔍 **Auto-Discovery** - Automatically finds llama-server and GGUF models
+- 📊 **System Diagnostics** - Built-in tools to check your setup
+- 💻 **JupyterLab Ready** - Optimized for notebook workflows
+- 🎯 **One-Line Inference** - Get started with minimal code
 
 ## Features
 
-- 🚀 **CUDA-Accelerated**: Native CUDA kernels for maximum performance
-- 🐍 **Pythonic API**: Simple, intuitive interface
+- 🚀 **CUDA-Accelerated**: Native CUDA support for maximum performance
+- 🤖 **Auto-Start**: Automatically manages llama-server lifecycle
+- 🐍 **Pythonic API**: Clean, intuitive interface
 - 📊 **Performance Metrics**: Built-in latency and throughput tracking
 - 🔄 **Streaming Support**: Real-time token generation
 - 📦 **Batch Processing**: Efficient multi-prompt inference
-- 🎯 **T4 Optimized**: Tuned for Kaggle/Colab NVIDIA T4 GPUs
+- 🎯 **Smart Discovery**: Finds models and executables automatically
+- 💻 **JupyterLab Integration**: Perfect for interactive workflows
+- 🛠️ **Context Manager Support**: Automatic resource cleanup
 
 ## Installation
 
-### From PyPI (when published)
+### Step 1: Install llcuda
 
 ```bash
 pip install llcuda
 ```
 
-### From Source
+### Step 2: Set up llama-cpp-cuda
+
+You need llama-server executable with CUDA support. Choose one option:
+
+#### Option A: Use Existing Installation (Recommended for You)
+
+If you already have llama-cpp-cuda installed:
 
 ```bash
-# Install dependencies
-pip install pybind11 numpy cmake
-
-# Clone repository
-git clone https://github.com/waqasm86/local-llama-cuda.git
-cd local-llama-cuda
-
-# Set CUDA architecture (75 for T4 GPU)
-export CUDA_ARCHITECTURES=75
-
-# Install
-pip install -e .
+# Set environment variable to your llama-cpp-cuda directory
+export LLAMA_CPP_DIR="/media/waqasm86/External1/Project-Nvidia/llama-cpp-cuda"
 ```
 
-### For Kaggle/Colab
+Add this to your `~/.bashrc` or `~/.profile` to make it permanent.
 
-```python
-# Install in notebook
-!pip install pybind11 numpy
-!git clone https://github.com/waqasm86/local-llama-cuda.git
-%cd local-llama-cuda
+#### Option B: Build from Source
 
-import os
-os.environ['CUDA_ARCHITECTURES'] = '75'  # T4 GPU
-!pip install -e .
+```bash
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+mkdir build && cd build
+cmake .. -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=50  # Adjust for your GPU
+cmake --build . --config Release -j$(nproc)
 ```
+
+#### Option C: Download Pre-built Binary
+
+Check [llama.cpp releases](https://github.com/ggerganov/llama.cpp/releases) for pre-built binaries.
 
 ## Quick Start
+
+### Ultra-Simple Usage (Auto-Start Mode)
 
 ```python
 import llcuda
 
-# Create engine
+# Create engine and load model with auto-start
 engine = llcuda.InferenceEngine()
-
-# Load model
-engine.load_model("model.gguf", gpu_layers=8)
-
-# Run inference
-result = engine.infer(
-    prompt="What is artificial intelligence?",
-    max_tokens=100,
-    temperature=0.7
+engine.load_model(
+    "/path/to/model.gguf",
+    auto_start=True,  # Automatically starts llama-server
+    gpu_layers=99     # Offload all layers to GPU
 )
 
+# Run inference
+result = engine.infer("What is artificial intelligence?", max_tokens=100)
 print(result.text)
-print(f"Latency: {result.latency_ms:.2f}ms")
-print(f"Throughput: {result.tokens_per_sec:.2f} tok/s")
+print(f"Speed: {result.tokens_per_sec:.1f} tokens/sec")
+```
+
+### JupyterLab Usage
+
+```python
+import llcuda
+
+# Check system setup
+llcuda.print_system_info()
+
+# Find available models
+models = llcuda.find_gguf_models()
+print(f"Found {len(models)} models")
+
+# Use auto-start with context manager
+with llcuda.InferenceEngine() as engine:
+    engine.load_model(models[0], auto_start=True)
+    result = engine.infer("Explain quantum computing")
+    print(result.text)
+# Server automatically stopped when exiting context
+```
+
+### Traditional Usage (Manual Server)
+
+```bash
+# Terminal 1: Start llama-server manually
+/path/to/llama-server -m model.gguf --port 8090 -ngl 99 &
+```
+
+```python
+# Python code
+import llcuda
+
+engine = llcuda.InferenceEngine()
+result = engine.infer("What is AI?")
+print(result.text)
 ```
 
 ## Usage Examples
 
-### Streaming Inference
+### System Check
 
 ```python
-def print_token(chunk):
-    print(chunk, end='', flush=True)
+import llcuda
 
-result = engine.infer_stream(
-    prompt="Write a story about AI.",
-    callback=print_token,
-    max_tokens=200
+# Comprehensive system information
+llcuda.print_system_info()
+
+# Check CUDA availability
+if llcuda.check_cuda_available():
+    gpu_info = llcuda.get_cuda_device_info()
+    print(f"GPUs: {len(gpu_info['gpus'])}")
+```
+
+### Basic Inference
+
+```python
+import llcuda
+
+engine = llcuda.InferenceEngine()
+engine.load_model("model.gguf", auto_start=True, gpu_layers=99)
+
+result = engine.infer(
+    prompt="What is machine learning?",
+    max_tokens=100,
+    temperature=0.7,
+    top_p=0.9
 )
+
+if result.success:
+    print(result.text)
+    print(f"Latency: {result.latency_ms:.0f}ms")
+    print(f"Throughput: {result.tokens_per_sec:.1f} tok/s")
+else:
+    print(f"Error: {result.error_message}")
 ```
 
 ### Batch Processing
 
 ```python
 prompts = [
+    "What is AI?",
     "What is ML?",
-    "Explain neural networks.",
-    "What is deep learning?"
+    "What is DL?"
 ]
 
 results = engine.batch_infer(prompts, max_tokens=50)
 
-for result in results:
-    print(result.text)
+for prompt, result in zip(prompts, results):
+    print(f"Q: {prompt}")
+    print(f"A: {result.text}\n")
 ```
 
-### Performance Benchmarking
+### Streaming Inference
 
 ```python
-# Reset metrics
-engine.reset_metrics()
+def on_chunk(text):
+    print(text, end='', flush=True)
 
+result = engine.infer_stream(
+    prompt="Write a story about AI",
+    callback=on_chunk,
+    max_tokens=200
+)
+```
+
+### Performance Monitoring
+
+```python
 # Run multiple inferences
-for _ in range(100):
-    result = engine.infer("Hello!", max_tokens=64)
+for _ in range(10):
+    engine.infer("Test prompt", max_tokens=50)
 
-# Get metrics
+# Get detailed metrics
 metrics = engine.get_metrics()
 print(f"Mean latency: {metrics['latency']['mean_ms']:.2f}ms")
 print(f"p95 latency: {metrics['latency']['p95_ms']:.2f}ms")
 print(f"Throughput: {metrics['throughput']['tokens_per_sec']:.2f} tok/s")
 ```
 
-## Requirements
-
-### System Requirements
-
-- **GPU**: NVIDIA GPU with CUDA support (T4, P100, V100, etc.)
-- **CUDA**: 11.7+ or 12.0+
-- **Python**: 3.11+
-- **OS**: Linux (Ubuntu 20.04+, tested on Kaggle/Colab)
-
-### Python Dependencies
-
-- `numpy>=1.20.0`
-- `pybind11>=2.10.0` (build-time)
-- `cmake>=3.24` (build-time)
-
-### Backend Requirement
-
-This package requires `llama-server` running as a backend. See [Setup Guide](#setup-with-llama-server) below.
-
-## Setup with llama-server
-
-### Install llama.cpp
-
-```bash
-# Clone llama.cpp
-git clone https://github.com/ggerganov/llama.cpp.git
-cd llama.cpp
-
-# Build with CUDA
-mkdir build && cd build
-cmake .. -DGGML_CUDA=ON
-cmake --build . --config Release -j8
-```
-
-### Start llama-server
-
-```bash
-# Start server (background)
-./build/bin/llama-server \
-  -m /path/to/model.gguf \
-  --port 8090 \
-  -ngl 99 \
-  -c 4096 &
-```
-
-### Use with llcuda
+### Advanced: Manual Server Management
 
 ```python
-# Point to server
-engine = llcuda.InferenceEngine(server_url="http://127.0.0.1:8090")
+from llcuda import ServerManager
+
+# Create and configure server
+manager = ServerManager()
+manager.start_server(
+    model_path="model.gguf",
+    port=8090,
+    gpu_layers=99,
+    ctx_size=4096,
+    n_parallel=2
+)
+
+# Use the server
+engine = llcuda.InferenceEngine()
+result = engine.infer("Hello!")
+
+# Stop when done
+manager.stop_server()
 ```
 
 ## API Reference
@@ -177,96 +231,180 @@ engine = llcuda.InferenceEngine(server_url="http://127.0.0.1:8090")
 
 Main interface for LLM inference.
 
-#### Methods
-
-- `load_model(model_path, gpu_layers=0, ...)` - Load a GGUF model
-- `infer(prompt, max_tokens=128, ...)` - Single inference
+**Methods:**
+- `load_model(model_path, gpu_layers=99, auto_start=False, ...)` - Load GGUF model
+- `infer(prompt, max_tokens=128, temperature=0.7, ...)` - Single inference
 - `infer_stream(prompt, callback, ...)` - Streaming inference
 - `batch_infer(prompts, ...)` - Batch inference
 - `get_metrics()` - Get performance metrics
-- `reset_metrics()` - Reset metrics
-- `unload_model()` - Unload current model
+- `reset_metrics()` - Reset metrics counters
+- `check_server()` - Check if server is running
+- `unload_model()` - Stop server and cleanup
 
-#### Properties
-
+**Properties:**
 - `is_loaded` - Check if model is loaded
+
+### ServerManager
+
+Low-level server lifecycle management.
+
+**Methods:**
+- `start_server(model_path, port=8090, gpu_layers=99, ...)` - Start llama-server
+- `stop_server()` - Stop running server
+- `restart_server(model_path, ...)` - Restart with new config
+- `check_server_health()` - Check server health
+- `find_llama_server()` - Find llama-server executable
+- `get_server_info()` - Get server status info
 
 ### InferResult
 
-Inference result object.
+Result object from inference.
 
-#### Properties
-
-- `success` - Whether inference succeeded
-- `text` - Generated text
-- `tokens_generated` - Number of tokens generated
-- `latency_ms` - Inference latency in milliseconds
-- `tokens_per_sec` - Generation throughput
-- `error_message` - Error message if failed
+**Properties:**
+- `success` (bool) - Whether inference succeeded
+- `text` (str) - Generated text
+- `tokens_generated` (int) - Number of tokens generated
+- `latency_ms` (float) - Inference latency in milliseconds
+- `tokens_per_sec` (float) - Generation throughput
+- `error_message` (str) - Error message if failed
 
 ### Utility Functions
 
 - `check_cuda_available()` - Check if CUDA is available
 - `get_cuda_device_info()` - Get GPU information
+- `detect_cuda()` - Detailed CUDA detection
+- `find_gguf_models(directory=None)` - Find GGUF models
+- `get_llama_cpp_cuda_path()` - Find llama-cpp-cuda installation
+- `print_system_info()` - Print comprehensive system info
+- `setup_environment()` - Setup environment variables
+- `quick_infer(prompt, model_path=None, ...)` - One-liner inference
 
-## Kaggle/Colab Notebook
+## Configuration
 
-See [examples/kaggle_colab_example.ipynb](examples/kaggle_colab_example.ipynb) for a complete notebook example.
+### Environment Variables
+
+- `LLAMA_CPP_DIR` - Path to llama-cpp-cuda installation
+- `LLAMA_SERVER_PATH` - Direct path to llama-server executable
+- `CUDA_VISIBLE_DEVICES` - Which GPUs to use
+
+Example `.bashrc` / `.profile`:
+
+```bash
+export LLAMA_CPP_DIR="/media/waqasm86/External1/Project-Nvidia/llama-cpp-cuda"
+export LD_LIBRARY_PATH="$LLAMA_CPP_DIR/lib:$LD_LIBRARY_PATH"
+```
+
+### Config File
+
+llcuda can use a config file at `~/.llcuda/config.json`:
+
+```json
+{
+  "server": {
+    "url": "http://127.0.0.1:8090",
+    "port": 8090,
+    "auto_start": true
+  },
+  "model": {
+    "gpu_layers": 99,
+    "ctx_size": 2048
+  },
+  "inference": {
+    "max_tokens": 128,
+    "temperature": 0.7
+  }
+}
+```
+
+## System Requirements
+
+### Hardware
+- **GPU**: NVIDIA GPU with CUDA support (Compute Capability 5.0+)
+- **VRAM**: 1GB+ (depends on model size)
+- **RAM**: 4GB+ recommended
+
+### Software
+- **Python**: 3.11+
+- **CUDA**: 11.7+ or 12.0+
+- **OS**: Linux (Ubuntu 20.04+), tested on Ubuntu 22.04
+
+### Python Dependencies
+- `numpy>=1.20.0`
+- `requests>=2.20.0`
 
 ## Performance
 
-Tested on NVIDIA T4 GPU (Kaggle/Colab):
+Benchmarks on NVIDIA GeForce 940M (1GB VRAM):
 
-| Model | Quantization | Throughput | p95 Latency |
-|-------|--------------|------------|-------------|
-| Gemma 2B | Q4_K_M | 45 tok/s | 180ms |
-| Mistral 7B | Q4_K_M | 28 tok/s | 320ms |
-| Llama 2 7B | Q4_K_M | 26 tok/s | 340ms |
+| Model | Quantization | GPU Layers | Throughput | Latency |
+|-------|--------------|------------|------------|---------|
+| Gemma 3 1B | Q4_K_M | 20 | ~15 tok/s | ~200ms |
+| Gemma 2B | Q4_K_M | 10 | ~12 tok/s | ~250ms |
 
-*Results with `gpu_layers=99`, `batch_size=512`, `ctx_size=4096`*
+Higher-end GPUs (T4, P100, V100, A100) will see significantly better performance.
 
 ## Troubleshooting
 
-### ImportError: No module named '_llcuda'
+### Server not found
 
-**Solution**: Reinstall with proper CUDA architecture:
-```bash
-export CUDA_ARCHITECTURES=75  # For T4 GPU
-pip install --force-reinstall -e .
+```python
+# Check if llama-server can be found
+import llcuda
+server_path = llcuda.ServerManager().find_llama_server()
+print(server_path)  # Should show path to llama-server
 ```
+
+If None, set `LLAMA_CPP_DIR` or `LLAMA_SERVER_PATH`.
 
 ### CUDA out of memory
 
-**Solution**: Reduce GPU layers or use smaller model:
+Reduce GPU layers:
+
 ```python
-engine.load_model("model.gguf", gpu_layers=4)  # Use fewer layers
+engine.load_model("model.gguf", auto_start=True, gpu_layers=10)
 ```
 
-### Server connection failed
+Or use smaller context size:
 
-**Solution**: Ensure llama-server is running:
-```bash
-curl http://127.0.0.1:8090/health
+```python
+engine.load_model("model.gguf", auto_start=True, ctx_size=1024)
 ```
+
+### Check System Setup
+
+```python
+import llcuda
+llcuda.print_system_info()
+```
+
+This will show:
+- Python version and executable
+- CUDA availability and GPU info
+- llama-cpp-cuda installation status
+- Available GGUF models
+
+## Examples
+
+See the `examples/` directory:
+
+- `quickstart_jupyterlab.ipynb` - Complete JupyterLab tutorial
+- `kaggle_colab_example.ipynb` - Cloud platform example
 
 ## Development
 
 ### Running Tests
 
 ```bash
-# Install dev dependencies
 pip install -e ".[dev]"
-
-# Run tests
 pytest tests/
 ```
 
-### Building Documentation
+### Building from Source
 
 ```bash
-pip install -e ".[dev]"
-cd docs
-make html
+git clone https://github.com/waqasm86/llcuda
+cd llcuda
+pip install -e .
 ```
 
 ## Contributing
@@ -279,30 +417,29 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Citation
 
-If you use this package in your research, please cite:
-
 ```bibtex
 @software{llcuda2024,
   title={llcuda: CUDA-Accelerated LLM Inference for Python},
   author={Muhammad, Waqas},
   year={2024},
-  url={https://github.com/waqasm86/local-llama-cuda}
+  version={0.2.0},
+  url={https://github.com/waqasm86/llcuda}
 }
 ```
 
 ## Acknowledgments
 
-- **llama.cpp**: GGML/GGUF inference engine
-- **NVIDIA CUDA**: GPU acceleration framework
-- **pybind11**: C++/Python bindings
+- **llama.cpp** - GGML/GGUF inference engine
+- **NVIDIA CUDA** - GPU acceleration framework
+- **Python community** - For amazing tools and libraries
 
 ## Links
 
-- **Documentation**: [GitHub Pages](https://waqasm86.github.io/projects/local-llama-cuda/)
-- **Source Code**: [GitHub](https://github.com/waqasm86/local-llama-cuda)
-- **Issues**: [Bug Tracker](https://github.com/waqasm86/local-llama-cuda/issues)
-- **PyPI**: [Package](https://pypi.org/project/llcuda/) (when published)
+- **GitHub**: https://github.com/waqasm86/llcuda
+- **PyPI**: https://pypi.org/project/llcuda/
+- **Issues**: https://github.com/waqasm86/llcuda/issues
+- **llama.cpp**: https://github.com/ggerganov/llama.cpp
 
 ---
 
-**Built for on-device AI with Python** 🐍🚀
+**Built with ❤️ for on-device AI** 🚀

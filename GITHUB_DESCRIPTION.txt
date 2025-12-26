@@ -1,1 +1,1 @@
-CUDA-accelerated LLM inference for Python - Pure Python package for easy installation on Kaggle, Colab, and all platforms. Works with llama-server backend for high-performance GPU inference.
+CUDA-accelerated LLM inference for Python with automatic server management. Zero-configuration setup, JupyterLab-ready, production-grade performance. Just install and start inferencing!
