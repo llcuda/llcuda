@@ -15,7 +15,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Waqas Muhammad", email = "your.email@example.com"}
+    {name = "Waqas Muhammad", email = "waqasm86@gmail.com"}
 ]
 keywords = ["llm", "cuda", "gpu", "inference", "deep-learning", "llama"]
 classifiers = [
@@ -51,10 +51,10 @@ jupyter = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/waqasm86/local-llama-cuda"
-Documentation = "https://github.com/waqasm86/local-llama-cuda#readme"
-Repository = "https://github.com/waqasm86/local-llama-cuda"
-"Bug Tracker" = "https://github.com/waqasm86/local-llama-cuda/issues"
+Homepage = "https://github.com/waqasm86/llcuda"
+Documentation = "https://github.com/waqasm86/llcuda#readme"
+Repository = "https://github.com/waqasm86/llcuda"
+"Bug Tracker" = "https://github.com/waqasm86/llcuda/issues"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
