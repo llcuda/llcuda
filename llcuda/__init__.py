@@ -41,11 +41,14 @@ from .utils import (
     validate_model_path
 )
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"  # Updated for JupyterLab features
 __all__ = [
+    # Core classes
     'InferenceEngine',
     'InferResult',
     'ServerManager',
+
+    # Utility functions
     'check_cuda_available',
     'get_cuda_device_info',
     'detect_cuda',
@@ -53,6 +56,13 @@ __all__ = [
     'find_gguf_models',
     'print_system_info',
     'get_llama_cpp_cuda_path',
+    'quick_infer',
+
+    # New modules (lazily imported)
+    'jupyter',
+    'chat',
+    'embeddings',
+    'models',
 ]
 
 
