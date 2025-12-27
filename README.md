@@ -1,10 +1,16 @@
 # llcuda - CUDA-Accelerated LLM Inference for Python
 
-High-performance Python package for running LLM inference with CUDA acceleration and **automatic server management**. Designed for ease of use in JupyterLab, notebooks, and production environments.
+High-performance Python package for running LLM inference with CUDA acceleration and **automatic server management**. Designed for ease of use in JupyterLab, notebooks, and production environments. Tested on GeForce 940M (1GB VRAM) to RTX 4090.
 
 [![PyPI version](https://badge.fury.io/py/llcuda.svg)](https://pypi.org/project/llcuda/)
+[![Downloads](https://pepy.tech/badge/llcuda)](https://pepy.tech/project/llcuda)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/waqasm86/llcuda)](https://github.com/waqasm86/llcuda/stargazers)
+
+> **Perfect for**: Legacy NVIDIA GPUs • JupyterLab workflows • Local LLM development • No-compilation setup • GeForce 900/800 series
+>
+> **Keywords**: cuda llm inference python, llama.cpp python wrapper, local llm python, gguf inference, jupyterlab llm, automatic server management, zero configuration
 
 ## ✨ What's New in v0.2.0
 
