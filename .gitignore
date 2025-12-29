@@ -163,6 +163,11 @@ install_manifest.txt
 *.bin
 *.safetensors
 
+# Bundled binaries and libraries (included in wheel only, not in git)
+llcuda/binaries/
+llcuda/lib/
+llcuda/models/*.gguf
+
 # Local configuration
 config.local.yml
 .env.local
