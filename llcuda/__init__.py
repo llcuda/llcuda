@@ -74,7 +74,7 @@ from .utils import (
     validate_model_path
 )
 
-__version__ = "1.0.0"  # PyTorch-style integrated package with CUDA 12.8 binaries
+__version__ = "1.0.1"  # Fixed parameter mapping and library loading for low-VRAM GPUs
 __all__ = [
     # Core classes
     'InferenceEngine',
@@ -222,6 +222,7 @@ class InferenceEngine:
             raise ValueError(f"Model loading failed: {e}")
 
         # Step 2: Auto-configure if requested and no manual settings provided
+        auto_settings = {}
         if auto_configure and (gpu_layers is None or ctx_size is None):
             if verbose:
                 print("\nAuto-configuring optimal settings...")
@@ -245,6 +246,8 @@ class InferenceEngine:
                 gpu_layers = 99
             if ctx_size is None:
                 ctx_size = 2048
+            # Set default auto_settings for later use
+            auto_settings = {'batch_size': 512, 'ubatch_size': 128}
 
         # Step 3: Validate model path exists
         if not model_path.exists():
@@ -262,12 +265,18 @@ class InferenceEngine:
                 # Extract port from server URL
                 port = int(self.server_url.split(':')[-1].split('/')[0])
 
+                # Extract batch parameters from kwargs or use defaults
+                batch_size = kwargs.pop('batch_size', auto_settings.get('batch_size', 512) if auto_configure else 512)
+                ubatch_size = kwargs.pop('ubatch_size', auto_settings.get('ubatch_size', 128) if auto_configure else 128)
+
                 success = self._server_manager.start_server(
                     model_path=str(model_path),
                     port=port,
                     gpu_layers=gpu_layers,
                     ctx_size=ctx_size,
                     n_parallel=n_parallel,
+                    batch_size=batch_size,
+                    ubatch_size=ubatch_size,
                     verbose=verbose,
                     **kwargs
                 )

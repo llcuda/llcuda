@@ -64,6 +64,7 @@ class ServerManager:
         if env_path:
             path = Path(env_path)
             if path.exists() and path.is_file():
+                self._setup_library_path(path)
                 return path
 
         # Priority 2: LLAMA_CPP_DIR
@@ -71,17 +72,20 @@ class ServerManager:
         if llama_cpp_dir:
             path = Path(llama_cpp_dir) / 'bin' / 'llama-server'
             if path.exists():
+                self._setup_library_path(path)
                 return path
 
         # Priority 3: Project-specific location (Ubuntu-Cuda-Llama.cpp-Executable)
         project_paths = [
             Path('/media/waqasm86/External1/Project-Nvidia/Ubuntu-Cuda-Llama.cpp-Executable/bin/llama-server'),
+            Path('/media/waqasm86/External1/Project-Nvidia/llama.cpp/build/bin/llama-server'),
             Path.home() / 'Ubuntu-Cuda-Llama.cpp-Executable' / 'bin' / 'llama-server',
             Path.cwd() / 'Ubuntu-Cuda-Llama.cpp-Executable' / 'bin' / 'llama-server',
         ]
 
         for path in project_paths:
             if path.exists():
+                self._setup_library_path(path)
                 return path
 
         # Priority 4: System locations
@@ -95,14 +99,36 @@ class ServerManager:
         for path_str in system_paths:
             path = Path(path_str)
             if path.exists():
+                self._setup_library_path(path)
                 return path
 
         # Priority 5: User's home directory
         home_path = Path.home() / '.llcuda' / 'bin' / 'llama-server'
         if home_path.exists():
+            self._setup_library_path(home_path)
             return home_path
 
         return None
+
+    def _setup_library_path(self, server_path: Path):
+        """
+        Setup LD_LIBRARY_PATH for the llama-server executable.
+
+        Args:
+            server_path: Path to llama-server executable
+        """
+        # Find lib directory relative to server binary
+        lib_dir = server_path.parent.parent / 'lib'
+
+        if lib_dir.exists():
+            lib_path_str = str(lib_dir.absolute())
+            current_ld_path = os.environ.get('LD_LIBRARY_PATH', '')
+
+            if lib_path_str not in current_ld_path:
+                if current_ld_path:
+                    os.environ['LD_LIBRARY_PATH'] = f"{lib_path_str}:{current_ld_path}"
+                else:
+                    os.environ['LD_LIBRARY_PATH'] = lib_path_str
 
     def check_server_health(self, timeout: float = 2.0) -> bool:
         """
@@ -131,6 +157,8 @@ class ServerManager:
         gpu_layers: int = 99,
         ctx_size: int = 2048,
         n_parallel: int = 1,
+        batch_size: int = 512,
+        ubatch_size: int = 128,
         timeout: int = 60,
         verbose: bool = True,
         **kwargs
@@ -145,9 +173,11 @@ class ServerManager:
             gpu_layers: Number of layers to offload to GPU (default: 99)
             ctx_size: Context size (default: 2048)
             n_parallel: Number of parallel sequences (default: 1)
+            batch_size: Logical maximum batch size (default: 512)
+            ubatch_size: Physical maximum batch size (default: 128)
             timeout: Max seconds to wait for server startup (default: 60)
             verbose: Print status messages (default: True)
-            **kwargs: Additional server arguments
+            **kwargs: Additional server arguments (flash_attn, cache_ram, fit, etc.)
 
         Returns:
             True if server started successfully, False otherwise
@@ -186,13 +216,26 @@ class ServerManager:
             '-ngl', str(gpu_layers),
             '-c', str(ctx_size),
             '--parallel', str(n_parallel),
+            '-b', str(batch_size),
+            '-ub', str(ubatch_size),
         ]
 
-        # Add additional arguments
+        # Add additional arguments with proper parameter mapping
+        param_map = {
+            'flash_attn': '-fa',
+            'cache_ram': '--cache-ram',
+            'fit': '-fit',
+        }
+
         for key, value in kwargs.items():
             if key.startswith('-'):
+                # Already formatted parameter
                 cmd.extend([key, str(value)])
+            elif key in param_map:
+                # Use mapped parameter name
+                cmd.extend([param_map[key], str(value)])
             else:
+                # Convert underscores to hyphens for standard parameters
                 cmd.extend([f'--{key.replace("_", "-")}', str(value)])
 
         if verbose:
