@@ -161,6 +161,7 @@ class ServerManager:
         ubatch_size: int = 128,
         timeout: int = 60,
         verbose: bool = True,
+        skip_gpu_check: bool = False,
         **kwargs
     ) -> bool:
         """
@@ -177,6 +178,7 @@ class ServerManager:
             ubatch_size: Physical maximum batch size (default: 128)
             timeout: Max seconds to wait for server startup (default: 60)
             verbose: Print status messages (default: True)
+            skip_gpu_check: Skip GPU compatibility check (default: False)
             **kwargs: Additional server arguments (flash_attn, cache_ram, fit, etc.)
 
         Returns:
@@ -184,8 +186,40 @@ class ServerManager:
 
         Raises:
             FileNotFoundError: If llama-server executable not found
-            RuntimeError: If server fails to start
+            RuntimeError: If server fails to start or GPU is incompatible
         """
+        # Check GPU compatibility (only if using GPU layers)
+        if gpu_layers > 0 and not skip_gpu_check:
+            from .utils import check_gpu_compatibility
+            compat = check_gpu_compatibility(min_compute_cap=5.0)
+
+            if verbose:
+                print(f"GPU Check:")
+                print(f"  Platform: {compat['platform']}")
+                if compat['gpu_name']:
+                    print(f"  GPU: {compat['gpu_name']}")
+                if compat['compute_capability']:
+                    print(f"  Compute Capability: {compat['compute_capability']}")
+
+            if not compat['compatible']:
+                error_msg = f"GPU Compatibility Error: {compat['reason']}\n"
+                if compat['compute_capability'] and compat['compute_capability'] < 5.0:
+                    error_msg += (
+                        f"\nYour GPU (compute capability {compat['compute_capability']}) is not supported.\n"
+                        f"llcuda requires NVIDIA GPU with compute capability 5.0 or higher.\n"
+                        f"Supported GPUs: Maxwell, Pascal, Volta, Turing, Ampere, Ada Lovelace.\n\n"
+                        f"Options:\n"
+                        f"1. Use CPU-only mode: engine.load_model(model_path, gpu_layers=0)\n"
+                        f"2. Upgrade to a newer GPU\n"
+                        f"3. Use skip_gpu_check=True to override (may cause runtime errors)"
+                    )
+                else:
+                    error_msg += "\nTo skip this check, use skip_gpu_check=True"
+                raise RuntimeError(error_msg)
+
+            if verbose and compat['compatible']:
+                print(f"  Status: ✓ Compatible")
+
         # Check if server is already running
         if self.check_server_health(timeout=1.0):
             if verbose:

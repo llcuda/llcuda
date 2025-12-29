@@ -78,6 +78,80 @@ def detect_cuda() -> Dict[str, Any]:
     return info
 
 
+def check_gpu_compatibility(min_compute_cap: float = 5.0) -> Dict[str, Any]:
+    """
+    Check if GPU is compatible with llcuda binaries.
+
+    llcuda binaries are compiled for compute capability 5.0+ (Maxwell and newer):
+    - 5.0: Maxwell (GTX 900 series, Tesla M40)
+    - 6.x: Pascal (GTX 10xx, Tesla P100)
+    - 7.0: Volta (Tesla V100)
+    - 7.5: Turing (RTX 20xx, Tesla T4, GTX 16xx)
+    - 8.0: Ampere (RTX 30xx, A100)
+    - 8.6: Ampere (RTX 30xx)
+    - 8.9: Ada Lovelace (RTX 40xx)
+
+    Args:
+        min_compute_cap: Minimum compute capability required (default: 5.0)
+
+    Returns:
+        Dictionary with compatibility information:
+        - compatible: bool - Whether GPU is compatible
+        - compute_capability: float - GPU compute capability
+        - gpu_name: str - GPU name
+        - reason: str - Explanation if not compatible
+        - platform: str - Detected platform (local/colab/kaggle)
+    """
+    result = {
+        'compatible': False,
+        'compute_capability': None,
+        'gpu_name': None,
+        'reason': None,
+        'platform': 'local'
+    }
+
+    # Detect platform
+    if 'COLAB_GPU' in os.environ or 'COLAB_TPU_ADDR' in os.environ:
+        result['platform'] = 'colab'
+    elif 'KAGGLE_KERNEL_RUN_TYPE' in os.environ:
+        result['platform'] = 'kaggle'
+
+    cuda_info = detect_cuda()
+
+    if not cuda_info['available']:
+        result['reason'] = 'No CUDA GPU detected. Please ensure NVIDIA drivers are installed.'
+        return result
+
+    if not cuda_info['gpus']:
+        result['reason'] = 'CUDA available but no GPUs found.'
+        return result
+
+    # Check first GPU (most common case)
+    gpu = cuda_info['gpus'][0]
+    result['gpu_name'] = gpu['name']
+
+    try:
+        compute_cap = float(gpu['compute_capability'])
+        result['compute_capability'] = compute_cap
+
+        if compute_cap < min_compute_cap:
+            result['reason'] = (
+                f"GPU compute capability {compute_cap} is below minimum required {min_compute_cap}. "
+                f"llcuda requires Maxwell architecture or newer (compute capability 5.0+)."
+            )
+            return result
+
+        # All checks passed
+        result['compatible'] = True
+        result['reason'] = f"GPU {gpu['name']} (compute capability {compute_cap}) is compatible."
+
+    except (ValueError, TypeError):
+        result['reason'] = f"Could not parse compute capability: {gpu.get('compute_capability')}"
+        return result
+
+    return result
+
+
 def get_llama_cpp_cuda_path() -> Optional[Path]:
     """
     Get the path to Ubuntu-Cuda-Llama.cpp-Executable installation if it exists.

@@ -64,6 +64,7 @@ if _LLAMA_SERVER.exists():
 from .server import ServerManager
 from .utils import (
     detect_cuda,
+    check_gpu_compatibility,
     get_llama_cpp_cuda_path,
     setup_environment,
     find_gguf_models,
@@ -74,7 +75,7 @@ from .utils import (
     validate_model_path
 )
 
-__version__ = "1.0.2"  # Documentation update release
+__version__ = "1.1.0"  # Multi-GPU architecture support, Colab/Kaggle compatibility
 __all__ = [
     # Core classes
     'InferenceEngine',
@@ -84,6 +85,7 @@ __all__ = [
     # Utility functions
     'check_cuda_available',
     'get_cuda_device_info',
+    'check_gpu_compatibility',
     'detect_cuda',
     'setup_environment',
     'find_gguf_models',

@@ -7,15 +7,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llcuda"
-version = "1.0.2"
-description = "PyTorch-style CUDA-accelerated LLM inference with bundled binaries, smart model loading, and hardware auto-configuration"
+version = "1.1.0"
+description = "PyTorch-style CUDA-accelerated LLM inference with bundled binaries for compute capability 5.0+ GPUs. Works on JupyterLab, Google Colab, and Kaggle."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
     {name = "Waqas Muhammad", email = "waqasm86@gmail.com"}
 ]
-keywords = ["llm", "cuda", "gpu", "inference", "deep-learning", "llama", "jupyter", "jupyterlab", "chat", "embeddings", "semantic-search", "gguf"]
+keywords = ["llm", "cuda", "gpu", "inference", "deep-learning", "llama", "jupyter", "jupyterlab", "chat", "embeddings", "semantic-search", "gguf", "colab", "kaggle", "t4", "turing", "ampere"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -30,6 +30,7 @@ classifiers = [
     "Framework :: Jupyter",
     "Framework :: Jupyter :: JupyterLab",
     "Environment :: GPU :: NVIDIA CUDA :: 12",
+    "Environment :: GPU :: NVIDIA CUDA :: 11",
 ]
 
 dependencies = [
