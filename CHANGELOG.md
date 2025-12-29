@@ -5,6 +5,181 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-12-29
+
+### 🐛 Critical Bug Fixes - Low-VRAM GPU Compatibility
+
+This patch release fixes critical issues preventing llcuda from working on low-VRAM GPUs like the GeForce 940M.
+
+### Fixed
+
+#### 1. Invalid Parameter Error (`--n-batch`)
+- **Issue**: Server crashed with `error: invalid argument: --n-batch`
+- **Root Cause**: Parameter mapping incorrectly converted `n_batch` to `--n-batch` instead of `-b` or `--batch-size`
+- **Fix**: Updated `server.py` to use correct llama-server parameter names
+  - Added `batch_size` and `ubatch_size` as explicit function parameters
+  - Created `param_map` dictionary for special parameter mappings (`flash_attn`, `cache_ram`, `fit`)
+  - Fixed command building to use `-b` and `-ub` flags directly
+
+#### 2. Shared Library Loading Failure
+- **Issue**: `error while loading shared libraries: libmtmd.so.0: cannot open shared object file`
+- **Root Cause**: `LD_LIBRARY_PATH` not configured to find bundled or external shared libraries
+- **Fix**: Added `_setup_library_path()` method to `ServerManager`
+  - Automatically detects `lib/` directory relative to llama-server binary
+  - Configures `LD_LIBRARY_PATH` when finding server executable
+  - Works with both bundled binaries and external installations
+
+#### 3. Parameter Naming Inconsistencies
+- **Issue**: Users received confusing errors when using incorrect parameter names
+- **Fix**:
+  - Documented correct parameter names in code and documentation
+  - Added proper handling for `flash_attn`, `cache_ram`, `fit` parameters
+  - Fixed auto_settings initialization to prevent NameError
+
+### Changed
+
+#### API Parameters
+- **`InferenceEngine.load_model()`**:
+  - Now properly accepts `batch_size` and `ubatch_size` (not `n_batch`/`n_ubatch`)
+  - Parameters are extracted from kwargs and passed correctly to ServerManager
+
+- **`ServerManager.start_server()`**:
+  - Added `batch_size: int = 512` parameter
+  - Added `ubatch_size: int = 128` parameter
+  - Updated command building with proper parameter mapping
+
+#### File Changes
+- **`llcuda/llcuda/server.py`** (Lines 126-211):
+  - Updated method signature with explicit batch parameters
+  - Added `param_map` for special parameter handling
+  - Added `_setup_library_path()` for automatic library configuration
+  - Added `/media/waqasm86/External1/Project-Nvidia/llama.cpp/build/bin/llama-server` to search paths
+
+- **`llcuda/llcuda/__init__.py`** (Lines 225-279):
+  - Fixed `auto_settings` initialization
+  - Fixed batch parameter extraction and passing to ServerManager
+
+### Added
+
+#### Documentation
+- **`FIXES_SUMMARY.md`**: Comprehensive technical documentation of all fixes
+- **`test_llcuda_fixed.py`**: Test script demonstrating correct usage
+- **`p4-llcuda-fixed.ipynb`**: Updated Jupyter notebook with corrected examples
+
+### Improved
+
+#### GPU Compatibility
+- **GeForce 940M Support** (1GB VRAM):
+  - Tested and verified working with 14 GPU layers
+  - Achieves ~10-15 tok/s throughput
+  - Example configuration provided in documentation
+
+#### Error Messages
+- Better parameter validation
+- Clearer error messages for library loading issues
+
+### Testing
+
+#### Verified On
+- **Hardware**: NVIDIA GeForce 940M (1GB VRAM, Compute 5.0)
+- **Software**: Ubuntu 22.04, CUDA 12.8, Python 3.11
+- **Model**: Gemma 3 1B Q4_K_M (~806 MB)
+- **Performance**: 10.54 tok/s with optimized settings
+
+#### Test Results
+```bash
+$ python3.11 test_llcuda_fixed.py
+✓ SUCCESS!
+Tokens: 50
+Latency: 4742.17ms
+Throughput: 10.54 tok/s
+```
+
+### Correct Usage
+
+#### For Low-VRAM GPUs (GeForce 940M, 1GB):
+```python
+import llcuda
+
+engine = llcuda.InferenceEngine()
+engine.load_model(
+    "bartowski/google_gemma-3-1b-it-GGUF:google_gemma-3-1b-it-Q4_K_M.gguf",
+    gpu_layers=14,           # Fits in 1GB VRAM
+    ctx_size=1536,           # Reduced context
+    n_parallel=1,
+    batch_size=128,          # ✅ CORRECT (not n_batch)
+    ubatch_size=64,          # ✅ CORRECT (not n_ubatch)
+    flash_attn='off',        # ✅ String value
+    cache_ram=0,             # ✅ Minimize cache
+    fit='off',
+    auto_configure=False,
+    interactive_download=False
+)
+
+result = engine.infer("What is AI?", max_tokens=50)
+print(result.text)
+```
+
+### Breaking Changes
+⚠️ **Intentional Breaking Change**:
+- `n_batch` and `n_ubatch` parameters no longer accepted (they never worked correctly)
+- Use `batch_size` and `ubatch_size` instead
+
+### Migration Guide
+
+#### Before (v1.0.0 - Broken):
+```python
+engine.load_model(
+    model_path,
+    n_batch=128,      # ❌ Wrong parameter name
+    n_ubatch=64,      # ❌ Wrong parameter name
+)
+# Result: Server crashes with "invalid argument: --n-batch"
+```
+
+#### After (v1.0.1 - Fixed):
+```python
+engine.load_model(
+    model_path,
+    batch_size=128,   # ✅ Correct parameter name
+    ubatch_size=64,   # ✅ Correct parameter name
+)
+# Result: Works correctly
+```
+
+### Backward Compatibility
+- ✅ All v1.0.0 code using `gpu_layers`, `ctx_size`, `n_parallel` works unchanged
+- ✅ New `batch_size`, `ubatch_size` parameters are optional (have defaults)
+- ⚠️ Code using `n_batch`, `n_ubatch` will fail (was already broken in v1.0.0)
+
+### Recommended Settings by GPU
+
+#### GeForce 940M (1GB VRAM):
+```python
+gpu_layers=14, ctx_size=1536, batch_size=128, ubatch_size=64
+```
+
+#### GTX 1650 (4GB VRAM):
+```python
+gpu_layers=33, ctx_size=4096, batch_size=512, ubatch_size=128
+```
+
+#### RTX 3060 (12GB VRAM):
+```python
+gpu_layers=99, ctx_size=8192, batch_size=2048, ubatch_size=512
+```
+
+### Links
+- **GitHub**: https://github.com/waqasm86/llcuda
+- **PyPI**: https://pypi.org/project/llcuda/1.0.1/
+- **Documentation**: https://waqasm86.github.io/
+- **Technical Details**: [FIXES_SUMMARY.md](FIXES_SUMMARY.md)
+
+### Acknowledgments
+- Thanks to users testing on low-VRAM GPUs for identifying these critical issues
+
+---
+
 ## [1.0.0] - 2025-12-29
 
 ### 🎉 Major Release - PyTorch-Style Integration
