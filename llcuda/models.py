@@ -3,17 +3,19 @@ llcuda.models - Model Management and Discovery
 
 This module provides utilities for:
 - Discovering local GGUF models
-- Downloading models from HuggingFace
+- Downloading models from HuggingFace with confirmation
 - Getting model metadata and information
 - Managing model collections
 - Recommending optimal settings per model
 
 Examples:
-    List local models:
-    >>> from llcuda.models import list_models
-    >>> models = list_models()
-    >>> for model in models:
-    ...     print(f"{model['name']}: {model['size_mb']:.1f} MB")
+    Smart model loading (auto-download from registry):
+    >>> from llcuda.models import load_model_smart
+    >>> model_path = load_model_smart("gemma-3-1b-Q4_K_M")  # Asks for confirmation
+
+    List registry models:
+    >>> from llcuda.models import list_registry_models
+    >>> models = list_registry_models()
 
     Download from HuggingFace:
     >>> from llcuda.models import download_model
@@ -28,6 +30,7 @@ Examples:
 from typing import List, Dict, Optional, Any, Tuple
 from pathlib import Path
 import struct
+import shutil
 import json
 import os
 import subprocess
@@ -512,3 +515,243 @@ class ModelManager:
 
     def __iter__(self):
         return iter(self.models)
+
+
+# ============================================================================
+# Smart Model Loading with Registry and Auto-Download
+# ============================================================================
+
+def load_model_smart(
+    model_name_or_path: str,
+    cache_dir: Optional[Path] = None,
+    interactive: bool = True,
+    force_download: bool = False
+) -> Path:
+    """
+    Smart model loader with auto-download and confirmation.
+
+    Handles three cases:
+    1. Local path exists → returns path
+    2. Model name in registry → downloads from HuggingFace (with confirmation)
+    3. HuggingFace syntax "repo:file" → downloads directly
+
+    Args:
+        model_name_or_path: Model name from registry, local path, or "repo:file"
+        cache_dir: Cache directory (default: llcuda/models/)
+        interactive: Ask for confirmation before downloading
+        force_download: Re-download even if cached
+
+    Returns:
+        Path to model file
+
+    Raises:
+        ValueError: If model not found or download cancelled
+        FileNotFoundError: If local path doesn't exist
+
+    Examples:
+        >>> # From registry (auto-downloads)
+        >>> path = load_model_smart("gemma-3-1b-Q4_K_M")
+
+        >>> # Local path
+        >>> path = load_model_smart("/path/to/model.gguf")
+
+        >>> # HuggingFace syntax
+        >>> path = load_model_smart("google/gemma-3-1b-it-GGUF:gemma-3-1b-it-Q4_K_M.gguf")
+    """
+    from ._internal.registry import MODEL_REGISTRY, get_model_info
+
+    # Get default cache directory
+    if cache_dir is None:
+        # Import at runtime to avoid circular dependency
+        from . import _MODEL_CACHE
+        cache_dir = _MODEL_CACHE
+
+    # Case 1: Local path exists
+    path_obj = Path(model_name_or_path).expanduser()
+    if path_obj.exists() and path_obj.is_file():
+        print(f"✓ Using local model: {path_obj.name}")
+        return path_obj
+
+    # Case 2: Model in registry
+    if model_name_or_path in MODEL_REGISTRY:
+        model_info = get_model_info(model_name_or_path)
+        cached_path = cache_dir / model_info['file']
+
+        # Check if already cached
+        if cached_path.exists() and not force_download:
+            print(f"✓ Using cached model: {cached_path.name}")
+            return cached_path
+
+        # Ask for confirmation
+        if interactive:
+            print("\n" + "=" * 70)
+            print(f"Model: {model_name_or_path}")
+            print(f"Description: {model_info['description']}")
+            print(f"Size: {model_info['size_mb']} MB (~{model_info['size_mb']/1024:.1f} GB)")
+            print(f"Minimum VRAM: {model_info['min_vram_gb']} GB")
+            print(f"Source: https://huggingface.co/{model_info['repo']}")
+            print(f"Cache location: {cached_path}")
+            print("=" * 70)
+
+            response = input("\nDownload this model? [Y/n]: ").strip().lower()
+            if response and response not in ['y', 'yes']:
+                raise ValueError("Model download cancelled by user")
+
+        # Download
+        print(f"\nDownloading {model_info['file']}...")
+        print(f"This may take a while ({model_info['size_mb']} MB)...")
+
+        try:
+            from huggingface_hub import hf_hub_download
+            from tqdm import tqdm
+
+            downloaded_path = hf_hub_download(
+                repo_id=model_info['repo'],
+                filename=model_info['file'],
+                cache_dir=str(cache_dir),
+                resume_download=True,
+                local_dir=str(cache_dir),
+                local_dir_use_symlinks=False
+            )
+
+            # Ensure it's in our cache directory
+            downloaded_path_obj = Path(downloaded_path)
+            if downloaded_path_obj != cached_path:
+                # Copy or move to cache
+                if not cached_path.exists():
+                    shutil.copy(downloaded_path_obj, cached_path)
+
+            print(f"✓ Model downloaded: {cached_path.name}")
+            return cached_path
+
+        except ImportError:
+            raise ImportError(
+                "huggingface_hub required for model downloads. "
+                "Install with: pip install huggingface_hub"
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to download model: {e}")
+
+    # Case 3: HuggingFace syntax "repo:file"
+    if '/' in model_name_or_path and ':' in model_name_or_path:
+        try:
+            repo_id, filename = model_name_or_path.split(':', 1)
+        except ValueError:
+            raise ValueError(
+                f"Invalid HuggingFace format. Use 'repo/id:filename.gguf', "
+                f"got: {model_name_or_path}"
+            )
+
+        cached_path = cache_dir / filename
+
+        # Check if already cached
+        if cached_path.exists() and not force_download:
+            print(f"✓ Using cached model: {cached_path.name}")
+            return cached_path
+
+        # Ask for confirmation
+        if interactive:
+            print("\n" + "=" * 70)
+            print(f"Repository: {repo_id}")
+            print(f"File: {filename}")
+            print(f"Cache location: {cached_path}")
+            print("=" * 70)
+
+            response = input("\nDownload this model? [Y/n]: ").strip().lower()
+            if response and response not in ['y', 'yes']:
+                raise ValueError("Model download cancelled by user")
+
+        # Download
+        print(f"\nDownloading {filename} from {repo_id}...")
+
+        try:
+            from huggingface_hub import hf_hub_download
+
+            downloaded_path = hf_hub_download(
+                repo_id=repo_id,
+                filename=filename,
+                cache_dir=str(cache_dir),
+                resume_download=True,
+                local_dir=str(cache_dir),
+                local_dir_use_symlinks=False
+            )
+
+            downloaded_path_obj = Path(downloaded_path)
+            if downloaded_path_obj != cached_path:
+                if not cached_path.exists():
+                    shutil.copy(downloaded_path_obj, cached_path)
+
+            print(f"✓ Model downloaded: {cached_path.name}")
+            return cached_path
+
+        except ImportError:
+            raise ImportError(
+                "huggingface_hub required for model downloads. "
+                "Install with: pip install huggingface_hub"
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to download model: {e}")
+
+    # Case 4: Not found
+    raise ValueError(
+        f"Model not found: '{model_name_or_path}'\n\n"
+        f"Available options:\n"
+        f"  1. Use a model name from registry: {', '.join(list(MODEL_REGISTRY.keys())[:5])}...\n"
+        f"  2. Provide a local file path: /path/to/model.gguf\n"
+        f"  3. Use HuggingFace syntax: repo/id:filename.gguf"
+    )
+
+
+def list_registry_models() -> Dict[str, Dict[str, Any]]:
+    """
+    List all models available in the registry.
+
+    Returns:
+        Dictionary of model name -> model info
+
+    Example:
+        >>> from llcuda.models import list_registry_models
+        >>> models = list_registry_models()
+        >>> for name, info in models.items():
+        ...     print(f"{name}: {info['description']}")
+    """
+    from ._internal.registry import MODEL_REGISTRY
+    return MODEL_REGISTRY.copy()
+
+
+def print_registry_models(vram_gb: Optional[float] = None):
+    """
+    Print formatted list of registry models.
+
+    Args:
+        vram_gb: Optional VRAM filter - only show compatible models
+
+    Example:
+        >>> from llcuda.models import print_registry_models
+        >>> print_registry_models(vram_gb=1.0)  # Show models for 1GB VRAM
+    """
+    from ._internal.registry import MODEL_REGISTRY, find_models_by_vram
+
+    if vram_gb is not None:
+        models = find_models_by_vram(vram_gb)
+        print(f"Models compatible with {vram_gb} GB VRAM:")
+        print("=" * 80)
+    else:
+        models = MODEL_REGISTRY
+        print("All available models in registry:")
+        print("=" * 80)
+
+    if not models:
+        print(f"No models found for {vram_gb} GB VRAM")
+        print(f"Try increasing VRAM or check models with print_registry_models()")
+        return
+
+    for i, (name, info) in enumerate(models.items(), 1):
+        print(f"\n{i}. {name}")
+        print(f"   Description: {info['description']}")
+        print(f"   Size: {info['size_mb']} MB (~{info['size_mb']/1024:.1f} GB)")
+        print(f"   Min VRAM: {info['min_vram_gb']} GB")
+        print(f"   Repository: {info['repo']}")
+        print(f"   \n   Usage: engine.load_model('{name}')")
+
+    print("\n" + "=" * 80)

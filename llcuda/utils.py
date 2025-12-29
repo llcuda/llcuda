@@ -356,3 +356,118 @@ def validate_model_path(model_path: str) -> bool:
     """
     path = Path(model_path)
     return path.exists() and path.suffix.lower() == '.gguf'
+
+
+def auto_configure_for_model(model_path: Path, vram_gb: Optional[float] = None) -> Dict[str, Any]:
+    """
+    Auto-configure optimal inference settings based on hardware and model.
+
+    Automatically detects GPU VRAM and recommends optimal settings for:
+    - gpu_layers: Number of layers to offload to GPU
+    - ctx_size: Context window size
+    - batch_size: Batch size for prompt processing
+    - ubatch_size: Micro-batch size (critical for low VRAM)
+
+    Args:
+        model_path: Path to GGUF model file
+        vram_gb: Optional VRAM in GB (auto-detected if not provided)
+
+    Returns:
+        Dictionary with recommended settings
+
+    Example:
+        >>> from llcuda.utils import auto_configure_for_model
+        >>> from pathlib import Path
+        >>> settings = auto_configure_for_model(Path("model.gguf"))
+        >>> print(settings)
+        {'gpu_layers': 20, 'ctx_size': 1024, 'batch_size': 512, 'ubatch_size': 128}
+    """
+    # Detect VRAM if not provided
+    if vram_gb is None:
+        cuda_info = detect_cuda()
+        if cuda_info['available'] and cuda_info['gpus']:
+            # Parse VRAM from first GPU
+            gpu = cuda_info['gpus'][0]
+            mem_str = gpu['memory'].split()[0]  # e.g., "1024 MiB" or "8.0 GiB"
+
+            # Convert to GB
+            if 'GiB' in gpu['memory']:
+                vram_gb = float(mem_str)
+            elif 'MiB' in gpu['memory']:
+                vram_gb = float(mem_str) / 1024
+            else:
+                # Fallback: assume MiB
+                vram_gb = float(mem_str) / 1024
+        else:
+            # No CUDA detected, use CPU-only defaults
+            print("⚠ CUDA not detected, using CPU-only configuration")
+            return {
+                'gpu_layers': 0,
+                'ctx_size': 512,
+                'batch_size': 256,
+                'ubatch_size': 64,
+                'n_parallel': 1
+            }
+
+    # Get model information
+    try:
+        from .models import ModelInfo
+        model_info = ModelInfo.from_file(str(model_path))
+        model_size_gb = model_info.file_size_mb / 1024
+
+        # Use ModelInfo's built-in recommendations
+        settings = model_info.get_recommended_settings(vram_gb=vram_gb)
+
+        print(f"✓ Auto-configured for {vram_gb:.1f} GB VRAM")
+        print(f"  GPU Layers: {settings['gpu_layers']}")
+        print(f"  Context Size: {settings['ctx_size']}")
+        print(f"  Batch Size: {settings['batch_size']}")
+        print(f"  Micro-batch Size: {settings['ubatch_size']}")
+
+        return settings
+
+    except Exception as e:
+        # Fallback to basic estimation
+        print(f"⚠ Could not read model metadata, using conservative defaults: {e}")
+
+        # Conservative defaults based on VRAM
+        if vram_gb >= 8:
+            return {
+                'gpu_layers': 99,
+                'ctx_size': 4096,
+                'batch_size': 2048,
+                'ubatch_size': 512,
+                'n_parallel': 2
+            }
+        elif vram_gb >= 4:
+            return {
+                'gpu_layers': 40,
+                'ctx_size': 2048,
+                'batch_size': 1024,
+                'ubatch_size': 256,
+                'n_parallel': 1
+            }
+        elif vram_gb >= 2:
+            return {
+                'gpu_layers': 20,
+                'ctx_size': 1024,
+                'batch_size': 512,
+                'ubatch_size': 128,
+                'n_parallel': 1
+            }
+        elif vram_gb >= 1:
+            return {
+                'gpu_layers': 8,
+                'ctx_size': 512,
+                'batch_size': 512,
+                'ubatch_size': 128,
+                'n_parallel': 1
+            }
+        else:
+            return {
+                'gpu_layers': 0,
+                'ctx_size': 512,
+                'batch_size': 256,
+                'ubatch_size': 64,
+                'n_parallel': 1
+            }
