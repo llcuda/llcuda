@@ -74,7 +74,7 @@ from .utils import (
     validate_model_path
 )
 
-__version__ = "1.0.1"  # Fixed parameter mapping and library loading for low-VRAM GPUs
+__version__ = "1.0.2"  # Documentation update release
 __all__ = [
     # Core classes
     'InferenceEngine',

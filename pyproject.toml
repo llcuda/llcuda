@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llcuda"
-version = "1.0.1"
+version = "1.0.2"
 description = "PyTorch-style CUDA-accelerated LLM inference with bundled binaries, smart model loading, and hardware auto-configuration"
 readme = "README.md"
 requires-python = ">=3.11"
