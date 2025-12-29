@@ -1,4 +1,4 @@
-# llcuda v1.0.0 - PyTorch-Style CUDA LLM Inference
+# llcuda v1.0.1 - PyTorch-Style CUDA LLM Inference
 
 **Zero-configuration CUDA-accelerated LLM inference for Python with bundled binaries, smart model loading, and hardware auto-configuration.**
 
@@ -7,16 +7,20 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/waqasm86/llcuda)](https://github.com/waqasm86/llcuda/stargazers)
 
-> **Perfect for**: Legacy NVIDIA GPUs (GeForce 900/800 series) • Zero-configuration setup • PyTorch-style API • Production-ready inference
+> **Perfect for**: Low-VRAM NVIDIA GPUs (GeForce 900/800 series) • Zero-configuration setup • PyTorch-style API • Production-ready inference
 
 ---
 
-## 🎯 What is llcuda v1.0.0?
+## 🎯 What is llcuda v1.0.1?
 
-A **PyTorch-style Python package** that makes LLM inference on legacy NVIDIA GPUs as easy as:
+A **PyTorch-style Python package** that makes LLM inference on low-VRAM NVIDIA GPUs as easy as:
 
 ```bash
-pip install llcuda
+# Install latest version
+pip install --upgrade llcuda
+
+# Or install specific version
+pip install llcuda==1.0.1
 ```
 
 ```python
@@ -32,17 +36,23 @@ print(result.text)
 
 ---
 
-## ✨ What's New in v1.0.0
+## ✨ What's New in v1.0.1
 
-🚀 **Complete rewrite** with PyTorch-style integration:
+🐛 **Critical Bug Fixes** for low-VRAM GPU compatibility:
+
+- **Fixed `--n-batch` Error** - Corrected parameter mapping for `batch_size` and `ubatch_size`
+- **Fixed Library Loading** - Automatic `LD_LIBRARY_PATH` configuration for shared libraries
+- **Improved Error Messages** - Better parameter validation and error reporting
+- **Tested on GeForce 940M** - Verified working with 1GB VRAM (10-15 tok/s)
+
+### Previous (v1.0.0) Features:
 
 - **Bundled CUDA Binaries** (47 MB wheel) - llama-server + all libraries included
-- **Zero Configuration** - Works immediately after `pip install`
+- **Zero Configuration** - Works immediately after `pip install --upgrade llcuda`
 - **Smart Model Loading** - 11 curated models with auto-download from HuggingFace
 - **Hardware Auto-Config** - Detects your GPU VRAM and optimizes settings automatically
 - **Model Registry** - Pre-configured models tested on GeForce 940M
 - **Performance Metrics** - Built-in P50/P95/P99 latency tracking
-- **User Confirmation** - Always asks before downloading models
 
 ---
 
@@ -51,13 +61,18 @@ print(result.text)
 ### Installation
 
 ```bash
-pip install llcuda
+# Install or upgrade to latest version
+pip install --upgrade llcuda
+
+# Or install specific version
+pip install llcuda==1.0.1
 ```
 
 **That's all you need!** The package includes:
 - llama-server executable (CUDA 12.8)
 - All required shared libraries
 - Auto-configuration on import
+- Automatic library path setup (NEW in v1.0.1)
 
 ### Basic Usage
 
