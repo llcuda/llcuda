@@ -1,38 +1,35 @@
-# Include documentation files
+# MANIFEST.in for llcuda-cu128 (CUDA 12.8 integrated package)
+
+# Documentation
 include README.md
 include LICENSE
-include QUICKSTART.md
-include INSTALL.md
-include INDEX.md
-include KAGGLE_COLAB.md
-include PACKAGE_SUMMARY.md
+include CHANGELOG.md
 
-# Include requirements
-include requirements.txt
+# Binaries (CRITICAL - include ALL binaries)
+recursive-include llcuda/binaries *
+graft llcuda/binaries/cuda12
+
+# Shared libraries (CRITICAL - include ALL .so files)
+recursive-include llcuda/lib *.so*
+graft llcuda/lib
+
+# Model cache directory
+include llcuda/models/.gitkeep
+
+# Internal modules
+recursive-include llcuda/_internal *.py
+
+# Python package files
 include pyproject.toml
+include setup.py
+include setup_cuda12.py
 
-# Include build files
-include build_wheel.sh
-recursive-include llcuda *.cpp
-recursive-include llcuda *.h
-recursive-include llcuda CMakeLists.txt
-
-# Include examples
-recursive-include examples *.ipynb
-recursive-include examples *.py
-recursive-include examples *.md
-
-# Include tests
-recursive-include tests *.py
-
-# Exclude build artifacts
+# Exclude unwanted files
+global-exclude *.pyc
 global-exclude __pycache__
-global-exclude *.py[co]
-global-exclude .git*
+global-exclude *.pyo
 global-exclude .DS_Store
-global-exclude *.so
-global-exclude *.dll
-global-exclude *.dylib
-recursive-exclude build *
-recursive-exclude dist *
-recursive-exclude *.egg-info *
+global-exclude .git*
+global-exclude *.swp
+global-exclude *.bak
+recursive-exclude llcuda/__pycache__ *

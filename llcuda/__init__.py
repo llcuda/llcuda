@@ -1,32 +1,65 @@
 """
 llcuda - CUDA-Accelerated LLM Inference for Python
 
-This module provides a Pythonic interface for CUDA-accelerated LLM inference
-via llama-server backend with automatic server management.
+PyTorch-style self-contained package with CUDA 12.8 binaries and libraries.
+No manual setup required - just pip install and use!
 
 Examples:
-    Basic usage with auto-start:
+    Basic usage (auto-download model from registry):
     >>> import llcuda
     >>> engine = llcuda.InferenceEngine()
-    >>> engine.load_model("/path/to/model.gguf", auto_start=True)
+    >>> engine.load_model("gemma-3-1b-Q4_K_M")  # Auto-downloads and configures
     >>> result = engine.infer("What is AI?", max_tokens=100)
     >>> print(result.text)
 
-    Manual server management:
-    >>> from llcuda import ServerManager
-    >>> manager = ServerManager()
-    >>> manager.start_server("/path/to/model.gguf", gpu_layers=99)
-    >>> # Server is now running
+    Using local model:
     >>> engine = llcuda.InferenceEngine()
-    >>> result = engine.infer("Hello!")
-    >>> manager.stop_server()
+    >>> engine.load_model("/path/to/model.gguf", auto_start=True)
+    >>> result = engine.infer("What is AI?")
 """
 
 from typing import Optional, List, Dict, Any
 import os
+import sys
 import subprocess
 import requests
 import time
+from pathlib import Path
+
+# ============================================================================
+# AUTO-CONFIGURATION (PyTorch-style)
+# Automatically configure paths to bundled CUDA binaries and libraries
+# ============================================================================
+
+_LLCUDA_DIR = Path(__file__).parent
+_BIN_DIR = _LLCUDA_DIR / 'binaries' / 'cuda12'
+_LIB_DIR = _LLCUDA_DIR / 'lib'
+_MODEL_CACHE = _LLCUDA_DIR / 'models'
+
+# Ensure model cache directory exists
+_MODEL_CACHE.mkdir(parents=True, exist_ok=True)
+
+# Auto-configure LD_LIBRARY_PATH for bundled shared libraries
+if _LIB_DIR.exists():
+    _lib_path_str = str(_LIB_DIR.absolute())
+    _current_ld_path = os.environ.get('LD_LIBRARY_PATH', '')
+
+    if _lib_path_str not in _current_ld_path:
+        if _current_ld_path:
+            os.environ['LD_LIBRARY_PATH'] = f"{_lib_path_str}:{_current_ld_path}"
+        else:
+            os.environ['LD_LIBRARY_PATH'] = _lib_path_str
+
+# Auto-configure LLAMA_SERVER_PATH to bundled executable
+_LLAMA_SERVER = _BIN_DIR / 'llama-server'
+if _LLAMA_SERVER.exists():
+    os.environ['LLAMA_SERVER_PATH'] = str(_LLAMA_SERVER.absolute())
+    # Make executable if not already
+    if not os.access(_LLAMA_SERVER, os.X_OK):
+        try:
+            os.chmod(_LLAMA_SERVER, 0o755)
+        except Exception:
+            pass  # Ignore permission errors
 
 from .server import ServerManager
 from .utils import (
@@ -41,7 +74,7 @@ from .utils import (
     validate_model_path
 )
 
-__version__ = "0.3.0"  # Updated for JupyterLab features
+__version__ = "1.0.0"  # PyTorch-style integrated package with CUDA 12.8 binaries
 __all__ = [
     # Core classes
     'InferenceEngine',
@@ -124,55 +157,113 @@ class InferenceEngine:
 
     def load_model(
         self,
-        model_path: str,
-        gpu_layers: int = 99,
-        ctx_size: int = 2048,
-        auto_start: bool = False,
+        model_name_or_path: str,
+        gpu_layers: Optional[int] = None,
+        ctx_size: Optional[int] = None,
+        auto_start: bool = True,
+        auto_configure: bool = True,
         n_parallel: int = 1,
         verbose: bool = True,
+        interactive_download: bool = True,
         **kwargs
     ) -> bool:
         """
-        Load a GGUF model for inference.
+        Load a GGUF model for inference with smart loading and auto-configuration.
 
-        If auto_start=True and server is not running, it will automatically
-        start llama-server with the specified model and configuration.
+        This method supports three loading modes:
+        1. Registry name: "gemma-3-1b-Q4_K_M" (auto-downloads from HuggingFace)
+        2. Local path: "/path/to/model.gguf"
+        3. HuggingFace syntax: "google/gemma-3-1b-it-GGUF:gemma-3-1b-it-Q4_K_M.gguf"
 
         Args:
-            model_path: Path to the GGUF model file
-            gpu_layers: Number of layers to offload to GPU (default: 99 = all)
-            ctx_size: Context size (default: 2048)
-            auto_start: Automatically start server if not running (default: False)
+            model_name_or_path: Model name from registry, local path, or HF syntax
+            gpu_layers: Number of layers to offload to GPU (None = auto-configure)
+            ctx_size: Context size (None = auto-configure)
+            auto_start: Automatically start server if not running (default: True)
+            auto_configure: Automatically configure optimal settings (default: True)
             n_parallel: Number of parallel sequences (default: 1)
             verbose: Print status messages (default: True)
-            **kwargs: Additional server parameters
+            interactive_download: Ask for confirmation before downloading (default: True)
+            **kwargs: Additional server parameters (batch_size, ubatch_size, etc.)
 
         Returns:
-            True if model loaded successfully, False otherwise
+            True if model loaded successfully
 
         Raises:
             FileNotFoundError: If model file not found
+            ValueError: If model download cancelled
             ConnectionError: If server not running and auto_start=False
             RuntimeError: If server fails to start
-        """
-        # Validate model path
-        if not validate_model_path(model_path):
-            raise FileNotFoundError(f"Model file not found or invalid: {model_path}")
 
-        # Check if server is running
+        Examples:
+            >>> # Auto-download from registry
+            >>> engine.load_model("gemma-3-1b-Q4_K_M")
+
+            >>> # Local path with manual settings
+            >>> engine.load_model("/path/to/model.gguf", gpu_layers=20, ctx_size=2048)
+
+            >>> # HuggingFace download
+            >>> engine.load_model("google/gemma-3-1b-it-GGUF:gemma-3-1b-it-Q4_K_M.gguf")
+        """
+        from .models import load_model_smart
+        from .utils import auto_configure_for_model
+
+        # Step 1: Smart model loading (handles registry, local, HF)
+        if verbose:
+            print(f"Loading model: {model_name_or_path}")
+
+        try:
+            model_path = load_model_smart(
+                model_name_or_path,
+                interactive=interactive_download
+            )
+        except ValueError as e:
+            # User cancelled download or model not found
+            raise ValueError(f"Model loading failed: {e}")
+
+        # Step 2: Auto-configure if requested and no manual settings provided
+        if auto_configure and (gpu_layers is None or ctx_size is None):
+            if verbose:
+                print("\nAuto-configuring optimal settings...")
+
+            auto_settings = auto_configure_for_model(model_path)
+
+            # Use auto-configured values if not manually specified
+            if gpu_layers is None:
+                gpu_layers = auto_settings['gpu_layers']
+            if ctx_size is None:
+                ctx_size = auto_settings['ctx_size']
+
+            # Merge auto-configured settings with kwargs
+            if 'batch_size' not in kwargs:
+                kwargs['batch_size'] = auto_settings.get('batch_size', 512)
+            if 'ubatch_size' not in kwargs:
+                kwargs['ubatch_size'] = auto_settings.get('ubatch_size', 128)
+        else:
+            # Use defaults if not auto-configuring
+            if gpu_layers is None:
+                gpu_layers = 99
+            if ctx_size is None:
+                ctx_size = 2048
+
+        # Step 3: Validate model path exists
+        if not model_path.exists():
+            raise FileNotFoundError(f"Model file not found: {model_path}")
+
+        # Step 4: Start server if needed
         if not self.check_server():
             if auto_start:
                 if verbose:
-                    print(f"Starting llama-server with model: {model_path}")
+                    print(f"\nStarting llama-server...")
 
-                # Create server manager and start server
+                # Create server manager
                 self._server_manager = ServerManager(server_url=self.server_url)
 
                 # Extract port from server URL
                 port = int(self.server_url.split(':')[-1].split('/')[0])
 
                 success = self._server_manager.start_server(
-                    model_path=model_path,
+                    model_path=str(model_path),
                     port=port,
                     gpu_layers=gpu_layers,
                     ctx_size=ctx_size,
@@ -193,7 +284,10 @@ class InferenceEngine:
         self._model_loaded = True
 
         if verbose:
-            print(f"✓ Model loaded and ready for inference")
+            print(f"\n✓ Model loaded and ready for inference")
+            print(f"  Server: {self.server_url}")
+            print(f"  GPU Layers: {gpu_layers}")
+            print(f"  Context Size: {ctx_size}")
 
         return True
 
