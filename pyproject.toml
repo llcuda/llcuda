@@ -7,8 +7,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llcuda"
-version = "0.3.0"
-description = "CUDA-accelerated LLM inference for Python with JupyterLab integration and automatic server management"
+version = "1.0.0"
+description = "PyTorch-style CUDA-accelerated LLM inference with bundled binaries, smart model loading, and hardware auto-configuration"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -17,7 +17,7 @@ authors = [
 ]
 keywords = ["llm", "cuda", "gpu", "inference", "deep-learning", "llama", "jupyter", "jupyterlab", "chat", "embeddings", "semantic-search", "gguf"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
@@ -29,11 +29,14 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Framework :: Jupyter",
     "Framework :: Jupyter :: JupyterLab",
+    "Environment :: GPU :: NVIDIA CUDA :: 12",
 ]
 
 dependencies = [
     "numpy>=1.20.0",
     "requests>=2.20.0",
+    "huggingface_hub>=0.10.0",
+    "tqdm>=4.60.0",
 ]
 
 [project.optional-dependencies]
