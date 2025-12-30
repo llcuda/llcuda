@@ -38,14 +38,14 @@ engine.load_model("gemma-3-1b-Q4_K_M")
 
 ### New Features
 
-- ✅ **Multi-GPU Architecture Support** - Works on all NVIDIA GPUs (compute 5.0-8.9)
+- ✅ **Hybrid Bootstrap Architecture** - 51 KB PyPI package (was 327 MB in v1.0.x)
+- ✅ **Multi-GPU Architecture Support** - Works on all NVIDIA GPUs (SM 5.0, 6.0, 6.1, 7.0, 7.5, 8.0, 8.6, 8.9)
 - ✅ **Google Colab** - Full support for T4, P100, V100, A100 GPUs
 - ✅ **Kaggle** - Works on Tesla T4 notebooks
+- ✅ **Auto-Download on First Import** - Binaries and models downloaded automatically
 - ✅ **GPU Auto-Detection** - Automatic platform and GPU compatibility checking
-- ✅ **Better Error Messages** - Clear guidance when issues occur
+- ✅ **Professional Distribution** - Matches PyTorch/TensorFlow pattern
 - ✅ **No Breaking Changes** - Fully backward compatible with v1.0.x
-
-See [RELEASE_v1.1.0.md](RELEASE_v1.1.0.md) for full changelog.
 
 ---
 
@@ -77,11 +77,17 @@ llcuda v1.1.0 supports **all modern NVIDIA GPUs** with compute capability 5.0+:
 pip install llcuda
 ```
 
-**That's all you need!** The package includes:
-- llama-server executable (CUDA 12.8, multi-arch)
-- All required shared libraries (114 MB CUDA library with multi-GPU support)
-- Auto-configuration on import
-- Works immediately on Colab/Kaggle
+**First-time setup**: On first `import llcuda`, the package will automatically:
+- Download optimized binaries (~700 MB) from GitHub Releases based on your GPU
+- Download default model (~770 MB) from Hugging Face
+- Configure everything automatically
+- This is a **one-time download** taking 3-5 minutes
+
+**Hybrid Bootstrap Architecture**:
+- PyPI package: Only **51 KB** (Python code only)
+- Binaries: Auto-downloaded from GitHub (supports SM 5.0-8.9)
+- Models: Auto-downloaded from Hugging Face
+- Subsequent imports: Instant (uses cached files)
 
 ### Local Usage
 
