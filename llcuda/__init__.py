@@ -60,6 +60,20 @@ if _LLAMA_SERVER.exists():
             os.chmod(_LLAMA_SERVER, 0o755)
         except Exception:
             pass  # Ignore permission errors
+else:
+    # ========================================================================
+    # HYBRID BOOTSTRAP: Download binaries and models on first import
+    # ========================================================================
+    try:
+        from ._internal.bootstrap import bootstrap
+        bootstrap()
+    except Exception as e:
+        import warnings
+        warnings.warn(
+            f"llcuda bootstrap failed: {e}\n"
+            "Some features may not work. Please check your installation.",
+            RuntimeWarning
+        )
 
 from .server import ServerManager
 from .utils import (

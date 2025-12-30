@@ -1,28 +1,29 @@
-# MANIFEST.in for llcuda-cu128 (CUDA 12.8 integrated package)
+# MANIFEST.in for llcuda v1.1.0 (Thin package with hybrid bootstrap)
 
 # Documentation
 include README.md
 include LICENSE
 include CHANGELOG.md
 
-# Binaries (CRITICAL - include ALL binaries)
-recursive-include llcuda/binaries *
-graft llcuda/binaries/cuda12
-
-# Shared libraries (CRITICAL - include ALL .so files)
-recursive-include llcuda/lib *.so*
-graft llcuda/lib
-
-# Model cache directory
+# Directory placeholders (CRITICAL - include .gitkeep files to preserve structure)
+include llcuda/binaries/.gitkeep
+include llcuda/binaries/cuda12/.gitkeep
+include llcuda/lib/.gitkeep
 include llcuda/models/.gitkeep
 
-# Internal modules
+# Internal modules (bootstrap downloader)
 recursive-include llcuda/_internal *.py
 
 # Python package files
 include pyproject.toml
 include setup.py
-include setup_cuda12.py
+
+# EXCLUDE binaries and models (downloaded on first import)
+global-exclude *.so
+global-exclude *.so.*
+global-exclude llama-*
+global-exclude *.gguf
+global-exclude *.bin
 
 # Exclude unwanted files
 global-exclude *.pyc
