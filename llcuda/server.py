@@ -4,7 +4,12 @@ llcuda.server - Server Management for llama-server
 This module provides automatic management of llama-server lifecycle,
 including finding, starting, and stopping the server process.
 """
-
+import tarfile
+import requests
+import shutil
+from pathlib import Path
+import sys
+import time
 from typing import Optional, Dict, Any
 import os
 import subprocess
@@ -33,6 +38,22 @@ class ServerManager:
         >>> # Server is now running
         >>> manager.stop_server()
     """
+
+    _BINARY_BASE_URL = "https://github.com/waqasm86/Ubuntu-Cuda-Llama.cpp-Executable/releases/latest/download/llama.cpp-ubuntu-cuda-x64.tar.xz"
+
+    # Also add this function to get the actual download URL
+    def _get_download_url(self):
+        """Get the actual download URL by following redirects"""
+        try:
+            import requests
+            # Get the final URL after redirects
+            response = requests.head(self._BINARY_BASE_URL, allow_redirects=True, timeout=10)
+            return response.url
+        except Exception as e:
+            print(f"Warning: Could not get redirect URL: {e}")
+            # Fall back to the base URL
+            return self._BINARY_BASE_URL
+
 
     def __init__(self, server_url: str = "http://127.0.0.1:8090"):
         """
@@ -148,6 +169,157 @@ class ServerManager:
             return response.status_code == 200
         except requests.exceptions.RequestException:
             return False
+    
+    def _detect_platform(self):
+        """
+        Detect the current platform (colab, kaggle, or local).
+        
+        Returns:
+            Dictionary with platform information
+        """
+        platform_info = {
+            'platform': 'local',
+            'gpu_name': None,
+            'compute_capability': None
+        }
+        
+        # Check for Google Colab
+        if 'COLAB_GPU' in os.environ:
+            platform_info['platform'] = 'colab'
+            # Try to get GPU info in Colab
+            try:
+                result = subprocess.run(['nvidia-smi', '--query-gpu=name,compute_cap', '--format=csv,noheader'], 
+                                    capture_output=True, text=True)
+                if result.stdout:
+                    lines = result.stdout.strip().split('\n')
+                    if lines:
+                        parts = lines[0].split(',')
+                        platform_info['gpu_name'] = parts[0].strip()
+                        if len(parts) > 1:
+                            platform_info['compute_capability'] = float(parts[1].strip())
+            except:
+                pass
+            return platform_info
+        
+        # Check for Kaggle
+        if 'KAGGLE_KERNEL_RUN_TYPE' in os.environ:
+            platform_info['platform'] = 'kaggle'
+            # Kaggle typically uses T4 GPUs
+            platform_info['gpu_name'] = 'Tesla T4'
+            platform_info['compute_capability'] = 7.5
+            return platform_info
+        
+        # Check for local NVIDIA GPU
+        try:
+            # Get GPU name and compute capability
+            result = subprocess.run(['nvidia-smi', '--query-gpu=name,compute_cap', '--format=csv,noheader'], 
+                                capture_output=True, text=True)
+            if result.stdout:
+                lines = result.stdout.strip().split('\n')
+                if lines:
+                    parts = lines[0].split(',')
+                    platform_info['gpu_name'] = parts[0].strip()
+                    if len(parts) > 1:
+                        platform_info['compute_capability'] = float(parts[1].strip())
+        except:
+            pass
+        
+        return platform_info
+
+
+
+    def _download_llama_server(self):
+        """
+        Download and extract the pre-built llama-server binary.
+        Returns the path to the downloaded binary.
+        """
+        print("llama-server not found. Downloading pre-built CUDA binary...")
+        
+        # Determine cache directory based on platform
+        platform_info = self._detect_platform()
+        if platform_info['platform'] == 'colab':
+            cache_dir = Path("/content/.cache/llcuda")
+        elif platform_info['platform'] == 'kaggle':
+            cache_dir = Path("/kaggle/working/.cache/llcuda")
+        else:
+            # Local machine
+            cache_dir = Path.home() / ".cache" / "llcuda"
+        
+        # Create cache directory
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Define paths
+        tar_path = cache_dir / "llama.cpp-ubuntu-cuda-x64.tar.xz"
+        extract_dir = cache_dir / "extracted"
+        
+        # Download the binary archive (with progress indicator)
+        try:
+            download_url = self._get_download_url()
+            print(f"Downloading from: {download_url}")
+            
+            response = requests.get(download_url, stream=True, timeout=60)
+            response.raise_for_status()
+            
+            total_size = int(response.headers.get('content-length', 0))
+            downloaded = 0
+            
+            with open(tar_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+                    downloaded += len(chunk)
+                    if total_size > 0:
+                        percent = (downloaded / total_size) * 100
+                        sys.stdout.write(f"\rDownloading: {percent:.1f}% ({downloaded}/{total_size} bytes)")
+                        sys.stdout.flush()
+            
+            print("\n✓ Download complete")
+            
+        except requests.exceptions.RequestException as e:
+            raise RuntimeError(f"Failed to download binary: {e}\n"
+                            "Check your internet connection or download manually from:\n"
+                            f"{self._BINARY_BASE_URL}")
+        
+        # Extract the archive
+        print("Extracting binary...")
+        try:
+            shutil.rmtree(extract_dir, ignore_errors=True)  # Clean previous extraction
+            extract_dir.mkdir(exist_ok=True)
+            
+            with tarfile.open(tar_path, 'r:xz') as tar:
+                tar.extractall(extract_dir)
+            
+            # Find the actual binary (it might be in a subdirectory)
+            possible_paths = list(extract_dir.rglob("llama-server"))
+            if not possible_paths:
+                # Try bin/ subdirectory
+                possible_paths = list(extract_dir.rglob("bin/llama-server"))
+            
+            if not possible_paths:
+                raise FileNotFoundError("Could not find llama-server in downloaded archive")
+            
+            server_binary = possible_paths[0]
+            print(f"✓ Found binary at: {server_binary}")
+            
+            # Clean up the tar file
+            if tar_path.exists():
+                tar_path.unlink()
+            
+            # Set and return the binary path
+            final_path = cache_dir / "llama-server"
+            shutil.copy2(server_binary, final_path)
+            os.chmod(final_path, 0o755)
+            
+            # Clean up extraction directory
+            shutil.rmtree(extract_dir, ignore_errors=True)
+            
+            print(f"✓ Binary installed at: {final_path}")
+            return str(final_path)
+            
+        except (tarfile.TarError, OSError) as e:
+            raise RuntimeError(f"Failed to extract binary: {e}")
+
+
+
 
     def start_server(
         self,
@@ -231,10 +403,18 @@ class ServerManager:
             self._server_path = self.find_llama_server()
 
         if self._server_path is None:
+            # Auto-download llama-server binary
+            self._server_path = self._download_llama_server()
+            
+        # Verify the binary exists and is executable
+        if not os.path.exists(self._server_path):
             raise FileNotFoundError(
-                "llama-server not found. Please install llama.cpp or set LLAMA_SERVER_PATH.\n"
-                "See: https://github.com/ggerganov/llama.cpp for installation instructions."
+                f"llama-server not found at downloaded location: {self._server_path}\n"
+                "Try setting LLAMA_SERVER_PATH environment variable manually."
             )
+    
+        # Make sure it's executable
+        os.chmod(self._server_path, 0o755)
 
         # Verify model exists
         model_path_obj = Path(model_path)
