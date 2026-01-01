@@ -1,14 +1,8 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
-*.dll
-*.dylib
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -28,83 +22,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# poetry
-poetry.lock
-
-# pdm
-.pdm.toml
-
-# PEP 582
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
+# Virtual Environments
 .env
 .venv
 env/
@@ -113,65 +31,81 @@ ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
+# LLM Models and Binaries
+*.gguf
+*.gguf.*
+*.bin
+*.safetensors
+*.pth
+*.pt
+*.ckpt
+llama-server
+llama-cli
+llama-bench
 
-# Rope project settings
-.ropeproject
+# Binary Archives
+*.tar.xz
+*.tar.gz
+*.zip
+*.7z
 
-# mkdocs documentation
-/site
+# Cache and Temporary Files
+.cache/
+.cache*/
+.cargo/
+.npm/
+.yarn/
+.yalc/
+.yarn-cache/
+*.tmp
+*.temp
+*~
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# IDEs
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
-# OS
+# OS files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# CMake
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-install_manifest.txt
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
 
-# CUDA
-*.ptx
-*.cubin
+# Logs
+*.log
+logs/
 
-# Models (large files)
-*.gguf
-*.bin
-*.safetensors
+# Jupyter
+.ipynb_checkpoints/
 
-# Bundled binaries and libraries (included in wheel only, not in git)
-llcuda/binaries/
-llcuda/lib/
-llcuda/models/*.gguf
+# Documentation
+_site/
+site/
 
-# Local configuration
-config.local.yml
-.env.local
+# Specific to llcuda
+binaries/
+models/
+tests/test_model.gguf
+tests/gemma-3-1b-it-Q4_K_M.gguf
+*.gguf.test
 
-# Test outputs
-test_output/
-*.test.log
+# Auto-download cache
+.cache/llcuda/
+/content/.cache/llcuda/
+/kaggle/working/.cache/llcuda/
+
+# Project specific exclusions (from your system)
+/media/waqasm86/External1/Project-Nvidia/Ubuntu-Cuda-Llama.cpp-Executable/
+/media/waqasm86/External1/Project-Nvidia/llama.cpp/
