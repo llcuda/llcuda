@@ -1,37 +1,28 @@
-# llcuda: CUDA-Accelerated LLM Inference for Python
+# 🚀 llcuda v1.1.4 - CUDA-Accelerated LLM Inference for Python
 
-**Effortless, zero-configuration LLM inference with CUDA acceleration. Compatible with all modern NVIDIA GPUs, Google Colab, Kaggle, and JupyterLab. PyTorch-inspired API for seamless integration.**
+**PyTorch-style self-contained package with CUDA 12.8 binaries and libraries.**  
+**No manual setup required - just `pip install llcuda` and use!**
 
-> Ideal for:  
-> - Google Colab and Kaggle notebooks  
-> - Local development on GPUs from GTX 940M to RTX 4090  
-> - Production-grade performance without manual setup  
+[![PyPI version](https://badge.fury.io/py/llcuda.svg)](https://pypi.org/project/llcuda/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![CUDA 12.1+](https://img.shields.io/badge/CUDA-12.1+-green.svg)](https://developer.nvidia.com/cuda-toolkit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
----
+## ✨ Features
 
-## What's New in Version 1.1.1
+- **Self-contained**: Includes CUDA 12.8 binaries and libraries - no separate CUDA installation needed
+- **Auto-download**: Binaries download automatically on first import (models download on-demand)
+- **Multi-GPU Support**: Automatically detects and optimizes for your GPU
+- **Colab/Kaggle Ready**: Works out-of-the-box in cloud notebooks
+- **GGUF Support**: Load any GGUF model (Llama, Gemma, Phi, Mistral, etc.)
+- **Smart Configuration**: Auto-tunes settings for optimal performance
+- **Simple API**: PyTorch-style interface for easy adoption
 
-**Universal GPU Compatibility and Cloud-Optimized Design**
+## 📦 Installation
 
-In previous versions (1.0.x), compatibility was limited, often leading to errors like "no kernel image available" on older architectures such as Tesla T4 in Colab/Kaggle.
+```bash
+# Install from PyPI
+pip install llcuda
 
-With v1.1.1, we've introduced a **hybrid bootstrap architecture** for broader support:
-
-- **Ultra-Light PyPI Package**: Only 51 KB (down from 327 MB) – pure Python code.  
-- **Auto-Download System**: Binaries (~700 MB) and models (~770 MB) fetch automatically on first import, based on your GPU.  
-- **Expanded GPU Support**: All NVIDIA architectures with compute capability 5.0+ (Maxwell to Ada Lovelace).  
-- **Full Cloud Integration**: Seamless on Google Colab (T4, P100, V100, A100) and Kaggle (T4).  
-- **No Breaking Changes**: Backward-compatible with v1.0.x APIs.  
-
-Example Upgrade:
-
-```python
-# Previously (v1.0.x) – Error on T4/P100
-!pip install llcuda==1.0.0
-engine = llcuda.InferenceEngine()
-engine.load_model("gemma-3-1b-Q4_K_M")  # Fails on incompatible GPUs
-
-# Now (v1.1.1) – Works everywhere
-!pip install llcuda
-engine = llcuda.InferenceEngine()
-engine.load_model("gemma-3-1b-Q4_K_M")  # Auto-configures and runs
+# For development version
+pip install git+https://github.com/waqasm86/llcuda.git
