@@ -32,3 +32,6 @@ Thumbs.db
 
 # Local configs
 local_*.json
+
+# Ignore large GGUF model files (used only for local testing)
+*.gguf
