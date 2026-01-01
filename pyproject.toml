@@ -95,7 +95,7 @@ target-version = ['py311', 'py312', 'py313']
 include = '\.pyi?$'
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "1.1.1"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
