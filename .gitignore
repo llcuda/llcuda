@@ -73,3 +73,14 @@ tmp/
 
 # Cleanup script (temporary)
 cleanup_old_versions.sh
+
+# Temporary upload directories
+pypi_source/
+
+# Post-release cleanup files
+cleanup_old_versions.sh
+upload_release.sh
+
+# Local test files
+test_*.log
+*.bak

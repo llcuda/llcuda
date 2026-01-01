@@ -9,13 +9,13 @@
 
 ---
 
-## What's New in Version 1.1.1
+## What's New in Version 1.1.1.post1
 
 **Universal GPU Compatibility and Cloud-Optimized Design**
 
 In previous versions (1.0.x), compatibility was limited, often leading to errors like "no kernel image available" on older architectures such as Tesla T4 in Colab/Kaggle.
 
-With v1.1.1, we've introduced a **hybrid bootstrap architecture** for broader support:
+With v1.1.1.post1, we've introduced a **hybrid bootstrap architecture** for broader support:
 
 - **Ultra-Light PyPI Package**: Only 51 KB (down from 327 MB) – pure Python code.  
 - **Auto-Download System**: Binaries (~700 MB) and models (~770 MB) fetch automatically on first import, based on your GPU.  
@@ -27,11 +27,11 @@ Example Upgrade:
 
 ```python
 # Previously (v1.0.x) – Error on T4/P100
-!pip install llcuda==1.0.0
+!pip install llcuda==1.1.1.post1==1.0.0
 engine = llcuda.InferenceEngine()
 engine.load_model("gemma-3-1b-Q4_K_M")  # Fails on incompatible GPUs
 
-# Now (v1.1.1) – Works everywhere
-!pip install llcuda
+# Now (v1.1.1.post1) – Works everywhere
+!pip install llcuda==1.1.1.post1
 engine = llcuda.InferenceEngine()
 engine.load_model("gemma-3-1b-Q4_K_M")  # Auto-configures and runs
