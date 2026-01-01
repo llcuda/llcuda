@@ -108,7 +108,7 @@ from .utils import (
     validate_model_path
 )
 
-__version__ = "1.1.0"  # Multi-GPU architecture support, Colab/Kaggle compatibility
+__version__ = "1.1.1"  # Multi-GPU architecture support, Colab/Kaggle compatibility
 __all__ = [
     # Core classes
     'InferenceEngine',
