@@ -25,6 +25,7 @@ import subprocess
 import requests
 import time
 from pathlib import Path
+import logging
 
 # ============================================================================
 # AUTO-CONFIGURATION (PyTorch-style)
@@ -49,6 +50,11 @@ if _LIB_DIR.exists():
             os.environ['LD_LIBRARY_PATH'] = f"{_lib_path_str}:{_current_ld_path}"
         else:
             os.environ['LD_LIBRARY_PATH'] = _lib_path_str
+    
+    # Log the setup (optional: helps with debugging)
+    logging.info(f"llcuda: Set LD_LIBRARY_PATH to include {_lib_path_str}")
+else:
+    logging.warning("llcuda: Library directory not found - shared libraries may not load correctly")
 
 # Auto-configure LLAMA_SERVER_PATH to bundled executable
 _LLAMA_SERVER = _BIN_DIR / 'llama-server'
@@ -67,6 +73,19 @@ else:
     try:
         from ._internal.bootstrap import bootstrap
         bootstrap()
+
+        # Re-apply env vars after bootstrap (in case paths were created during download)
+        if _LIB_DIR.exists():
+            _lib_path_str = str(_LIB_DIR.absolute())
+            _current_ld_path = os.environ.get('LD_LIBRARY_PATH', '')
+            if _lib_path_str not in _current_ld_path:
+                os.environ['LD_LIBRARY_PATH'] = f"{_lib_path_str}:{_current_ld_path}" if _current_ld_path else _lib_path_str
+        
+        if _LLAMA_SERVER.exists():
+            os.environ['LLAMA_SERVER_PATH'] = str(_LLAMA_SERVER.absolute())
+            if not os.access(_LLAMA_SERVER, os.X_OK):
+                os.chmod(_LLAMA_SERVER, 0o755)
+
     except Exception as e:
         import warnings
         warnings.warn(
@@ -95,6 +114,7 @@ __all__ = [
     'InferenceEngine',
     'InferResult',
     'ServerManager',
+    'bootstrap',
 
     # Utility functions
     'check_cuda_available',
@@ -157,6 +177,19 @@ class InferenceEngine:
             'total_latency_ms': 0.0,
             'latencies': []
         }
+
+    def check_for_updates():
+        try:
+            response = requests.get("https://pypi.org/pypi/llcuda/json", timeout=2)
+            latest = response.json()["info"]["version"]
+            if latest != __version__:
+                print(f"llcuda: New version available ({latest}) - pip install --upgrade llcuda")
+        except Exception:
+            pass  # Silent fail
+
+    # Call once on import (optional)
+    check_for_updates()
+
 
     def check_server(self) -> bool:
         """

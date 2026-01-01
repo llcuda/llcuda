@@ -1,111 +1,34 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
+# llcuda - Recommended .gitignore
+
+# Bundled binaries and libraries (large, downloaded via bootstrap)
+llcuda/binaries/
+llcuda/lib/
+llcuda/models/
+
+# Bootstrap bundles (huge tar.gz)
+bundles/
+
+# Build artifacts
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
 
-# Virtual Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+# Jupyter/IPython
+.ipynb_checkpoints/
 
-# LLM Models and Binaries
-*.gguf
-*.gguf.*
-*.bin
-*.safetensors
-*.pth
-*.pt
-*.ckpt
-llama-server
-llama-cli
-llama-bench
-
-# Binary Archives
-*.tar.xz
-*.tar.gz
-*.zip
-*.7z
-
-# Cache and Temporary Files
-.cache/
-.cache*/
-.cargo/
-.npm/
-.yarn/
-.yalc/
-.yarn-cache/
-*.tmp
-*.temp
-*~
-
-# IDE files
-.vscode/
+# IDE/Editor files
 .idea/
+.vscode/
 *.swp
-*.swo
+*~
 
 # OS files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
-# Test files
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.nox/
-
-# Logs
-*.log
-logs/
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Documentation
-_site/
-site/
-
-# Specific to llcuda
-binaries/
-models/
-tests/test_model.gguf
-tests/gemma-3-1b-it-Q4_K_M.gguf
-*.gguf.test
-
-# Auto-download cache
-.cache/llcuda/
-/content/.cache/llcuda/
-/kaggle/working/.cache/llcuda/
-
-# Project specific exclusions (from your system)
-/media/waqasm86/External1/Project-Nvidia/Ubuntu-Cuda-Llama.cpp-Executable/
-/media/waqasm86/External1/Project-Nvidia/llama.cpp/
+# Local config
+local_config.json
