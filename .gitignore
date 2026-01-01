@@ -1,34 +1,34 @@
-# llcuda - Recommended .gitignore
-
-# Bundled binaries and libraries (large, downloaded via bootstrap)
+# === llcuda Specific - NEVER commit large files ===
+bundles/
 llcuda/binaries/
 llcuda/lib/
 llcuda/models/
+*.tar.gz
+*.whl
 
-# Bootstrap bundles (huge tar.gz)
-bundles/
-
-# Build artifacts
-build/
+# Python/build artifacts
 dist/
+build/
 *.egg-info/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 .pytest_cache/
 .coverage
 
-# Jupyter/IPython
+# Jupyter
 .ipynb_checkpoints/
 
-# IDE/Editor files
+# IDE/Editor
 .idea/
 .vscode/
 *.swp
 *~
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
-# Local config
-local_config.json
+# Local configs
+local_*.json
