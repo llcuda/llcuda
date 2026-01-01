@@ -10,7 +10,7 @@ packages = ["llcuda", "llcuda._internal"]
 
 [project]
 name = "llcuda"
-version = "1.1.0"
+version = "1.1.3"
 description = "PyTorch-style CUDA-accelerated LLM inference with hybrid bootstrap architecture. 51 KB package auto-downloads binaries for all NVIDIA GPUs (SM 5.0-8.9). Works on local GPUs, Google Colab, and Kaggle."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -95,7 +95,7 @@ target-version = ['py311', 'py312', 'py313']
 include = '\.pyi?$'
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "1.1.3"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false

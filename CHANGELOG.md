@@ -261,3 +261,7 @@ First stable release of llcuda with bundled CUDA binaries and zero-configuration
 ---
 
 *For detailed technical information, see [IMPLEMENTATION_SUMMARY_v1.1.0.md](IMPLEMENTATION_SUMMARY_v1.1.0.md)*
+## [1.1.3] - 2026-01-01
+- Clean up unnecessary development files from root directory
+- Streamline package structure for distribution
+
