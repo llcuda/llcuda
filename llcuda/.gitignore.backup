@@ -1,0 +1,37 @@
+# === llcuda Specific - NEVER commit large files ===
+bundles/
+llcuda/binaries/
+llcuda/lib/
+llcuda/models/
+*.tar.gz
+*.whl
+
+# Python/build artifacts
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local configs
+local_*.json
+
+# Ignore large GGUF model files (used only for local testing)
+*.gguf
