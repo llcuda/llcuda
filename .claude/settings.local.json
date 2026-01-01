@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push:*)",
+      "Bash(pip install:*)",
+      "Bash(python -m build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nPrepare package for PyPI publication\n\n- Add MIT LICENSE file\n- Update repository URLs from local-llama-cuda to llcuda\n- Update author email to waqasm86@gmail.com\n- Fix setup.py package discovery configuration\n- Add MANIFEST.in for proper file inclusion in distribution\n- Add comprehensive PyPI publishing guide\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(python -m twine:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate to Python 3.11+ and add essential project files\n\n- Update Python requirement from 3.8+ to 3.11+ in setup.py, pyproject.toml, and README.md\n- Add .gitignore for proper version control\n- Add CHANGELOG.md tracking version history\n- Add CONTRIBUTING.md with contribution guidelines\n- Add QUICK_PUBLISH_STEPS.md for quick PyPI publishing reference\n- Add tests/__init__.py for proper test package structure\n- Update Python version classifiers to 3.11, 3.12, 3.13\n- Rebuild distribution package with new requirements\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)",
+      "Bash(git reset:*)",
+      "Bash(git clean:*)"
+    ]
+  }
+}

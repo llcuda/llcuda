@@ -1,0 +1,355 @@
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~
+$ gcc --version
+gcc.exe (Rev8, Built by MSYS2 project) 15.2.0
+Copyright (C) 2025 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~
+$ g++ --version
+g++.exe (Rev8, Built by MSYS2 project) 15.2.0
+Copyright (C) 2025 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~
+$ cd "C:\Users\CS-AprilVenture\Documents\Project-Waqas\Project-Waqas-Programming\Project-Nvidia\p1-cpp"
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp
+$ make -S . -B build -G "MinGW Makefiles"
+bash: make: command not found
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp
+$ cmake -S . -B build -G "MinGW Makefiles"
+-- The CXX compiler identification is GNU 15.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/msys64/ucrt64/bin/c++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (5.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: C:/Users/CS-AprilVenture/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp/build
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp
+$ cmake --build build
+[ 50%] Building CXX object CMakeFiles/helloworld.dir/helloworld.cpp.obj
+[100%] Linking CXX executable helloworld.exe
+[100%] Built target helloworld
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp
+$ ls
+CMakeLists.txt  build  helloworld.cpp
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp
+$ cd build
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp/build
+$ ls
+CMakeCache.txt  CMakeFiles  Makefile  cmake_install.cmake  helloworld.exe
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp/build
+$ ./helloworld.ex
+bash: ./helloworld.ex: No such file or directory
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp/build
+$ ./helloworld.exe
+Hello C++ World from VS Code and the C++ extension!
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp/build
+$ cd ..
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp
+$ rm -rf build
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp
+$ cmake -S . -B build -G "MinGW Makefiles"
+-- The C compiler identification is GNU 15.2.0
+-- The CXX compiler identification is GNU 15.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/msys64/ucrt64/bin/cc.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/msys64/ucrt64/bin/c++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (3.3s)
+-- Generating done (0.1s)
+-- Build files have been written to: C:/Users/CS-AprilVenture/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp/build
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp
+$ cmake --build build
+[ 50%] Building CXX object CMakeFiles/helloworld.dir/helloworld.cpp.obj
+[100%] Linking CXX executable helloworld.exe
+[100%] Built target helloworld
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp
+$ ls
+CMakeLists.txt  build  helloworld.cpp
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp
+$ ./build/helloworld.exe
+Hello C++ World from VS Code and the C++ extension!
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/p1-cpp
+$ cd "C:\Users\CS-AprilVenture\Documents\Project-Waqas\Project-Waqas-Programming\Project-Nvidia\waqasm86.github.io"
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/waqasm86.github.io (main)
+$ git add .
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/waqasm86.github.io (main)
+$ git commit -m "Initialize MkDocs Material personal site"
+[main (root-commit) c098238] Initialize MkDocs Material personal site
+ 10 files changed, 104 insertions(+)
+ create mode 100644 .github/workflows/gh-pages.yml
+ create mode 100644 docs/about.md
+ create mode 100644 docs/index.md
+ create mode 100644 docs/projects/cuda-llm-storage-pipeline.md
+ create mode 100644 docs/projects/cuda-mpi-llama-scheduler.md
+ create mode 100644 docs/projects/cuda-openmpi.md
+ create mode 100644 docs/projects/cuda-tcp-llama.md
+ create mode 100644 docs/projects/index.md
+ create mode 100644 mkdocs.yml
+ create mode 100644 requirements.txt
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/waqasm86.github.io (main)
+$ git push -u origin main
+info: please complete authentication in your browser...
+Enumerating objects: 14, done.
+Counting objects: 100% (14/14), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (10/10), done.
+Writing objects: 100% (14/14), 2.02 KiB | 229.00 KiB/s, done.
+Total 14 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+To https://github.com/waqasm86/waqasm86.github.io.git
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/waqasm86.github.io (main)
+$ ipconfig /flushdns
+
+Error: unrecognized or incomplete command line.
+
+USAGE:
+    ipconfig [/allcompartments] [/? | /all |
+                                 /renew [adapter] | /release [adapter] |
+                                 /renew6 [adapter] | /release6 [adapter] |
+                                 /flushdns | /displaydns | /registerdns |
+                                 /showclassid adapter |
+                                 /setclassid adapter [classid] |
+                                 /showclassid6 adapter |
+                                 /setclassid6 adapter [classid] ]
+
+where
+    adapter             Connection name
+                       (wildcard characters * and ? allowed, see examples)
+
+    Options:
+       /?               Display this help message
+       /all             Display full configuration information.
+       /release         Release the IPv4 address for the specified adapter.
+       /release6        Release the IPv6 address for the specified adapter.
+       /renew           Renew the IPv4 address for the specified adapter.
+       /renew6          Renew the IPv6 address for the specified adapter.
+       /flushdns        Purges the DNS Resolver cache.
+       /registerdns     Refreshes all DHCP leases and re-registers DNS names
+       /displaydns      Display the contents of the DNS Resolver Cache.
+       /showclassid     Displays all the dhcp class IDs allowed for adapter.
+       /setclassid      Modifies the dhcp class id.
+       /showclassid6    Displays all the IPv6 DHCP class IDs allowed for adapter.
+       /setclassid6     Modifies the IPv6 DHCP class id.
+
+
+The default is to display only the IP address, subnet mask and
+default gateway for each adapter bound to TCP/IP.
+
+For Release and Renew, if no adapter name is specified, then the IP address
+leases for all adapters bound to TCP/IP will be released or renewed.
+
+For Setclassid and Setclassid6, if no ClassId is specified, then the ClassId is removed.
+
+Examples:
+    > ipconfig                       ... Show information
+    > ipconfig /all                  ... Show detailed information
+    > ipconfig /renew                ... renew all adapters
+    > ipconfig /renew EL*            ... renew any connection that has its
+                                         name starting with EL
+    > ipconfig /release *Con*        ... release all matching connections,
+                                         eg. "Wired Ethernet Connection 1" or
+                                             "Wired Ethernet Connection 2"
+    > ipconfig /allcompartments      ... Show information about all
+                                         compartments
+    > ipconfig /allcompartments /all ... Show detailed information about all
+                                         compartments
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/waqasm86.github.io (main)
+$ [200~ipconfig /release~
+bash: [200~ipconfig: command not found
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/waqasm86.github.io (main)
+$ ipconfig /release
+
+Error: unrecognized or incomplete command line.
+
+USAGE:
+    ipconfig [/allcompartments] [/? | /all |
+                                 /renew [adapter] | /release [adapter] |
+                                 /renew6 [adapter] | /release6 [adapter] |
+                                 /flushdns | /displaydns | /registerdns |
+                                 /showclassid adapter |
+                                 /setclassid adapter [classid] |
+                                 /showclassid6 adapter |
+                                 /setclassid6 adapter [classid] ]
+
+where
+    adapter             Connection name
+                       (wildcard characters * and ? allowed, see examples)
+
+    Options:
+       /?               Display this help message
+       /all             Display full configuration information.
+       /release         Release the IPv4 address for the specified adapter.
+       /release6        Release the IPv6 address for the specified adapter.
+       /renew           Renew the IPv4 address for the specified adapter.
+       /renew6          Renew the IPv6 address for the specified adapter.
+       /flushdns        Purges the DNS Resolver cache.
+       /registerdns     Refreshes all DHCP leases and re-registers DNS names
+       /displaydns      Display the contents of the DNS Resolver Cache.
+       /showclassid     Displays all the dhcp class IDs allowed for adapter.
+       /setclassid      Modifies the dhcp class id.
+       /showclassid6    Displays all the IPv6 DHCP class IDs allowed for adapter.
+       /setclassid6     Modifies the IPv6 DHCP class id.
+
+
+The default is to display only the IP address, subnet mask and
+default gateway for each adapter bound to TCP/IP.
+
+For Release and Renew, if no adapter name is specified, then the IP address
+leases for all adapters bound to TCP/IP will be released or renewed.
+
+For Setclassid and Setclassid6, if no ClassId is specified, then the ClassId is removed.
+
+Examples:
+    > ipconfig                       ... Show information
+    > ipconfig /all                  ... Show detailed information
+    > ipconfig /renew                ... renew all adapters
+    > ipconfig /renew EL*            ... renew any connection that has its
+                                         name starting with EL
+    > ipconfig /release *Con*        ... release all matching connections,
+                                         eg. "Wired Ethernet Connection 1" or
+                                             "Wired Ethernet Connection 2"
+    > ipconfig /allcompartments      ... Show information about all
+                                         compartments
+    > ipconfig /allcompartments /all ... Show detailed information about all
+                                         compartments
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/waqasm86.github.io (main)
+$ ipconfig /renew
+
+Error: unrecognized or incomplete command line.
+
+USAGE:
+    ipconfig [/allcompartments] [/? | /all |
+                                 /renew [adapter] | /release [adapter] |
+                                 /renew6 [adapter] | /release6 [adapter] |
+                                 /flushdns | /displaydns | /registerdns |
+                                 /showclassid adapter |
+                                 /setclassid adapter [classid] |
+                                 /showclassid6 adapter |
+                                 /setclassid6 adapter [classid] ]
+
+where
+    adapter             Connection name
+                       (wildcard characters * and ? allowed, see examples)
+
+    Options:
+       /?               Display this help message
+       /all             Display full configuration information.
+       /release         Release the IPv4 address for the specified adapter.
+       /release6        Release the IPv6 address for the specified adapter.
+       /renew           Renew the IPv4 address for the specified adapter.
+       /renew6          Renew the IPv6 address for the specified adapter.
+       /flushdns        Purges the DNS Resolver cache.
+       /registerdns     Refreshes all DHCP leases and re-registers DNS names
+       /displaydns      Display the contents of the DNS Resolver Cache.
+       /showclassid     Displays all the dhcp class IDs allowed for adapter.
+       /setclassid      Modifies the dhcp class id.
+       /showclassid6    Displays all the IPv6 DHCP class IDs allowed for adapter.
+       /setclassid6     Modifies the IPv6 DHCP class id.
+
+
+The default is to display only the IP address, subnet mask and
+default gateway for each adapter bound to TCP/IP.
+
+For Release and Renew, if no adapter name is specified, then the IP address
+leases for all adapters bound to TCP/IP will be released or renewed.
+
+For Setclassid and Setclassid6, if no ClassId is specified, then the ClassId is removed.
+
+Examples:
+    > ipconfig                       ... Show information
+    > ipconfig /all                  ... Show detailed information
+    > ipconfig /renew                ... renew all adapters
+    > ipconfig /renew EL*            ... renew any connection that has its
+                                         name starting with EL
+    > ipconfig /release *Con*        ... release all matching connections,
+                                         eg. "Wired Ethernet Connection 1" or
+                                             "Wired Ethernet Connection 2"
+    > ipconfig /allcompartments      ... Show information about all
+                                         compartments
+    > ipconfig /allcompartments /all ... Show detailed information about all
+                                         compartments
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/waqasm86.github.io (main)
+$ netsh winsock reset
+
+Sucessfully reset the Winsock Catalog.
+You must restart the computer in order to complete the reset.
+
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/waqasm86.github.io (main)
+$ netsh int ip reset
+Resetting Compartment Forwarding, OK!
+Resetting Compartment, OK!
+Resetting Control Protocol, OK!
+Resetting Echo Sequence Request, OK!
+Resetting Global, OK!
+Resetting Interface, OK!
+Resetting Anycast Address, OK!
+Resetting Multicast Address, OK!
+Resetting Unicast Address, OK!
+Resetting Neighbor, OK!
+Resetting Path, OK!
+Resetting Potential, OK!
+Resetting Prefix Policy, OK!
+Resetting Proxy Neighbor, OK!
+Resetting Route, OK!
+Resetting Site Prefix, OK!
+Resetting Subinterface, OK!
+Resetting Wakeup Pattern, OK!
+Resetting Resolve Neighbor, OK!
+Resetting , OK!
+Resetting , OK!
+Resetting , OK!
+Resetting , OK!
+Resetting , failed.
+Access is denied.
+
+Resetting , OK!
+Resetting , OK!
+Resetting , OK!
+Resetting , OK!
+Resetting , OK!
+Resetting , OK!
+Resetting , OK!
+Resetting , OK!
+Restart the computer to complete this action.
+
+
+CS-AprilVenture@DESKTOP-DC0DM0C MINGW64 ~/Documents/Project-Waqas/Project-Waqas-Programming/Project-Nvidia/waqasm86.github.io (main)
+$
