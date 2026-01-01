@@ -214,26 +214,34 @@ def download_binaries() -> None:
     print()
 
 
-def download_default_model() -> None:
+def download_default_model(verbose: bool = True) -> bool:
     """
     Download default model (Gemma 3 1B) from Hugging Face.
+    
+    Args:
+        verbose: Whether to print progress messages
+        
+    Returns:
+        True if download successful, False otherwise
     """
     if not HF_AVAILABLE:
-        print("⚠️  huggingface_hub not available, skipping model download")
-        print("   Install with: pip install huggingface_hub")
-        return
+        if verbose:
+            print("⚠️  huggingface_hub not available")
+            print("   Install with: pip install huggingface_hub")
+        return False
 
     # Check if model already exists
     model_file = MODELS_DIR / "google_gemma-3-1b-it-Q4_K_M.gguf"
     if model_file.exists() and model_file.stat().st_size > 700_000_000:  # > 700 MB
-        print("✅ Model already downloaded")
-        return
+        if verbose:
+            print("✅ Model already downloaded")
+        return True
 
-    print("📥 Downloading default model from Hugging Face...")
-    print(f"   Repository: {HF_REPO_ID}")
-    print(f"   Model: google_gemma-3-1b-it-Q4_K_M.gguf (769 MB)")
-    print(f"   This is a one-time download")
-    print()
+    if verbose:
+        print("📥 Downloading default model from Hugging Face...")
+        print(f"   Repository: {HF_REPO_ID}")
+        print(f"   Model: google_gemma-3-1b-it-Q4_K_M.gguf (769 MB)")
+        print()
 
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -244,31 +252,32 @@ def download_default_model() -> None:
             local_dir=MODELS_DIR,
             local_dir_use_symlinks=False
         )
-        print()
-        print(f"✅ Model downloaded: {downloaded_path}")
+        if verbose:
+            print()
+            print(f"✅ Model downloaded: {downloaded_path}")
+        return True
     except Exception as e:
-        print(f"⚠️  Model download failed: {e}")
-        print("   You can manually download models later")
-
-    print()
+        if verbose:
+            print(f"⚠️  Model download failed: {e}")
+        return False
 
 
 def bootstrap() -> None:
     """
     Main bootstrap function called on first import.
+    Downloads ONLY binaries, not models.
     """
-    # Check if setup already complete
+    # Check if binaries already exist
     llama_server = BINARIES_DIR / "cuda12" / "llama-server"
-    model_file = MODELS_DIR / "google_gemma-3-1b-it-Q4_K_M.gguf"
-
-    if llama_server.exists() and model_file.exists():
-        # Setup already complete
+    
+    if llama_server.exists() and llama_server.stat().st_size > 0:
+        # Binaries already installed
         return
 
     # Create cache directory
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Download binaries
+    # Download binaries (only)
     if not llama_server.exists():
         try:
             download_binaries()
@@ -276,25 +285,23 @@ def bootstrap() -> None:
             print(f"❌ Binary download failed: {e}")
             print("   llcuda may not function correctly")
             print()
-
-    # Download default model
-    if not model_file.exists():
-        try:
-            download_default_model()
-        except Exception as e:
-            print(f"⚠️  Model download skipped: {e}")
-            print()
+            return
 
     print("=" * 60)
-    print("✅ llcuda Setup Complete!")
+    print("✅ llcuda Binaries Setup Complete!")
     print("=" * 60)
     print()
-    print("You can now use llcuda:")
+    print("You can now use llcuda. Models will be downloaded on-demand:")
     print()
     print("  import llcuda")
     print("  engine = llcuda.InferenceEngine()")
-    print("  engine.load_model('gemma-3-1b-Q4_K_M')")
+    print("  engine.load_model('gemma-3-1b-Q4_K_M')  # Downloads model if needed")
     print("  result = engine.infer('What is AI?')")
+    print()
+    print("Or download a model explicitly:")
+    print("  from llcuda.models import download_model")
+    print("  download_model('gemma-3-1b-Q4_K_M')")
+    print("=" * 60)
     print()
 
 
