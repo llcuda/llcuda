@@ -15,14 +15,15 @@ import subprocess
 
 try:
     from huggingface_hub import hf_hub_download
+
     HF_AVAILABLE = True
 except ImportError:
     HF_AVAILABLE = False
 
 # Configuration
-GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.1.5"
+GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.1.6"
 HF_REPO_ID = "waqasm86/llcuda-models"
-BINARY_BUNDLE_NAME = "llcuda-binaries-cuda12.tar.gz"
+BINARY_BUNDLE_NAME = "llcuda-binaries-cuda12-v1.1.6.tar.gz"
 
 # Paths
 PACKAGE_DIR = Path(__file__).parent.parent
@@ -45,7 +46,7 @@ def detect_gpu_compute_capability() -> Optional[Tuple[str, str]]:
             ["nvidia-smi", "--query-gpu=name,compute_cap", "--format=csv,noheader"],
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=10,
         )
 
         if result.returncode == 0 and result.stdout.strip():
@@ -69,6 +70,7 @@ def detect_platform() -> str:
     # Check for Colab
     try:
         import google.colab
+
         return "colab"
     except ImportError:
         pass
@@ -98,7 +100,9 @@ def download_file(url: str, dest_path: Path, desc: str = "Downloading") -> None:
             percent = int(count * block_size * 100 / total_size)
             mb_downloaded = count * block_size / (1024 * 1024)
             mb_total = total_size / (1024 * 1024)
-            sys.stdout.write(f"\r{desc}: {percent}% ({mb_downloaded:.1f}/{mb_total:.1f} MB)")
+            sys.stdout.write(
+                f"\r{desc}: {percent}% ({mb_downloaded:.1f}/{mb_total:.1f} MB)"
+            )
             sys.stdout.flush()
 
     try:
@@ -126,10 +130,10 @@ def extract_tarball(tarball_path: Path, dest_dir: Path) -> None:
         # First, check what's in the tarball
         members = tar.getmembers()
         print(f"Found {len(members)} files in archive")
-        
+
         # Extract all
         tar.extractall(dest_dir)
-        
+
         # List extracted files for debugging
         extracted_files = list(dest_dir.rglob("*"))
         print(f"Extracted {len(extracted_files)} files to {dest_dir}")
@@ -204,7 +208,9 @@ def download_binaries() -> None:
                 extracted_bundle = item
                 break
         else:
-            extracted_bundle = temp_extract_dir / BINARY_BUNDLE_NAME.replace(".tar.gz", "")
+            extracted_bundle = temp_extract_dir / BINARY_BUNDLE_NAME.replace(
+                ".tar.gz", ""
+            )
 
     print(f"📁 Using bundle directory: {extracted_bundle}")
 
@@ -222,13 +228,9 @@ def download_binaries() -> None:
                     cuda12_dir = BINARIES_DIR / "cuda12"
                     cuda12_dir.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(server_binaries[0], cuda12_dir / "llama-server")
-        
+
         if binaries_src.exists():
-            shutil.copytree(
-                binaries_src,
-                BINARIES_DIR,
-                dirs_exist_ok=True
-            )
+            shutil.copytree(binaries_src, BINARIES_DIR, dirs_exist_ok=True)
 
         # Copy libraries
         lib_src = extracted_bundle / "lib"
@@ -243,11 +245,7 @@ def download_binaries() -> None:
                         shutil.copy2(so_file, LIB_DIR / so_file.name)
 
         if lib_src.exists() and lib_src != extracted_bundle:
-            shutil.copytree(
-                lib_src,
-                LIB_DIR,
-                dirs_exist_ok=True
-            )
+            shutil.copytree(lib_src, LIB_DIR, dirs_exist_ok=True)
 
         # Make binaries executable
         for binary in BINARIES_DIR.glob("**/*"):
@@ -264,27 +262,26 @@ def download_binaries() -> None:
         print("⚠️  Bundle not found, searching for binaries...")
         server_binaries = list(temp_extract_dir.rglob("llama-server"))
         so_files = list(temp_extract_dir.rglob("*.so*"))
-        
+
         if server_binaries:
             BINARIES_DIR.mkdir(parents=True, exist_ok=True)
             cuda12_dir = BINARIES_DIR / "cuda12"
             cuda12_dir.mkdir(parents=True, exist_ok=True)
             shutil.copy2(server_binaries[0], cuda12_dir / "llama-server")
             print(f"  Copied llama-server: {server_binaries[0]}")
-        
+
         if so_files:
             LIB_DIR.mkdir(parents=True, exist_ok=True)
             for so_file in so_files:
                 shutil.copy2(so_file, LIB_DIR / so_file.name)
                 print(f"  Copied library: {so_file.name}")
-        
+
         if server_binaries or so_files:
             print("✅ Found and installed binaries!")
 
     # Cleanup
     shutil.rmtree(temp_extract_dir, ignore_errors=True)
     print()
-
 
 
 def download_default_model() -> None:
@@ -315,7 +312,7 @@ def download_default_model() -> None:
             repo_id=HF_REPO_ID,
             filename="google_gemma-3-1b-it-Q4_K_M.gguf",
             local_dir=MODELS_DIR,
-            local_dir_use_symlinks=False
+            local_dir_use_symlinks=False,
         )
         print()
         print(f"✅ Model downloaded: {downloaded_path}")
