@@ -16,10 +16,22 @@ rm -rf build/ dist/ *.egg-info
 find . -name "*.pyc" -delete
 find . -name "__pycache__" -delete
 
-# Verify version consistency
+# Verify version consistency - FIXED version parsing
 echo "Verifying version consistency..."
-PYPROJECT_VERSION=$(grep 'version =' pyproject.toml | cut -d'"' -f2)
+# Method 1: Get project version using sed
+PYPROJECT_VERSION=$(sed -n '/^\[project\]/,/^\[/p' pyproject.toml | grep 'version =' | head -1 | cut -d'"' -f2)
+
+# Method 2: Alternative if method 1 fails
+if [ -z "$PYPROJECT_VERSION" ]; then
+    PYPROJECT_VERSION=$(grep '^version =' pyproject.toml | head -1 | cut -d'"' -f2)
+fi
+
 INIT_VERSION=$(grep '__version__ =' llcuda/__init__.py | cut -d'"' -f2)
+
+if [ -z "$PYPROJECT_VERSION" ]; then
+    echo "✗ Could not find version in pyproject.toml"
+    exit 1
+fi
 
 if [ "$PYPROJECT_VERSION" = "$INIT_VERSION" ]; then
     echo "✓ Versions match: $PYPROJECT_VERSION"
