@@ -1,1 +1,1 @@
-CUDA-accelerated LLM inference for Python, Version 1.1.5 - PyTorch-style, zero-configuration, works on Colab/Kaggle/local GPUs.
+Clean, ultra-lightweight CUDA-accelerated LLM inference for Python 3.11+. Version 1.1.6 - Streamlined project structure with 62KB package and hybrid bootstrap for all NVIDIA GPUs (SM 5.0-8.9). Works on Colab/Kaggle/local GPUs.

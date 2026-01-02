@@ -1,8 +1,11 @@
 """
-llcuda - CUDA-Accelerated LLM Inference for Python
+llcuda - Clean, Ultra-Lightweight CUDA-Accelerated LLM Inference for Python 3.11+
 
-PyTorch-style self-contained package with CUDA 12.8 binaries and libraries.
+Streamlined PyTorch-style package with hybrid bootstrap architecture.
+62KB package with auto-download of CUDA binaries and libraries.
 No manual setup required - just pip install and use!
+
+Version 1.1.6 - Clean project structure optimized for development and deployment.
 
 Examples:
     Basic usage (auto-download model from registry):
@@ -16,6 +19,14 @@ Examples:
     >>> engine = llcuda.InferenceEngine()
     >>> engine.load_model("/path/to/model.gguf", auto_start=True)
     >>> result = engine.infer("What is AI?")
+
+Key Features:
+    - Ultra-lightweight 62KB package
+    - Python 3.11+ optimized
+    - Universal GPU support (SM 5.0-8.9)
+    - Hybrid bootstrap (auto-download binaries/models)
+    - Works on Colab/Kaggle/local GPUs
+    - Clean, maintainable codebase
 """
 
 from typing import Optional, List, Dict, Any
@@ -382,8 +393,8 @@ class InferenceEngine:
                 success = self._server_manager.start_server(
                     model_path=str(model_path),
                     port=port,
-                    gpu_layers=gpu_layers,
-                    ctx_size=ctx_size,
+                    gpu_layers=gpu_layers if gpu_layers is not None else 99,
+                    ctx_size=ctx_size if ctx_size is not None else 2048,
                     n_parallel=n_parallel,
                     batch_size=batch_size,
                     ubatch_size=ubatch_size,

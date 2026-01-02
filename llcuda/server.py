@@ -4,6 +4,7 @@ llcuda.server - Server Management for llama-server
 This module provides automatic management of llama-server lifecycle,
 including finding, starting, and stopping the server process.
 """
+
 import tarfile
 import requests
 import shutil
@@ -46,14 +47,16 @@ class ServerManager:
         """Get the actual download URL by following redirects"""
         try:
             import requests
+
             # Get the final URL after redirects
-            response = requests.head(self._BINARY_BASE_URL, allow_redirects=True, timeout=10)
+            response = requests.head(
+                self._BINARY_BASE_URL, allow_redirects=True, timeout=10
+            )
             return response.url
         except Exception as e:
             print(f"Warning: Could not get redirect URL: {e}")
             # Fall back to the base URL
             return self._BINARY_BASE_URL
-
 
     def __init__(self, server_url: str = "http://127.0.0.1:8090"):
         """
@@ -81,7 +84,7 @@ class ServerManager:
             Path to llama-server executable, or None if not found
         """
         # Priority 1: Explicit path from environment
-        env_path = os.getenv('LLAMA_SERVER_PATH')
+        env_path = os.getenv("LLAMA_SERVER_PATH")
         if env_path:
             path = Path(env_path)
             if path.exists() and path.is_file():
@@ -89,19 +92,23 @@ class ServerManager:
                 return path
 
         # Priority 2: LLAMA_CPP_DIR
-        llama_cpp_dir = os.getenv('LLAMA_CPP_DIR')
+        llama_cpp_dir = os.getenv("LLAMA_CPP_DIR")
         if llama_cpp_dir:
-            path = Path(llama_cpp_dir) / 'bin' / 'llama-server'
+            path = Path(llama_cpp_dir) / "bin" / "llama-server"
             if path.exists():
                 self._setup_library_path(path)
                 return path
 
         # Priority 3: Project-specific location (Ubuntu-Cuda-Llama.cpp-Executable)
         project_paths = [
-            Path('/media/waqasm86/External1/Project-Nvidia/Ubuntu-Cuda-Llama.cpp-Executable/bin/llama-server'),
-            Path('/media/waqasm86/External1/Project-Nvidia/llama.cpp/build/bin/llama-server'),
-            Path.home() / 'Ubuntu-Cuda-Llama.cpp-Executable' / 'bin' / 'llama-server',
-            Path.cwd() / 'Ubuntu-Cuda-Llama.cpp-Executable' / 'bin' / 'llama-server',
+            Path(
+                "/media/waqasm86/External1/Project-Nvidia/Ubuntu-Cuda-Llama.cpp-Executable/bin/llama-server"
+            ),
+            Path(
+                "/media/waqasm86/External1/Project-Nvidia/llama.cpp/build/bin/llama-server"
+            ),
+            Path.home() / "Ubuntu-Cuda-Llama.cpp-Executable" / "bin" / "llama-server",
+            Path.cwd() / "Ubuntu-Cuda-Llama.cpp-Executable" / "bin" / "llama-server",
         ]
 
         for path in project_paths:
@@ -111,10 +118,10 @@ class ServerManager:
 
         # Priority 4: System locations
         system_paths = [
-            '/usr/local/bin/llama-server',
-            '/usr/bin/llama-server',
-            '/opt/llama.cpp/bin/llama-server',
-            '/opt/homebrew/bin/llama-server',  # macOS Homebrew
+            "/usr/local/bin/llama-server",
+            "/usr/bin/llama-server",
+            "/opt/llama.cpp/bin/llama-server",
+            "/opt/homebrew/bin/llama-server",  # macOS Homebrew
         ]
 
         for path_str in system_paths:
@@ -124,7 +131,7 @@ class ServerManager:
                 return path
 
         # Priority 5: User's home directory
-        home_path = Path.home() / '.llcuda' / 'bin' / 'llama-server'
+        home_path = Path.home() / ".llcuda" / "bin" / "llama-server"
         if home_path.exists():
             self._setup_library_path(home_path)
             return home_path
@@ -139,17 +146,17 @@ class ServerManager:
             server_path: Path to llama-server executable
         """
         # Find lib directory relative to server binary
-        lib_dir = server_path.parent.parent / 'lib'
+        lib_dir = server_path.parent.parent / "lib"
 
         if lib_dir.exists():
             lib_path_str = str(lib_dir.absolute())
-            current_ld_path = os.environ.get('LD_LIBRARY_PATH', '')
+            current_ld_path = os.environ.get("LD_LIBRARY_PATH", "")
 
             if lib_path_str not in current_ld_path:
                 if current_ld_path:
-                    os.environ['LD_LIBRARY_PATH'] = f"{lib_path_str}:{current_ld_path}"
+                    os.environ["LD_LIBRARY_PATH"] = f"{lib_path_str}:{current_ld_path}"
                 else:
-                    os.environ['LD_LIBRARY_PATH'] = lib_path_str
+                    os.environ["LD_LIBRARY_PATH"] = lib_path_str
 
     def check_server_health(self, timeout: float = 2.0) -> bool:
         """
@@ -162,71 +169,78 @@ class ServerManager:
             True if server is healthy, False otherwise
         """
         try:
-            response = requests.get(
-                f"{self.server_url}/health",
-                timeout=timeout
-            )
+            response = requests.get(f"{self.server_url}/health", timeout=timeout)
             return response.status_code == 200
         except requests.exceptions.RequestException:
             return False
-    
+
     def _detect_platform(self):
         """
         Detect the current platform (colab, kaggle, or local).
-        
+
         Returns:
             Dictionary with platform information
         """
         platform_info = {
-            'platform': 'local',
-            'gpu_name': None,
-            'compute_capability': None
+            "platform": "local",
+            "gpu_name": None,
+            "compute_capability": None,
         }
-        
+
         # Check for Google Colab
-        if 'COLAB_GPU' in os.environ:
-            platform_info['platform'] = 'colab'
+        if "COLAB_GPU" in os.environ:
+            platform_info["platform"] = "colab"
             # Try to get GPU info in Colab
             try:
-                result = subprocess.run(['nvidia-smi', '--query-gpu=name,compute_cap', '--format=csv,noheader'], 
-                                    capture_output=True, text=True)
+                result = subprocess.run(
+                    [
+                        "nvidia-smi",
+                        "--query-gpu=name,compute_cap",
+                        "--format=csv,noheader",
+                    ],
+                    capture_output=True,
+                    text=True,
+                )
                 if result.stdout:
-                    lines = result.stdout.strip().split('\n')
+                    lines = result.stdout.strip().split("\n")
                     if lines:
-                        parts = lines[0].split(',')
-                        platform_info['gpu_name'] = parts[0].strip()
+                        parts = lines[0].split(",")
+                        platform_info["gpu_name"] = parts[0].strip()
                         if len(parts) > 1:
-                            platform_info['compute_capability'] = float(parts[1].strip())
+                            platform_info["compute_capability"] = float(
+                                parts[1].strip()
+                            )
             except:
                 pass
             return platform_info
-        
+
         # Check for Kaggle
-        if 'KAGGLE_KERNEL_RUN_TYPE' in os.environ:
-            platform_info['platform'] = 'kaggle'
+        if "KAGGLE_KERNEL_RUN_TYPE" in os.environ:
+            platform_info["platform"] = "kaggle"
             # Kaggle typically uses T4 GPUs
-            platform_info['gpu_name'] = 'Tesla T4'
-            platform_info['compute_capability'] = 7.5
+            platform_info["gpu_name"] = "Tesla T4"
+            platform_info["compute_capability"] = 7.5
             return platform_info
-        
+
         # Check for local NVIDIA GPU
         try:
             # Get GPU name and compute capability
-            result = subprocess.run(['nvidia-smi', '--query-gpu=name,compute_cap', '--format=csv,noheader'], 
-                                capture_output=True, text=True)
+            result = subprocess.run(
+                ["nvidia-smi", "--query-gpu=name,compute_cap", "--format=csv,noheader"],
+                capture_output=True,
+                text=True,
+            )
             if result.stdout:
-                lines = result.stdout.strip().split('\n')
+                lines = result.stdout.strip().split("\n")
                 if lines:
-                    parts = lines[0].split(',')
-                    platform_info['gpu_name'] = parts[0].strip()
+                    parts = lines[0].split(",")
+                    platform_info["gpu_name"] = parts[0].strip()
                     if len(parts) > 1:
-                        platform_info['compute_capability'] = float(parts[1].strip())
+                        platform_info["compute_capability"] = float(parts[1].strip())
         except:
             pass
-        
+
         return platform_info
-
-
 
     def _download_llama_server(self):
         """
@@ -234,92 +248,95 @@ class ServerManager:
         Returns the path to the downloaded binary.
         """
         print("llama-server not found. Downloading pre-built CUDA binary...")
-        
+
         # Determine cache directory based on platform
         platform_info = self._detect_platform()
-        if platform_info['platform'] == 'colab':
+        if platform_info["platform"] == "colab":
             cache_dir = Path("/content/.cache/llcuda")
-        elif platform_info['platform'] == 'kaggle':
+        elif platform_info["platform"] == "kaggle":
             cache_dir = Path("/kaggle/working/.cache/llcuda")
         else:
             # Local machine
             cache_dir = Path.home() / ".cache" / "llcuda"
-        
+
         # Create cache directory
         cache_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Define paths
         tar_path = cache_dir / "llama.cpp-ubuntu-cuda-x64.tar.xz"
         extract_dir = cache_dir / "extracted"
-        
+
         # Download the binary archive (with progress indicator)
         try:
             download_url = self._get_download_url()
             print(f"Downloading from: {download_url}")
-            
+
             response = requests.get(download_url, stream=True, timeout=60)
             response.raise_for_status()
-            
-            total_size = int(response.headers.get('content-length', 0))
+
+            total_size = int(response.headers.get("content-length", 0))
             downloaded = 0
-            
-            with open(tar_path, 'wb') as f:
+
+            with open(tar_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
                     downloaded += len(chunk)
                     if total_size > 0:
                         percent = (downloaded / total_size) * 100
-                        sys.stdout.write(f"\rDownloading: {percent:.1f}% ({downloaded}/{total_size} bytes)")
+                        sys.stdout.write(
+                            f"\rDownloading: {percent:.1f}% ({downloaded}/{total_size} bytes)"
+                        )
                         sys.stdout.flush()
-            
+
             print("\n✓ Download complete")
-            
+
         except requests.exceptions.RequestException as e:
-            raise RuntimeError(f"Failed to download binary: {e}\n"
-                            "Check your internet connection or download manually from:\n"
-                            f"{self._BINARY_BASE_URL}")
-        
+            raise RuntimeError(
+                f"Failed to download binary: {e}\n"
+                "Check your internet connection or download manually from:\n"
+                f"{self._BINARY_BASE_URL}"
+            )
+
         # Extract the archive
         print("Extracting binary...")
         try:
             shutil.rmtree(extract_dir, ignore_errors=True)  # Clean previous extraction
             extract_dir.mkdir(exist_ok=True)
-            
-            with tarfile.open(tar_path, 'r:xz') as tar:
+
+            with tarfile.open(tar_path, "r:xz") as tar:
                 tar.extractall(extract_dir)
-            
+
             # Find the actual binary (it might be in a subdirectory)
             possible_paths = list(extract_dir.rglob("llama-server"))
             if not possible_paths:
                 # Try bin/ subdirectory
                 possible_paths = list(extract_dir.rglob("bin/llama-server"))
-            
+
             if not possible_paths:
-                raise FileNotFoundError("Could not find llama-server in downloaded archive")
-            
+                raise FileNotFoundError(
+                    "Could not find llama-server in downloaded archive"
+                )
+
             server_binary = possible_paths[0]
             print(f"✓ Found binary at: {server_binary}")
-            
+
             # Clean up the tar file
             if tar_path.exists():
                 tar_path.unlink()
-            
+
             # Set and return the binary path
             final_path = cache_dir / "llama-server"
             shutil.copy2(server_binary, final_path)
             os.chmod(final_path, 0o755)
-            
+
             # Clean up extraction directory
             shutil.rmtree(extract_dir, ignore_errors=True)
-            
+
             print(f"✓ Binary installed at: {final_path}")
             return str(final_path)
-            
+
         except (tarfile.TarError, OSError) as e:
             raise RuntimeError(f"Failed to extract binary: {e}")
-
-
-
 
     def start_server(
         self,
@@ -334,7 +351,7 @@ class ServerManager:
         timeout: int = 60,
         verbose: bool = True,
         skip_gpu_check: bool = False,
-        **kwargs
+        **kwargs,
     ) -> bool:
         """
         Start llama-server with specified configuration.
@@ -363,19 +380,20 @@ class ServerManager:
         # Check GPU compatibility (only if using GPU layers)
         if gpu_layers > 0 and not skip_gpu_check:
             from .utils import check_gpu_compatibility
+
             compat = check_gpu_compatibility(min_compute_cap=5.0)
 
             if verbose:
                 print(f"GPU Check:")
                 print(f"  Platform: {compat['platform']}")
-                if compat['gpu_name']:
+                if compat["gpu_name"]:
                     print(f"  GPU: {compat['gpu_name']}")
-                if compat['compute_capability']:
+                if compat["compute_capability"]:
                     print(f"  Compute Capability: {compat['compute_capability']}")
 
-            if not compat['compatible']:
+            if not compat["compatible"]:
                 error_msg = f"GPU Compatibility Error: {compat['reason']}\n"
-                if compat['compute_capability'] and compat['compute_capability'] < 5.0:
+                if compat["compute_capability"] and compat["compute_capability"] < 5.0:
                     error_msg += (
                         f"\nYour GPU (compute capability {compat['compute_capability']}) is not supported.\n"
                         f"llcuda requires NVIDIA GPU with compute capability 5.0 or higher.\n"
@@ -389,7 +407,7 @@ class ServerManager:
                     error_msg += "\nTo skip this check, use skip_gpu_check=True"
                 raise RuntimeError(error_msg)
 
-            if verbose and compat['compatible']:
+            if verbose and compat["compatible"]:
                 print(f"  Status: ✓ Compatible")
 
         # Check if server is already running
@@ -405,14 +423,14 @@ class ServerManager:
         if self._server_path is None:
             # Auto-download llama-server binary
             self._server_path = self._download_llama_server()
-            
+
         # Verify the binary exists and is executable
         if not os.path.exists(self._server_path):
             raise FileNotFoundError(
                 f"llama-server not found at downloaded location: {self._server_path}\n"
                 "Try setting LLAMA_SERVER_PATH environment variable manually."
             )
-    
+
         # Make sure it's executable
         os.chmod(self._server_path, 0o755)
 
@@ -424,25 +442,33 @@ class ServerManager:
         # Build command
         cmd = [
             str(self._server_path),
-            '-m', str(model_path_obj.absolute()),
-            '--host', host,
-            '--port', str(port),
-            '-ngl', str(gpu_layers),
-            '-c', str(ctx_size),
-            '--parallel', str(n_parallel),
-            '-b', str(batch_size),
-            '-ub', str(ubatch_size),
+            "-m",
+            str(model_path_obj.absolute()),
+            "--host",
+            host,
+            "--port",
+            str(port),
+            "-ngl",
+            str(gpu_layers),
+            "-c",
+            str(ctx_size),
+            "--parallel",
+            str(n_parallel),
+            "-b",
+            str(batch_size),
+            "-ub",
+            str(ubatch_size),
         ]
 
         # Add additional arguments with proper parameter mapping
         param_map = {
-            'flash_attn': '-fa',
-            'cache_ram': '--cache-ram',
-            'fit': '-fit',
+            "flash_attn": "-fa",
+            "cache_ram": "--cache-ram",
+            "fit": "-fit",
         }
 
         for key, value in kwargs.items():
-            if key.startswith('-'):
+            if key.startswith("-"):
                 # Already formatted parameter
                 cmd.extend([key, str(value)])
             elif key in param_map:
@@ -450,7 +476,7 @@ class ServerManager:
                 cmd.extend([param_map[key], str(value)])
             else:
                 # Convert underscores to hyphens for standard parameters
-                cmd.extend([f'--{key.replace("_", "-")}', str(value)])
+                cmd.extend([f"--{key.replace('_', '-')}", str(value)])
 
         if verbose:
             print(f"Starting llama-server...")
@@ -466,14 +492,14 @@ class ServerManager:
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                start_new_session=True
+                start_new_session=True,
             )
         except Exception as e:
             raise RuntimeError(f"Failed to start llama-server: {e}")
 
         # Wait for server to be ready
         if verbose:
-            print(f"Waiting for server to be ready...", end='', flush=True)
+            print(f"Waiting for server to be ready...", end="", flush=True)
 
         start_time = time.time()
         while time.time() - start_time < timeout:
@@ -485,14 +511,15 @@ class ServerManager:
 
             # Check if process died
             if self.server_process.poll() is not None:
-                stderr = self.server_process.stderr.read().decode('utf-8', errors='ignore')
+                stderr = self.server_process.stderr.read().decode(
+                    "utf-8", errors="ignore"
+                )
                 raise RuntimeError(
-                    f"llama-server process died unexpectedly.\n"
-                    f"Error output:\n{stderr}"
+                    f"llama-server process died unexpectedly.\nError output:\n{stderr}"
                 )
 
             if verbose:
-                print('.', end='', flush=True)
+                print(".", end="", flush=True)
             time.sleep(1)
 
         # Timeout reached
@@ -546,15 +573,15 @@ class ServerManager:
             Dictionary with server information
         """
         info = {
-            'running': False,
-            'url': self.server_url,
-            'process_id': None,
-            'executable': str(self._server_path) if self._server_path else None,
+            "running": False,
+            "url": self.server_url,
+            "process_id": None,
+            "executable": str(self._server_path) if self._server_path else None,
         }
 
         if self.server_process and self.server_process.poll() is None:
-            info['running'] = True
-            info['process_id'] = self.server_process.pid
+            info["running"] = True
+            info["process_id"] = self.server_process.pid
 
         return info
 
