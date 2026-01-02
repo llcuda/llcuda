@@ -20,7 +20,7 @@ except ImportError:
     HF_AVAILABLE = False
 
 # Configuration
-GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.1.3"
+GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.1.5"
 HF_REPO_ID = "waqasm86/llcuda-models"
 BINARY_BUNDLE_NAME = "llcuda-binaries-cuda12.tar.gz"
 
