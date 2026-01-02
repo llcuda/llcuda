@@ -11,40 +11,24 @@ if [ ! -d "dist" ]; then
     exit 1
 fi
 
-# Check for wheel file
-WHEEL_FILE=$(ls dist/*.whl 2>/dev/null | head -1)
-if [ -z "$WHEEL_FILE" ]; then
-    echo "Error: No wheel file found in dist/"
+# Get version
+VERSION=$(grep -A1 '^\[project\]' pyproject.toml | grep 'version =' | cut -d'"' -f2)
+WHEEL_FILE="dist/llcuda-$VERSION-py3-none-any.whl"
+
+if [ ! -f "$WHEEL_FILE" ]; then
+    echo "Error: Wheel file not found: $WHEEL_FILE"
     exit 1
 fi
 
-echo "Found wheel: $(basename $WHEEL_FILE)"
-echo "Found source: $(ls dist/*.tar.gz 2>/dev/null | head -1 | xargs basename)"
+echo "Version: $VERSION"
+echo "Wheel: $(basename $WHEEL_FILE)"
+echo ""
 
 # Install/upgrade twine
-echo "Installing/upgrading twine..."
+echo "Installing twine..."
 python3.11 -m pip install --upgrade twine
 
-# Test upload to TestPyPI first
-echo ""
-read -p "Upload to TestPyPI first? (y/n) " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "Uploading to TestPyPI..."
-    python3.11 -m twine upload --repository testpypi dist/*
-    
-    echo ""
-    echo "Test upload complete! Verify at: https://test.pypi.org/project/llcuda/"
-    echo ""
-    read -p "Continue to real PyPI? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Stopping at TestPyPI."
-        exit 0
-    fi
-fi
-
-# Upload to real PyPI
+# Upload
 echo "Uploading to PyPI..."
 python3.11 -m twine upload dist/*
 
@@ -54,6 +38,6 @@ echo "Upload complete!"
 echo "========================================"
 echo "Package available at: https://pypi.org/project/llcuda/"
 echo ""
-echo "To verify installation:"
-echo "  pip install llcuda==1.1.2"
+echo "Verify with:"
+echo "  pip install llcuda==$VERSION"
 echo "  python -c \"import llcuda; print(llcuda.__version__)\""
