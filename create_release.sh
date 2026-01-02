@@ -1,59 +1,64 @@
 #!/bin/bash
-# Create release for llcuda v1.1.2
+# Create release for llcuda
 
 set -e
 
-VERSION="1.1.2"
-
 echo "========================================"
-echo "Creating llcuda v$VERSION Release"
+echo "Creating llcuda Release"
 echo "========================================"
 
-# 1. Verify clean git state
-echo "1. Checking git status..."
-if [ -n "$(git status --porcelain)" ]; then
-    echo "Error: Git working directory not clean"
-    git status
+# Get version from pyproject.toml
+VERSION=$(grep 'version =' pyproject.toml | cut -d'"' -f2)
+echo "Version: $VERSION"
+
+# 1. Build the distribution
+echo ""
+echo "1. Building distribution..."
+./build_wheel.sh
+
+# 2. Verify the build
+echo ""
+echo "2. Verifying build..."
+if [ ! -f "dist/llcuda-$VERSION-py3-none-any.whl" ]; then
+    echo "Error: Wheel file not found!"
     exit 1
 fi
 
-# 2. Update version files
-echo "2. Updating version to $VERSION..."
-sed -i "s/version = \"1.1.1.post1\"/version = \"$VERSION\"/" pyproject.toml
-sed -i "s/__version__ = \"1.1.1.post1\"/__version__ = \"$VERSION\"/" llcuda/__init__.py
-sed -i "s|download/v1.1.1|download/v$VERSION|g" llcuda/_internal/bootstrap.py
+if [ ! -f "dist/llcuda-$VERSION.tar.gz" ]; then
+    echo "Error: Source distribution not found!"
+    exit 1
+fi
 
-# 3. Build distribution
-echo "3. Building distribution..."
-bash build_wheel.sh
+# 3. Test installation
+echo ""
+echo "3. Testing installation..."
+python3.11 -m pip install dist/llcuda-$VERSION-py3-none-any.whl --force-reinstall --quiet
+python3.11 -c "import llcuda; print(f'✓ llcuda {llcuda.__version__} installed successfully!')"
 
-# 4. Commit changes
-echo "4. Committing changes..."
-git add .
-git commit -m "Release v$VERSION - Fix Colab compatibility and binary extraction"
-
-# 5. Create tag
-echo "5. Creating git tag v$VERSION..."
-git tag -a "v$VERSION" -m "Release version $VERSION"
-
-# 6. Push to GitHub
-echo "6. Pushing to GitHub..."
-git push origin main
-git push origin "v$VERSION"
-
+# 4. Summary
 echo ""
 echo "========================================"
-echo "Release v$VERSION created successfully!"
+echo "Release ready for distribution!"
 echo "========================================"
 echo ""
-echo "Next steps:"
-echo "1. Go to: https://github.com/waqasm86/llcuda/releases"
-echo "2. Edit the v$VERSION release"
-echo "3. Add release notes from CHANGELOG.md"
-echo "4. Upload dist/llcuda-$VERSION-py3-none-any.whl"
-echo "5. Upload dist/llcuda-$VERSION.tar.gz"
-echo "6. (Optional) Upload llcuda-binaries-cuda12.tar.gz if updated"
+echo "Files created:"
+echo "  - dist/llcuda-$VERSION-py3-none-any.whl"
+echo "  - dist/llcuda-$VERSION.tar.gz"
 echo ""
 echo "To upload to PyPI:"
-echo "  pip install twine"
-echo "  twine upload dist/*"
+echo "  ./upload_to_pypi.sh"
+echo ""
+echo "To create GitHub release manually:"
+echo "  1. Go to: https://github.com/waqasm86/llcuda/releases"
+echo "  2. Click 'Draft a new release'"
+echo "  3. Tag: v$VERSION"
+echo "  4. Title: llcuda v$VERSION"
+echo "  5. Copy release notes from CHANGELOG.md"
+echo "  6. Upload the .whl and .tar.gz files"
+echo ""
+echo "Remember to commit and push changes first:"
+echo "  git add ."
+echo "  git commit -m 'Release v$VERSION'"
+echo "  git tag v$VERSION"
+echo "  git push origin main --tags"
+echo "========================================"
