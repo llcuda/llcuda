@@ -556,7 +556,7 @@ def load_model_smart(
         >>> path = load_model_smart("/path/to/model.gguf")
 
         >>> # HuggingFace syntax
-        >>> path = load_model_smart("google/gemma-3-1b-it-GGUF:gemma-3-1b-it-Q4_K_M.gguf")
+        >>> path = load_model_smart("unsloth/gemma-3-1b-it-GGUF:gemma-3-1b-it-Q4_K_M.gguf")
     """
     from ._internal.registry import MODEL_REGISTRY, get_model_info
 

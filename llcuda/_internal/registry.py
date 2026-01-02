@@ -9,14 +9,14 @@ from typing import Dict, Any
 MODEL_REGISTRY: Dict[str, Dict[str, Any]] = {
     # Gemma Models
     "gemma-3-1b-Q4_K_M": {
-        "repo": "google/gemma-3-1b-it-GGUF",
+        "repo": "unsloth/gemma-3-1b-it-GGUF",
         "file": "gemma-3-1b-it-Q4_K_M.gguf",
         "size_mb": 700,
         "min_vram_gb": 0.5,
         "description": "Gemma 3 1B instruct (Q4_K_M) - Good for 1GB VRAM"
     },
     "gemma-3-1b-Q5_K_M": {
-        "repo": "google/gemma-3-1b-it-GGUF",
+        "repo": "unsloth/gemma-3-1b-it-GGUF",
         "file": "gemma-3-1b-it-Q5_K_M.gguf",
         "size_mb": 850,
         "min_vram_gb": 0.8,

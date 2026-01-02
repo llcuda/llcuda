@@ -290,7 +290,7 @@ class InferenceEngine:
         This method supports three loading modes:
         1. Registry name: "gemma-3-1b-Q4_K_M" (auto-downloads from HuggingFace)
         2. Local path: "/path/to/model.gguf"
-        3. HuggingFace syntax: "google/gemma-3-1b-it-GGUF:gemma-3-1b-it-Q4_K_M.gguf"
+        3. HuggingFace syntax: "unsloth/gemma-3-1b-it-GGUF:gemma-3-1b-it-Q4_K_M.gguf"
 
         Args:
             model_name_or_path: Model name from registry, local path, or HF syntax
@@ -321,7 +321,7 @@ class InferenceEngine:
             >>> engine.load_model("/path/to/model.gguf", gpu_layers=20, ctx_size=2048)
 
             >>> # HuggingFace download
-            >>> engine.load_model("google/gemma-3-1b-it-GGUF:gemma-3-1b-it-Q4_K_M.gguf")
+            >>> engine.load_model("unsloth/gemma-3-1b-it-GGUF:gemma-3-1b-it-Q4_K_M.gguf")
         """
         from .models import load_model_smart
         from .utils import auto_configure_for_model
