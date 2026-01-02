@@ -1,1 +1,1 @@
-CUDA-accelerated LLM inference for Python with automatic server management. Zero-configuration setup, JupyterLab-ready, production-grade performance. Just install and start inferencing!
+CUDA-accelerated LLM inference for Python, Version 1.1.5 - PyTorch-style, zero-configuration, works on Colab/Kaggle/local GPUs.

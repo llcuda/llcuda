@@ -60,3 +60,26 @@ This hotfix release addresses PyPI filename conflict from previous upload attemp
 - Binary extraction fixes for Google Colab
 - Updated download URLs
 - Enhanced library path detection
+
+## Version 1.1.5 (2026-01-02)
+
+### New Features
+- Enhanced compatibility with older NVIDIA GPUs (SM 5.0+)
+- Improved auto-download system for binaries and models
+- Better error handling for cloud environments (Colab/Kaggle)
+
+### Bug Fixes
+- Fixed binary path resolution in hybrid bootstrap
+- Improved GPU detection for legacy hardware
+- Resolved PyPI filename conflicts from previous versions
+
+### Performance
+- Optimized memory usage for GPUs with limited VRAM
+- Faster model loading on first import
+- Reduced package size for PyPI distribution
+
+## Version 1.1.5
+- Updated binary compatibility for broader GPU support
+- Fixed PyPI filename conflicts
+- Improved auto-download system
+
