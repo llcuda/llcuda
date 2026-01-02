@@ -5,7 +5,7 @@
 set -e
 
 echo "========================================="
-echo " Building llcuda v1.1.2 Python Wheel"
+echo " Building llcuda Python Wheel"
 echo "========================================="
 echo "Python version: $(python3.11 --version)"
 echo ""
@@ -15,25 +15,6 @@ echo "Cleaning previous builds..."
 rm -rf build/ dist/ *.egg-info
 find . -name "*.pyc" -delete
 find . -name "__pycache__" -delete
-
-# Remove temporary binaries (keep source clean)
-echo "Cleaning temporary files..."
-rm -rf llcuda/binaries/ llcuda/lib/ llcuda/models/
-rm -f llcuda-source.tar.gz llcuda-*.tar.gz llcuda-*.zip
-
-# Create empty directories for package structure
-mkdir -p llcuda/binaries/cuda12
-mkdir -p llcuda/lib
-mkdir -p llcuda/models
-mkdir -p releases/binaries
-mkdir -p releases/libraries
-
-# Placeholder files to keep directory structure
-touch llcuda/binaries/cuda12/.gitkeep
-touch llcuda/lib/.gitkeep
-touch llcuda/models/.gitkeep
-touch releases/binaries/.gitkeep
-touch releases/libraries/.gitkeep
 
 # Verify version consistency
 echo "Verifying version consistency..."
@@ -49,27 +30,7 @@ else
     exit 1
 fi
 
-# Check for required files
-echo "Checking required files..."
-required_files=(
-    "pyproject.toml"
-    "llcuda/__init__.py"
-    "llcuda/server.py"
-    "llcuda/_internal/bootstrap.py"
-    "README.md"
-    "LICENSE"
-)
-
-for file in "${required_files[@]}"; do
-    if [ -f "$file" ]; then
-        echo "✓ $file"
-    else
-        echo "✗ Missing: $file"
-        exit 1
-    fi
-done
-
-# Build using python3.11 specifically
+# Build using python3.11
 echo ""
 echo "Building with python3.11..."
 python3.11 -m pip install --upgrade pip build setuptools wheel
@@ -86,21 +47,6 @@ echo "========================================="
 echo "Built packages:"
 ls -lh dist/
 
-# Test installation
-echo ""
-echo "Testing installation..."
-python3.11 -m pip install dist/*.whl --force-reinstall --quiet
-
-echo "Running import test..."
-python3.11 -c "import llcuda; print(f'✓ llcuda {llcuda.__version__} installed successfully!')"
-
-# Clean up placeholder files
-rm -f llcuda/binaries/cuda12/.gitkeep
-rm -f llcuda/lib/.gitkeep
-rm -f llcuda/models/.gitkeep
-rm -f releases/binaries/.gitkeep
-rm -f releases/libraries/.gitkeep
-
 echo ""
 echo "========================================="
 echo " Distribution Summary"
@@ -115,8 +61,4 @@ echo ""
 echo "To upload to PyPI:"
 echo "  pip install twine"
 echo "  twine upload dist/*"
-echo ""
-echo "To create GitHub release:"
-echo "  git tag v$PYPROJECT_VERSION"
-echo "  git push origin v$PYPROJECT_VERSION"
 echo "========================================="
