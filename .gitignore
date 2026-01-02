@@ -87,4 +87,4 @@ test_outputs/
 *.whl
 llcuda-source.tar.gz
 llcuda-*.tar.gz
-llcuda-*.zip
+llcuda-*.zipcheck_binaries/
