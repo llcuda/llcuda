@@ -69,6 +69,8 @@ releases/binaries/
 releases/libraries/
 bundles/
 check_binaries/
+llcuda-binaries-*.tar.gz
+llcuda-bins-*.tar.gz
 
 # Archive files
 *.tar.gz
