@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+## [1.1.5] - 2025-01-15
+
+### 🔧 Version Skip - PyPI Filename Resolution
+
+This release skips to version 1.1.5 to resolve PyPI filename conflicts from previous upload attempts.
+
+### No Functional Changes
+- Contains all fixes from v1.1.2 and v1.1.3
+- Binary extraction fixes for Google Colab
+- Updated download URLs
+- Enhanced library path detection
+- PyPI upload compatibility fix
 ## [1.1.3] - 2025-01-15
 
 ### 🔧 Hotfix - PyPI Filename Conflict
