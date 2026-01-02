@@ -7,7 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.1.6] - 2026-01-03
+## [1.1.7] - 2025-01-03
+
+### 🚀 CUDA 12.8 Support and Enhanced Binary Distribution
+
+This release brings full CUDA 12.8 compatibility with optimized binaries for both modern and legacy GPUs.
+
+### Major Changes
+- **CUDA 12.8 Support**: Binaries compiled with CUDA Toolkit 12.8 for latest GPU drivers
+- **Optimized Binaries**: Reduced binary distribution from 551MB to 161MB (70% reduction)
+- **Enhanced Compatibility**: Improved support for Google Colab T4, Kaggle notebooks, and local systems
+- **Python 3.11 Focus**: Continued testing and optimization for Python 3.11+
+- **Package Size**: Maintained ultra-lightweight 62KB wheel, 61KB source distribution
+
+### Improvements
+- **Binary Distribution**: Streamlined archive includes only essential llama.cpp executables and libraries
+- **Download Speed**: Faster binary downloads for Colab and Kaggle users
+- **CUDA Runtime**: Full compatibility with CUDA 12.8 runtime and latest NVIDIA drivers
+- **GPU Support**: Tested on Maxwell (GTX 940M) through Ada Lovelace (RTX 4090) architectures
+- **Documentation**: Updated all docs with CUDA 12.8 compatibility information
+
+### Performance
+- **Binary Size**: Reduced from 551MB to 161MB (70% smaller)
+- **Installation**: Faster package installation and first-run bootstrap
+- **Memory**: Same efficient memory usage as v1.1.6
+- **Throughput**: Maintained performance across all supported GPUs
+
+### Maintained Features
+- ✅ Hybrid bootstrap architecture (auto-download binaries/models)
+- ✅ Universal GPU support (SM 5.0-8.9: Maxwell to Ada Lovelace)
+- ✅ All existing APIs and functionality from v1.1.6
+- ✅ Colab/Kaggle compatibility with T4 GPUs
+- ✅ Python 3.11+ support
+- ✅ CUDA 11/12 compatibility
+
+### Package Info
+- **Wheel Size**: 62 KB
+- **Source Size**: 61 KB
+- **Binary Archive**: 161 MB (llcuda-binaries-cuda12.tar.gz)
+- **Dependencies**: Unchanged (numpy, requests, huggingface_hub, tqdm)
+- **Python Support**: 3.11+ (explicitly tested)
+- **CUDA Support**: 11.0+ and 12.0+ (12.8 recommended)
+
+---
+
+## [1.1.6] - 2025-01-03
 
 ### 🧹 Project Cleanup and Structure Optimization
 

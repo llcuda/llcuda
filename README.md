@@ -10,34 +10,34 @@
 
 ---
 
-## What's New in Version 1.1.6
+## What's New in Version 1.1.7
 
-**Clean Project Structure and Python 3.11 Optimization**
+**CUDA 12.8 Support and Enhanced Binary Distribution**
 
-Version 1.1.6 focuses on streamlining the project while maintaining full functionality:
+Version 1.1.7 brings full CUDA 12.8 support with optimized binaries for both modern and legacy GPUs:
 
-- **Project Cleanup**: Removed 14GB+ of unnecessary binaries and old version files
-- **Optimized .gitignore**: Better exclusion of large files and build artifacts
-- **Streamlined Codebase**: Clean project structure ready for development and deployment
-- **Python 3.11 Focus**: Explicit testing and optimization for Python 3.11+
+- **CUDA 12.8 Support**: Updated binaries built with CUDA Toolkit 12.8
+- **Enhanced Compatibility**: Works seamlessly on Google Colab (T4), Kaggle, and local systems
+- **Optimized Binaries**: Lightweight 161MB binary distribution (down from 551MB)
+- **Python 3.11 Focus**: Tested and optimized for Python 3.11+
 - **Ultra-Light Package**: Only 62 KB wheel, 61 KB source distribution
-- **Hybrid Bootstrap**: Maintains auto-download of binaries and models on first use
-- **Universal GPU Support**: All NVIDIA architectures (SM 5.0-8.9) still supported
+- **Hybrid Bootstrap**: Auto-download of binaries and models on first use
+- **Universal GPU Support**: All NVIDIA architectures from Maxwell (GTX 940M) to Ada Lovelace (RTX 4090)
 
 Key Improvements:
-- Faster git operations and cloning
-- Reduced repository size from 14GB+ to <100MB
-- Cleaner development environment
-- Better GitHub/PyPI integration
-- Updated documentation and examples
+- CUDA 12.8 runtime support for latest NVIDIA drivers
+- Smaller binary distribution for faster downloads
+- Better compatibility with Google Colab and Kaggle notebooks
+- Updated dependencies and documentation
+- Improved JupyterLab integration
 
 Example Usage:
 
 ```python
-# Install the clean v1.1.6 package
-pip install llcuda==1.1.6
+# Install the latest v1.1.7 package
+pip install llcuda==1.1.7
 
-# Use with Python 3.11
+# Use with Python 3.11+ and CUDA 12.8
 import llcuda
 engine = llcuda.InferenceEngine()
 engine.load_model("gemma-3-1b-Q4_K_M")  # Auto-downloads and configures
@@ -52,7 +52,7 @@ print(result.text)
 ### Quick Install (Recommended)
 
 ```bash
-pip install llcuda==1.1.6
+pip install llcuda==1.1.7
 ```
 
 ### Python Requirements
@@ -340,12 +340,13 @@ python -m llcuda.tests.test_end_to_end
 
 ## Changelog
 
-### v1.1.6 (2025-01-03)
-- **Project Cleanup**: Removed 14GB+ of unnecessary files
-- **Structure**: Streamlined codebase and improved .gitignore
-- **Python 3.11**: Explicit testing and optimization
-- **Package Size**: Reduced to 62KB wheel, 61KB source
-- **Documentation**: Updated all docs and examples
+### v1.1.7 (2025-01-03)
+- **CUDA 12.8 Support**: Updated binaries built with CUDA Toolkit 12.8
+- **Optimized Binaries**: Reduced binary distribution from 551MB to 161MB
+- **Enhanced Compatibility**: Improved support for Google Colab T4 and Kaggle
+- **Python 3.11**: Continued focus on Python 3.11+ optimization
+- **Package Size**: Maintained 62KB wheel, 61KB source distribution
+- **Documentation**: Updated all docs for CUDA 12.8 compatibility
 
 [View full changelog](CHANGELOG.md)
 
