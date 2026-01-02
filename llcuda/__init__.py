@@ -33,9 +33,9 @@ import logging
 # ============================================================================
 
 _LLCUDA_DIR = Path(__file__).parent
-_BIN_DIR = _LLCUDA_DIR / 'binaries' / 'cuda12'
-_LIB_DIR = _LLCUDA_DIR / 'lib'
-_MODEL_CACHE = _LLCUDA_DIR / 'models'
+_BIN_DIR = _LLCUDA_DIR / "binaries" / "cuda12"
+_LIB_DIR = _LLCUDA_DIR / "lib"
+_MODEL_CACHE = _LLCUDA_DIR / "models"
 
 # Ensure model cache directory exists
 _MODEL_CACHE.mkdir(parents=True, exist_ok=True)
@@ -44,25 +44,26 @@ _MODEL_CACHE.mkdir(parents=True, exist_ok=True)
 # Auto-configure LD_LIBRARY_PATH for bundled shared libraries
 if _LIB_DIR.exists():
     _lib_path_str = str(_LIB_DIR.absolute())
-    _current_ld_path = os.environ.get('LD_LIBRARY_PATH', '')
+    _current_ld_path = os.environ.get("LD_LIBRARY_PATH", "")
 
     if _lib_path_str not in _current_ld_path:
         if _current_ld_path:
-            os.environ['LD_LIBRARY_PATH'] = f"{_lib_path_str}:{_current_ld_path}"
+            os.environ["LD_LIBRARY_PATH"] = f"{_lib_path_str}:{_current_ld_path}"
         else:
-            os.environ['LD_LIBRARY_PATH'] = _lib_path_str
-    
+            os.environ["LD_LIBRARY_PATH"] = _lib_path_str
+
     # Log the setup (optional: helps with debugging)
     logging.info(f"llcuda: Set LD_LIBRARY_PATH to include {_lib_path_str}")
 else:
-    logging.warning("llcuda: Library directory not found - shared libraries may not load correctly")
-
+    logging.warning(
+        "llcuda: Library directory not found - shared libraries may not load correctly"
+    )
 
 
 # Auto-configure LLAMA_SERVER_PATH to bundled executable
-_LLAMA_SERVER = _BIN_DIR / 'llama-server'
+_LLAMA_SERVER = _BIN_DIR / "llama-server"
 if _LLAMA_SERVER.exists():
-    os.environ['LLAMA_SERVER_PATH'] = str(_LLAMA_SERVER.absolute())
+    os.environ["LLAMA_SERVER_PATH"] = str(_LLAMA_SERVER.absolute())
     # Make executable if not already
     if not os.access(_LLAMA_SERVER, os.X_OK):
         try:
@@ -75,35 +76,40 @@ else:
     # ========================================================================
     try:
         from ._internal.bootstrap import bootstrap
+
         bootstrap()
 
         # Re-apply env vars after bootstrap (in case paths were created during download)
         if _LIB_DIR.exists():
             _lib_path_str = str(_LIB_DIR.absolute())
-            _current_ld_path = os.environ.get('LD_LIBRARY_PATH', '')
+            _current_ld_path = os.environ.get("LD_LIBRARY_PATH", "")
             if _lib_path_str not in _current_ld_path:
-                os.environ['LD_LIBRARY_PATH'] = f"{_lib_path_str}:{_current_ld_path}" if _current_ld_path else _lib_path_str
-        
+                os.environ["LD_LIBRARY_PATH"] = (
+                    f"{_lib_path_str}:{_current_ld_path}"
+                    if _current_ld_path
+                    else _lib_path_str
+                )
+
         if _LLAMA_SERVER.exists():
-            os.environ['LLAMA_SERVER_PATH'] = str(_LLAMA_SERVER.absolute())
+            os.environ["LLAMA_SERVER_PATH"] = str(_LLAMA_SERVER.absolute())
             if not os.access(_LLAMA_SERVER, os.X_OK):
                 os.chmod(_LLAMA_SERVER, 0o755)
 
     except Exception as e:
         import warnings
+
         warnings.warn(
             f"llcuda bootstrap failed: {e}\n"
             "Some features may not work. Please check your installation.",
-            RuntimeWarning
+            RuntimeWarning,
         )
-
-
 
 
 # Enhanced path debugging
 if not _LIB_DIR.exists():
     # Try to find lib directory in package
     import llcuda as lc
+
     package_dir = Path(lc.__file__).parent
     possible_lib_dirs = [
         package_dir / "lib",
@@ -111,14 +117,18 @@ if not _LIB_DIR.exists():
         Path("/usr/local/lib/python3.12/dist-packages/llcuda/lib"),
         Path("/usr/lib/python3/dist-packages/llcuda/lib"),
     ]
-    
+
     for lib_dir in possible_lib_dirs:
         if lib_dir.exists():
             _LIB_DIR = lib_dir
             _lib_path_str = str(_LIB_DIR.absolute())
-            _current_ld_path = os.environ.get('LD_LIBRARY_PATH', '')
+            _current_ld_path = os.environ.get("LD_LIBRARY_PATH", "")
             if _lib_path_str not in _current_ld_path:
-                os.environ['LD_LIBRARY_PATH'] = f"{_lib_path_str}:{_current_ld_path}" if _current_ld_path else _lib_path_str
+                os.environ["LD_LIBRARY_PATH"] = (
+                    f"{_lib_path_str}:{_current_ld_path}"
+                    if _current_ld_path
+                    else _lib_path_str
+                )
             break
 
 if not _LLAMA_SERVER.exists():
@@ -129,19 +139,16 @@ if not _LLAMA_SERVER.exists():
         Path("/usr/bin/llama-server"),
         Path.home() / ".cache/llcuda/llama-server",
     ]
-    
+
     for server_path in possible_server_paths:
         if server_path.exists():
-            os.environ['LLAMA_SERVER_PATH'] = str(server_path.absolute())
+            os.environ["LLAMA_SERVER_PATH"] = str(server_path.absolute())
             if not os.access(server_path, os.X_OK):
                 try:
                     os.chmod(server_path, 0o755)
                 except:
                     pass
             break
-
-
-
 
 
 from .server import ServerManager
@@ -155,33 +162,31 @@ from .utils import (
     load_config,
     create_config_file,
     get_recommended_gpu_layers,
-    validate_model_path
+    validate_model_path,
 )
 
-__version__ = "1.1.5"  # Multi-GPU architecture support, Colab/Kaggle compatibility (post-release)
+__version__ = "1.1.6"  # Latest version for Python 3.11 with cleaned project structure
 __all__ = [
     # Core classes
-    'InferenceEngine',
-    'InferResult',
-    'ServerManager',
-    'bootstrap',
-
+    "InferenceEngine",
+    "InferResult",
+    "ServerManager",
+    "bootstrap",
     # Utility functions
-    'check_cuda_available',
-    'get_cuda_device_info',
-    'check_gpu_compatibility',
-    'detect_cuda',
-    'setup_environment',
-    'find_gguf_models',
-    'print_system_info',
-    'get_llama_cpp_cuda_path',
-    'quick_infer',
-
+    "check_cuda_available",
+    "get_cuda_device_info",
+    "check_gpu_compatibility",
+    "detect_cuda",
+    "setup_environment",
+    "find_gguf_models",
+    "print_system_info",
+    "get_llama_cpp_cuda_path",
+    "quick_infer",
     # New modules (lazily imported)
-    'jupyter',
-    'chat',
-    'embeddings',
-    'models',
+    "jupyter",
+    "chat",
+    "embeddings",
+    "models",
 ]
 
 
@@ -222,10 +227,10 @@ class InferenceEngine:
         self._model_loaded = False
         self._server_manager: Optional[ServerManager] = None
         self._metrics = {
-            'requests': 0,
-            'total_tokens': 0,
-            'total_latency_ms': 0.0,
-            'latencies': []
+            "requests": 0,
+            "total_tokens": 0,
+            "total_latency_ms": 0.0,
+            "latencies": [],
         }
 
     def check_for_updates():
@@ -233,13 +238,14 @@ class InferenceEngine:
             response = requests.get("https://pypi.org/pypi/llcuda/json", timeout=2)
             latest = response.json()["info"]["version"]
             if latest != __version__:
-                print(f"llcuda: New version available ({latest}) - pip install --upgrade llcuda")
+                print(
+                    f"llcuda: New version available ({latest}) - pip install --upgrade llcuda"
+                )
         except Exception:
             pass  # Silent fail
 
     # Call once on import (optional)
     check_for_updates()
-
 
     def check_server(self) -> bool:
         """
@@ -264,7 +270,7 @@ class InferenceEngine:
         n_parallel: int = 1,
         verbose: bool = True,
         interactive_download: bool = True,
-        **kwargs
+        **kwargs,
     ) -> bool:
         """
         Load a GGUF model for inference with smart loading and auto-configuration.
@@ -313,8 +319,7 @@ class InferenceEngine:
 
         try:
             model_path = load_model_smart(
-                model_name_or_path,
-                interactive=interactive_download
+                model_name_or_path, interactive=interactive_download
             )
         except ValueError as e:
             # User cancelled download or model not found
@@ -330,15 +335,15 @@ class InferenceEngine:
 
             # Use auto-configured values if not manually specified
             if gpu_layers is None:
-                gpu_layers = auto_settings['gpu_layers']
+                gpu_layers = auto_settings["gpu_layers"]
             if ctx_size is None:
-                ctx_size = auto_settings['ctx_size']
+                ctx_size = auto_settings["ctx_size"]
 
             # Merge auto-configured settings with kwargs
-            if 'batch_size' not in kwargs:
-                kwargs['batch_size'] = auto_settings.get('batch_size', 512)
-            if 'ubatch_size' not in kwargs:
-                kwargs['ubatch_size'] = auto_settings.get('ubatch_size', 128)
+            if "batch_size" not in kwargs:
+                kwargs["batch_size"] = auto_settings.get("batch_size", 512)
+            if "ubatch_size" not in kwargs:
+                kwargs["ubatch_size"] = auto_settings.get("ubatch_size", 128)
         else:
             # Use defaults if not auto-configuring
             if gpu_layers is None:
@@ -346,7 +351,7 @@ class InferenceEngine:
             if ctx_size is None:
                 ctx_size = 2048
             # Set default auto_settings for later use
-            auto_settings = {'batch_size': 512, 'ubatch_size': 128}
+            auto_settings = {"batch_size": 512, "ubatch_size": 128}
 
         # Step 3: Validate model path exists
         if not model_path.exists():
@@ -362,11 +367,17 @@ class InferenceEngine:
                 self._server_manager = ServerManager(server_url=self.server_url)
 
                 # Extract port from server URL
-                port = int(self.server_url.split(':')[-1].split('/')[0])
+                port = int(self.server_url.split(":")[-1].split("/")[0])
 
                 # Extract batch parameters from kwargs or use defaults
-                batch_size = kwargs.pop('batch_size', auto_settings.get('batch_size', 512) if auto_configure else 512)
-                ubatch_size = kwargs.pop('ubatch_size', auto_settings.get('ubatch_size', 128) if auto_configure else 128)
+                batch_size = kwargs.pop(
+                    "batch_size",
+                    auto_settings.get("batch_size", 512) if auto_configure else 512,
+                )
+                ubatch_size = kwargs.pop(
+                    "ubatch_size",
+                    auto_settings.get("ubatch_size", 128) if auto_configure else 128,
+                )
 
                 success = self._server_manager.start_server(
                     model_path=str(model_path),
@@ -377,7 +388,7 @@ class InferenceEngine:
                     batch_size=batch_size,
                     ubatch_size=ubatch_size,
                     verbose=verbose,
-                    **kwargs
+                    **kwargs,
                 )
 
                 if not success:
@@ -407,8 +418,8 @@ class InferenceEngine:
         top_p: float = 0.9,
         top_k: int = 40,
         seed: int = 0,
-        stop_sequences: Optional[List[str]] = None
-    ) -> 'InferResult':
+        stop_sequences: Optional[List[str]] = None,
+    ) -> "InferResult":
         """
         Run inference on a single prompt.
 
@@ -432,7 +443,7 @@ class InferenceEngine:
             "temperature": temperature,
             "top_p": top_p,
             "top_k": top_k,
-            "stream": False
+            "stream": False,
         }
 
         if seed > 0:
@@ -443,9 +454,7 @@ class InferenceEngine:
 
         try:
             response = requests.post(
-                f"{self.server_url}/completion",
-                json=payload,
-                timeout=120
+                f"{self.server_url}/completion", json=payload, timeout=120
             )
 
             latency_ms = (time.time() - start_time) * 1000
@@ -453,27 +462,31 @@ class InferenceEngine:
             if response.status_code == 200:
                 data = response.json()
 
-                text = data.get('content', '')
-                tokens_generated = data.get('tokens_predicted', len(text.split()))
+                text = data.get("content", "")
+                tokens_generated = data.get("tokens_predicted", len(text.split()))
 
                 # Update metrics
-                self._metrics['requests'] += 1
-                self._metrics['total_tokens'] += tokens_generated
-                self._metrics['total_latency_ms'] += latency_ms
-                self._metrics['latencies'].append(latency_ms)
+                self._metrics["requests"] += 1
+                self._metrics["total_tokens"] += tokens_generated
+                self._metrics["total_latency_ms"] += latency_ms
+                self._metrics["latencies"].append(latency_ms)
 
                 result = InferResult()
                 result.success = True
                 result.text = text
                 result.tokens_generated = tokens_generated
                 result.latency_ms = latency_ms
-                result.tokens_per_sec = tokens_generated / (latency_ms / 1000) if latency_ms > 0 else 0
+                result.tokens_per_sec = (
+                    tokens_generated / (latency_ms / 1000) if latency_ms > 0 else 0
+                )
 
                 return result
             else:
                 result = InferResult()
                 result.success = False
-                result.error_message = f"Server error: {response.status_code} - {response.text}"
+                result.error_message = (
+                    f"Server error: {response.status_code} - {response.text}"
+                )
                 return result
 
         except requests.exceptions.Timeout:
@@ -498,8 +511,8 @@ class InferenceEngine:
         callback: Any,
         max_tokens: int = 128,
         temperature: float = 0.7,
-        **kwargs
-    ) -> 'InferResult':
+        **kwargs,
+    ) -> "InferResult":
         """
         Run streaming inference with callback for each chunk.
 
@@ -520,11 +533,8 @@ class InferenceEngine:
         return result
 
     def batch_infer(
-        self,
-        prompts: List[str],
-        max_tokens: int = 128,
-        **kwargs
-    ) -> List['InferResult']:
+        self, prompts: List[str], max_tokens: int = 128, **kwargs
+    ) -> List["InferResult"]:
         """
         Run batch inference on multiple prompts.
 
@@ -549,11 +559,11 @@ class InferenceEngine:
         Returns:
             Dictionary with latency, throughput, and GPU metrics
         """
-        latencies = self._metrics['latencies']
+        latencies = self._metrics["latencies"]
 
         if latencies:
             sorted_latencies = sorted(latencies)
-            mean_latency = self._metrics['total_latency_ms'] / len(latencies)
+            mean_latency = self._metrics["total_latency_ms"] / len(latencies)
             p50_idx = len(sorted_latencies) // 2
             p95_idx = int(len(sorted_latencies) * 0.95)
             p99_idx = int(len(sorted_latencies) * 0.99)
@@ -565,30 +575,36 @@ class InferenceEngine:
             mean_latency = p50 = p95 = p99 = 0
 
         return {
-            'latency': {
-                'mean_ms': mean_latency,
-                'p50_ms': p50,
-                'p95_ms': p95,
-                'p99_ms': p99,
-                'min_ms': min(latencies) if latencies else 0,
-                'max_ms': max(latencies) if latencies else 0,
-                'sample_count': len(latencies)
+            "latency": {
+                "mean_ms": mean_latency,
+                "p50_ms": p50,
+                "p95_ms": p95,
+                "p99_ms": p99,
+                "min_ms": min(latencies) if latencies else 0,
+                "max_ms": max(latencies) if latencies else 0,
+                "sample_count": len(latencies),
             },
-            'throughput': {
-                'total_tokens': self._metrics['total_tokens'],
-                'total_requests': self._metrics['requests'],
-                'tokens_per_sec': self._metrics['total_tokens'] / (self._metrics['total_latency_ms'] / 1000) if self._metrics['total_latency_ms'] > 0 else 0,
-                'requests_per_sec': self._metrics['requests'] / (self._metrics['total_latency_ms'] / 1000) if self._metrics['total_latency_ms'] > 0 else 0
-            }
+            "throughput": {
+                "total_tokens": self._metrics["total_tokens"],
+                "total_requests": self._metrics["requests"],
+                "tokens_per_sec": self._metrics["total_tokens"]
+                / (self._metrics["total_latency_ms"] / 1000)
+                if self._metrics["total_latency_ms"] > 0
+                else 0,
+                "requests_per_sec": self._metrics["requests"]
+                / (self._metrics["total_latency_ms"] / 1000)
+                if self._metrics["total_latency_ms"] > 0
+                else 0,
+            },
         }
 
     def reset_metrics(self):
         """Reset performance metrics counters."""
         self._metrics = {
-            'requests': 0,
-            'total_tokens': 0,
-            'total_latency_ms': 0.0,
-            'latencies': []
+            "requests": 0,
+            "total_tokens": 0,
+            "total_latency_ms": 0.0,
+            "latencies": [],
         }
 
     def unload_model(self):
@@ -684,9 +700,11 @@ class InferResult:
 
     def __repr__(self) -> str:
         if self.success:
-            return (f"InferResult(tokens={self.tokens_generated}, "
-                   f"latency={self.latency_ms:.2f}ms, "
-                   f"throughput={self.tokens_per_sec:.2f} tok/s)")
+            return (
+                f"InferResult(tokens={self.tokens_generated}, "
+                f"latency={self.latency_ms:.2f}ms, "
+                f"throughput={self.tokens_per_sec:.2f} tok/s)"
+            )
         else:
             return f"InferResult(Error: {self.error_message})"
 
@@ -702,7 +720,7 @@ def check_cuda_available() -> bool:
         True if CUDA is available, False otherwise
     """
     cuda_info = detect_cuda()
-    return cuda_info['available']
+    return cuda_info["available"]
 
 
 def get_cuda_device_info() -> Optional[Dict[str, Any]]:
@@ -713,13 +731,10 @@ def get_cuda_device_info() -> Optional[Dict[str, Any]]:
         Dictionary with GPU info or None if CUDA unavailable
     """
     cuda_info = detect_cuda()
-    if not cuda_info['available']:
+    if not cuda_info["available"]:
         return None
 
-    return {
-        'cuda_version': cuda_info['version'],
-        'gpus': cuda_info['gpus']
-    }
+    return {"cuda_version": cuda_info["version"], "gpus": cuda_info["gpus"]}
 
 
 # Convenience function
@@ -728,7 +743,7 @@ def quick_infer(
     model_path: Optional[str] = None,
     max_tokens: int = 128,
     server_url: str = "http://127.0.0.1:8090",
-    auto_start: bool = True
+    auto_start: bool = True,
 ) -> str:
     """
     Quick inference with minimal setup.

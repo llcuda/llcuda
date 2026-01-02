@@ -60,16 +60,28 @@ venv.bak/
 .DS_Store
 Thumbs.db
 
-# llcuda specific
+# llcuda specific - Large files and binaries
 llcuda/binaries/
 llcuda/lib/
 llcuda/models/
 *.gguf
 releases/binaries/
 releases/libraries/
+bundles/
+check_binaries/
+
+# Archive files
 *.tar.gz
 *.tar.xz
 *.zip
+llcuda-source.tar.gz
+llcuda-*.tar.gz
+llcuda-*.zip
+
+# Large source archives
+llcuda-v1.1.*-source.*
+*-source.tar.gz
+*-source.zip
 
 # Cache
 .cache/
@@ -85,6 +97,6 @@ test_outputs/
 
 # Build artifacts
 *.whl
-llcuda-source.tar.gz
-llcuda-*.tar.gz
-llcuda-*.zipcheck_binaries/
+dist/
+build/
+*.egg-info/
