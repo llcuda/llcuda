@@ -40,6 +40,7 @@ _MODEL_CACHE = _LLCUDA_DIR / 'models'
 # Ensure model cache directory exists
 _MODEL_CACHE.mkdir(parents=True, exist_ok=True)
 
+
 # Auto-configure LD_LIBRARY_PATH for bundled shared libraries
 if _LIB_DIR.exists():
     _lib_path_str = str(_LIB_DIR.absolute())
@@ -55,6 +56,8 @@ if _LIB_DIR.exists():
     logging.info(f"llcuda: Set LD_LIBRARY_PATH to include {_lib_path_str}")
 else:
     logging.warning("llcuda: Library directory not found - shared libraries may not load correctly")
+
+
 
 # Auto-configure LLAMA_SERVER_PATH to bundled executable
 _LLAMA_SERVER = _BIN_DIR / 'llama-server'
@@ -94,6 +97,53 @@ else:
             RuntimeWarning
         )
 
+
+
+
+# Enhanced path debugging
+if not _LIB_DIR.exists():
+    # Try to find lib directory in package
+    import llcuda as lc
+    package_dir = Path(lc.__file__).parent
+    possible_lib_dirs = [
+        package_dir / "lib",
+        package_dir.parent / "lib",
+        Path("/usr/local/lib/python3.12/dist-packages/llcuda/lib"),
+        Path("/usr/lib/python3/dist-packages/llcuda/lib"),
+    ]
+    
+    for lib_dir in possible_lib_dirs:
+        if lib_dir.exists():
+            _LIB_DIR = lib_dir
+            _lib_path_str = str(_LIB_DIR.absolute())
+            _current_ld_path = os.environ.get('LD_LIBRARY_PATH', '')
+            if _lib_path_str not in _current_ld_path:
+                os.environ['LD_LIBRARY_PATH'] = f"{_lib_path_str}:{_current_ld_path}" if _current_ld_path else _lib_path_str
+            break
+
+if not _LLAMA_SERVER.exists():
+    # Try to find server in alternative locations
+    possible_server_paths = [
+        _BIN_DIR / "llama-server",
+        Path("/usr/local/bin/llama-server"),
+        Path("/usr/bin/llama-server"),
+        Path.home() / ".cache/llcuda/llama-server",
+    ]
+    
+    for server_path in possible_server_paths:
+        if server_path.exists():
+            os.environ['LLAMA_SERVER_PATH'] = str(server_path.absolute())
+            if not os.access(server_path, os.X_OK):
+                try:
+                    os.chmod(server_path, 0o755)
+                except:
+                    pass
+            break
+
+
+
+
+
 from .server import ServerManager
 from .utils import (
     detect_cuda,
@@ -108,7 +158,7 @@ from .utils import (
     validate_model_path
 )
 
-__version__ = "1.1.1.post1"  # Multi-GPU architecture support, Colab/Kaggle compatibility (post-release)
+__version__ = "1.1.2"  # Multi-GPU architecture support, Colab/Kaggle compatibility (post-release)
 __all__ = [
     # Core classes
     'InferenceEngine',

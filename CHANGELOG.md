@@ -7,7 +7,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.2] - 2025-01-15
+
+### 🐛 Critical Fixes - Google Colab & Binary Extraction
+
+This release fixes critical issues preventing llcuda from working on Google Colab and Kaggle notebooks by addressing binary extraction and download problems.
+
+### Fixed
+
+#### 1. Binary Extraction Failure in Google Colab
+- **Issue**: `Extraction failed: /root/.cache/llcuda/extract/llcuda-binaries-cuda12 not found`
+- **Root Cause**: Bootstrap extraction logic assumed specific tarball structure
+- **Fix**: Updated `bootstrap.py` to handle flexible tarball structures
+  - Added robust directory detection for extracted binaries
+  - Improved error handling and debugging output
+  - Fallback search for binaries in any extracted location
+
+#### 2. Invalid Download URL in server.py
+- **Issue**: `404 Client Error: Not Found for url: https://github.com/waqasm86/Ubuntu-Cuda-Llama.cpp-Executable/releases/download/v0.1.0/...`
+- **Root Cause**: Hardcoded download URL pointing to non-existent release
+- **Fix**: Updated `server.py` to use correct release URL
+  - Changed `_BINARY_BASE_URL` to point to llcuda releases
+  - Added URL validation and fallback mechanisms
+  - Improved error messages with troubleshooting steps
+
+#### 3. Library Path Configuration Issues
+- **Issue**: `Library directory not found - shared libraries may not load correctly`
+- **Root Cause**: Library path detection failing on first import
+- **Fix**: Enhanced `__init__.py` with robust library discovery
+  - Added multiple fallback paths for library detection
+  - Improved LD_LIBRARY_PATH configuration
+  - Better error handling for missing binaries
+
+#### 4. Bootstrap Process Robustness
+- **Fix**: Added comprehensive debugging output during first-time setup
+- **Fix**: Better handling of partial downloads and extraction failures
+- **Fix**: Graceful degradation when binaries cannot be downloaded
+
+### Changed
+
+#### 1. Package Dependencies
+- **Minimum Python**: Now explicitly requires Python 3.11+
+- **Dependencies**: Updated numpy, requests, huggingface_hub version ranges
+
+#### 2. Build Process
+- **Simplified**: Removed complex CUDA compilation from build_wheel.sh
+- **Focus**: Wheel building now purely for Python distribution
+- **Binary Distribution**: Binaries provided separately via GitHub releases
+
+### Testing
+- Verified on Google Colab with Tesla T4 GPU
+- Verified on Kaggle notebooks
+- Confirmed backward compatibility with existing local installations
+
+---
+
 ## [1.1.0] - 2025-12-30
+... [keep existing content] ...
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [1.1.2] - 2025-12-30
+
+### 🐛 Critical Fixes - Google Colab & Binary Extraction
+
+This release fixes critical issues preventing llcuda from working on Google Colab and Kaggle notebooks by addressing binary extraction and download problems.
 
 ### 🚀 Major Release: Multi-GPU Architecture Support + Cloud Platform Compatibility
 

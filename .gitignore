@@ -19,11 +19,30 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
-# Virtual Environments
-.env/
-.venv/
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environments
+.env
+.venv
 env/
 venv/
 ENV/
@@ -39,48 +58,33 @@ venv.bak/
 
 # OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
-# llcuda specific - DO NOT PUSH THESE TO GITHUB
+# llcuda specific
+llcuda/binaries/
+llcuda/lib/
+llcuda/models/
 *.gguf
-models/              # GGUF models are large
-binaries/            # Binaries go to GitHub Releases
-lib/                 # Libraries go to GitHub Releases
+releases/binaries/
+releases/libraries/
 *.tar.gz
 *.tar.xz
 *.zip
-.cache/
-*.log
 
-# Test/Example outputs
-*.out
-*.output
+# Cache
+.cache/
+.cache/*
+!.cache/keep  # Keep empty directory
 
 # Temporary files
-temp/
 tmp/
-*.tmp
-*.temp
+temp/
+
+# Test outputs
+test_outputs/
 
 # Build artifacts
 *.whl
-*.tar
-
-# Cleanup script (temporary)
-cleanup_old_versions.sh
-
-# Temporary upload directories
-pypi_source/
-
-# Post-release cleanup files
-cleanup_old_versions.sh
-upload_release.sh
-
-# Local test files
-test_*.log
-*.bak
+llcuda-source.tar.gz
+llcuda-*.tar.gz
+llcuda-*.zip
