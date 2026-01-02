@@ -21,9 +21,9 @@ except ImportError:
     HF_AVAILABLE = False
 
 # Configuration
-GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.1.6"
+GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.1.7"
 HF_REPO_ID = "waqasm86/llcuda-models"
-BINARY_BUNDLE_NAME = "llcuda-binaries-cuda12-v1.1.6.tar.gz"
+BINARY_BUNDLE_NAME = "llcuda-binaries-cuda12.tar.gz"
 
 # Paths
 PACKAGE_DIR = Path(__file__).parent.parent
@@ -192,74 +192,48 @@ def download_binaries() -> None:
 
     extract_tarball(cache_tarball, temp_extract_dir)
 
-    # IMPORTANT: Debug - list what was extracted
-    print("📂 Checking extracted structure...")
-    for item in temp_extract_dir.rglob("*"):
-        print(f"  {item.relative_to(temp_extract_dir)}")
+    print("📂 Installing binaries and libraries...")
 
-    # Find the actual bundle directory (it might be directly in extract/)
-    extracted_dirs = [d for d in temp_extract_dir.iterdir() if d.is_dir()]
-    if len(extracted_dirs) == 1:
-        extracted_bundle = extracted_dirs[0]
-    else:
-        # Look for a directory containing "binaries" and "lib"
-        for item in temp_extract_dir.rglob("*"):
-            if item.is_dir() and "llcuda-binaries" in item.name:
-                extracted_bundle = item
-                break
-        else:
-            extracted_bundle = temp_extract_dir / BINARY_BUNDLE_NAME.replace(
-                ".tar.gz", ""
-            )
+    # The archive contains bin/ and lib/ directories
+    # We need to reorganize them into binaries/cuda12/ and lib/
 
-    print(f"📁 Using bundle directory: {extracted_bundle}")
+    bin_dir = temp_extract_dir / "bin"
+    lib_dir = temp_extract_dir / "lib"
 
-    if extracted_bundle.exists():
-        # Copy binaries
-        binaries_src = extracted_bundle / "binaries"
-        if not binaries_src.exists():
-            # Alternative: check if binaries are directly in extracted_bundle
-            binaries_src = extracted_bundle
-            if not (binaries_src / "cuda12").exists():
-                # Last resort: look for any llama-server binary
-                server_binaries = list(binaries_src.rglob("llama-server"))
-                if server_binaries:
-                    # Create cuda12 directory structure
-                    cuda12_dir = BINARIES_DIR / "cuda12"
-                    cuda12_dir.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(server_binaries[0], cuda12_dir / "llama-server")
+    if bin_dir.exists() and lib_dir.exists():
+        # Archive has bin/ and lib/ structure (v1.1.7 format)
+        print("  Found bin/ and lib/ directories")
 
-        if binaries_src.exists():
-            shutil.copytree(binaries_src, BINARIES_DIR, dirs_exist_ok=True)
+        # Create cuda12 directory and copy all binaries
+        cuda12_dir = BINARIES_DIR / "cuda12"
+        cuda12_dir.mkdir(parents=True, exist_ok=True)
 
-        # Copy libraries
-        lib_src = extracted_bundle / "lib"
-        if not lib_src.exists():
-            lib_src = extracted_bundle
-            if not (lib_src / "libggml-cuda.so").exists():
-                # Look for any .so files
-                so_files = list(lib_src.rglob("*.so*"))
-                if so_files:
-                    LIB_DIR.mkdir(parents=True, exist_ok=True)
-                    for so_file in so_files:
-                        shutil.copy2(so_file, LIB_DIR / so_file.name)
+        # Copy all files from bin/ to binaries/cuda12/
+        for item in bin_dir.iterdir():
+            if item.is_file():
+                dest = cuda12_dir / item.name
+                shutil.copy2(item, dest)
+                # Make executable if it's a binary (no extension)
+                if not item.suffix or item.suffix == '.sh':
+                    try:
+                        dest.chmod(0o755)
+                    except:
+                        pass
 
-        if lib_src.exists() and lib_src != extracted_bundle:
-            shutil.copytree(lib_src, LIB_DIR, dirs_exist_ok=True)
+        print(f"  Copied {len(list(bin_dir.iterdir()))} binaries to {cuda12_dir}")
 
-        # Make binaries executable
-        for binary in BINARIES_DIR.glob("**/*"):
-            if binary.is_file() and not binary.suffix:
-                try:
-                    binary.chmod(0o755)
-                    print(f"  Made executable: {binary}")
-                except:
-                    pass
+        # Copy all libraries from lib/ to lib/
+        LIB_DIR.mkdir(parents=True, exist_ok=True)
+        for item in lib_dir.iterdir():
+            if item.is_file():
+                shutil.copy2(item, LIB_DIR / item.name)
 
+        print(f"  Copied {len(list(lib_dir.iterdir()))} libraries to {LIB_DIR}")
         print("✅ Binaries installed successfully!")
+
     else:
         # Fallback: Try to find binaries anywhere in temp_extract_dir
-        print("⚠️  Bundle not found, searching for binaries...")
+        print("⚠️  Expected structure not found, searching for binaries...")
         server_binaries = list(temp_extract_dir.rglob("llama-server"))
         so_files = list(temp_extract_dir.rglob("*.so*"))
 
@@ -268,16 +242,20 @@ def download_binaries() -> None:
             cuda12_dir = BINARIES_DIR / "cuda12"
             cuda12_dir.mkdir(parents=True, exist_ok=True)
             shutil.copy2(server_binaries[0], cuda12_dir / "llama-server")
-            print(f"  Copied llama-server: {server_binaries[0]}")
+            server_binaries[0].chmod(0o755)
+            cuda12_dir.joinpath("llama-server").chmod(0o755)
+            print(f"  ✅ Found and copied llama-server")
 
         if so_files:
             LIB_DIR.mkdir(parents=True, exist_ok=True)
             for so_file in so_files:
                 shutil.copy2(so_file, LIB_DIR / so_file.name)
-                print(f"  Copied library: {so_file.name}")
+            print(f"  ✅ Found and copied {len(so_files)} libraries")
 
         if server_binaries or so_files:
-            print("✅ Found and installed binaries!")
+            print("✅ Binaries installed successfully!")
+        else:
+            print("❌ No binaries found in archive!")
 
     # Cleanup
     shutil.rmtree(temp_extract_dir, ignore_errors=True)
@@ -326,34 +304,26 @@ def download_default_model() -> None:
 def bootstrap() -> None:
     """
     Main bootstrap function called on first import.
+    Downloads binaries ONLY. Models are downloaded on-demand when load_model() is called.
     """
-    # Check if setup already complete
+    # Check if binaries already installed
     llama_server = BINARIES_DIR / "cuda12" / "llama-server"
-    model_file = MODELS_DIR / "google_gemma-3-1b-it-Q4_K_M.gguf"
 
-    if llama_server.exists() and model_file.exists():
-        # Setup already complete
+    if llama_server.exists():
+        # Binaries already installed
         return
 
     # Create cache directory
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Download binaries
-    if not llama_server.exists():
-        try:
-            download_binaries()
-        except Exception as e:
-            print(f"❌ Binary download failed: {e}")
-            print("   llcuda may not function correctly")
-            print()
-
-    # Download default model
-    if not model_file.exists():
-        try:
-            download_default_model()
-        except Exception as e:
-            print(f"⚠️  Model download skipped: {e}")
-            print()
+    # Download binaries only
+    try:
+        download_binaries()
+    except Exception as e:
+        print(f"❌ Binary download failed: {e}")
+        print("   llcuda may not function correctly")
+        print()
+        return
 
     print("=" * 60)
     print("✅ llcuda Setup Complete!")
@@ -363,7 +333,7 @@ def bootstrap() -> None:
     print()
     print("  import llcuda")
     print("  engine = llcuda.InferenceEngine()")
-    print("  engine.load_model('gemma-3-1b-Q4_K_M')")
+    print("  engine.load_model('gemma-3-1b-Q4_K_M')  # Downloads model on first use")
     print("  result = engine.infer('What is AI?')")
     print()
 

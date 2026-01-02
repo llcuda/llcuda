@@ -10,37 +10,37 @@
 
 ---
 
-## What's New in Version 1.1.7
+## What's New in Version 1.1.8
 
-**CUDA 12.8 Support and Enhanced Binary Distribution**
+**Bug Fixes for Google Colab and Kaggle**
 
-Version 1.1.7 brings full CUDA 12.8 support with optimized binaries for both modern and legacy GPUs:
+Version 1.1.8 fixes critical bootstrap issues for cloud environments:
 
-- **CUDA 12.8 Support**: Updated binaries built with CUDA Toolkit 12.8
-- **Enhanced Compatibility**: Works seamlessly on Google Colab (T4), Kaggle, and local systems
-- **Optimized Binaries**: Lightweight 161MB binary distribution (down from 551MB)
-- **Python 3.11 Focus**: Tested and optimized for Python 3.11+
-- **Ultra-Light Package**: Only 62 KB wheel, 61 KB source distribution
-- **Hybrid Bootstrap**: Auto-download of binaries and models on first use
-- **Universal GPU Support**: All NVIDIA architectures from Maxwell (GTX 940M) to Ada Lovelace (RTX 4090)
+- **Fixed Bootstrap**: Corrected v1.1.7 binary download URL (was pointing to v1.1.6)
+- **No Auto-Download**: Models download ONLY when explicitly requested - faster imports!
+- **Memory Efficient**: Prevents automatic 800MB model download on every import
+- **Improved Extraction**: Better handling of binary archive structure
+- **Colab/Kaggle Ready**: Tested and working on T4 GPUs
 
 Key Improvements:
-- CUDA 12.8 runtime support for latest NVIDIA drivers
-- Smaller binary distribution for faster downloads
-- Better compatibility with Google Colab and Kaggle notebooks
-- Updated dependencies and documentation
-- Improved JupyterLab integration
+- ✅ `import llcuda` is now instant - no model downloads
+- ✅ Models download only when you call `engine.load_model()`
+- ✅ Fixed 404 errors in Google Colab
+- ✅ Reduced memory footprint during initialization
+- ✅ Better error messages
 
 Example Usage:
 
 ```python
-# Install the latest v1.1.7 package
-pip install llcuda==1.1.7
+# Install the latest v1.1.8 package
+pip install llcuda==1.1.8
 
-# Use with Python 3.11+ and CUDA 12.8
+# Import is now instant - no model downloads!
 import llcuda
 engine = llcuda.InferenceEngine()
-engine.load_model("gemma-3-1b-Q4_K_M")  # Auto-downloads and configures
+
+# Model downloads only when you explicitly load it
+engine.load_model("gemma-3-1b-Q4_K_M")  # Downloads on first use
 result = engine.infer("What is AI?", max_tokens=100)
 print(result.text)
 ```
@@ -52,7 +52,7 @@ print(result.text)
 ### Quick Install (Recommended)
 
 ```bash
-pip install llcuda==1.1.7
+pip install llcuda==1.1.8
 ```
 
 ### Python Requirements
@@ -340,13 +340,12 @@ python -m llcuda.tests.test_end_to_end
 
 ## Changelog
 
-### v1.1.7 (2025-01-03)
-- **CUDA 12.8 Support**: Updated binaries built with CUDA Toolkit 12.8
-- **Optimized Binaries**: Reduced binary distribution from 551MB to 161MB
-- **Enhanced Compatibility**: Improved support for Google Colab T4 and Kaggle
-- **Python 3.11**: Continued focus on Python 3.11+ optimization
-- **Package Size**: Maintained 62KB wheel, 61KB source distribution
-- **Documentation**: Updated all docs for CUDA 12.8 compatibility
+### v1.1.8 (2025-01-03)
+- **Fixed Bootstrap**: Corrected binary download URL for v1.1.7
+- **No Auto-Download**: Models download only when explicitly requested
+- **Colab/Kaggle Fixed**: Resolved 404 errors and import issues
+- **Memory Efficient**: No automatic 800MB model download on import
+- **Better Extraction**: Improved binary archive handling
 
 [View full changelog](CHANGELOG.md)
 

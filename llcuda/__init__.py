@@ -5,7 +5,7 @@ Streamlined PyTorch-style package with hybrid bootstrap architecture.
 62KB package with auto-download of CUDA binaries and libraries.
 No manual setup required - just pip install and use!
 
-Version 1.1.7 - CUDA 12.8 support with enhanced binary distribution.
+Version 1.1.8 - Fixed Colab/Kaggle bootstrap and removed auto-model download.
 
 Examples:
     Basic usage (auto-download model from registry):
@@ -176,7 +176,7 @@ from .utils import (
     validate_model_path,
 )
 
-__version__ = "1.1.7"  # CUDA 12.8 support with enhanced binary distribution
+__version__ = "1.1.8"  # Fixed Colab/Kaggle bootstrap and removed auto-model download
 __all__ = [
     # Core classes
     "InferenceEngine",

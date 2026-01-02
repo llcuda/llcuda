@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.8] - 2025-01-03
+
+### 🐛 Bug Fixes - Colab/Kaggle Bootstrap
+
+Critical fixes for Google Colab and Kaggle compatibility.
+
+### Fixed
+- **Bootstrap URL**: Updated to download v1.1.7 binaries instead of v1.1.6 (404 error fix)
+- **Auto-Download Removed**: No longer downloads GGUF models on import - models download only when explicitly requested via `load_model()`
+- **Binary Extraction**: Improved handling of bin/lib archive structure for proper installation
+- **Memory Usage**: Prevents unnecessary 800MB model downloads on every import
+
+### Changes
+- Bootstrap now downloads binaries ONLY on first import
+- Models are downloaded on-demand when `engine.load_model()` is called
+- Improved error messages for binary download failures
+- Better archive structure handling (bin/ and lib/ directories)
+
+### User Impact
+- ✅ Faster `import llcuda` - no automatic model download
+- ✅ Works in Google Colab with T4 GPUs
+- ✅ Works in Kaggle notebooks
+- ✅ Models download only when needed
+- ✅ Reduced memory usage during initialization
+
+### Package Info
+- **Wheel Size**: 62 KB
+- **Source Size**: 61 KB
+- **Binary Archive**: 161 MB (llcuda-binaries-cuda12.tar.gz)
+- **Bootstrap**: Fixed for v1.1.7 binaries
+- **Python Support**: 3.11+
+- **CUDA Support**: 11.0+ and 12.0+ (12.8 recommended)
+
+---
+
 ## [1.1.7] - 2025-01-03
 
 ### 🚀 CUDA 12.8 Support and Enhanced Binary Distribution
