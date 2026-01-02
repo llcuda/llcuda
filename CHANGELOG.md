@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.9] - 2025-01-03
+
+### 🔧 Bug Fixes - llama-server Detection
+
+Critical fix for llama-server path detection in Google Colab and Kaggle.
+
+### Fixed
+- **Server Detection**: Added package binaries directory as priority #2 in search order
+- **Path Priority**: Now checks `llcuda/binaries/cuda12/llama-server` before system paths
+- **Cache Paths**: Added Colab (`/content/.cache`) and Kaggle (`/kaggle/working/.cache`) specific paths
+- **Library Path**: Automatic LD_LIBRARY_PATH setup for package-installed binaries
+
+### Added
+- **Silent Mode**: New `silent=True` parameter to suppress all llama-server output/warnings
+- **Better Detection**: Improved binary finding logic for cloud environments
+
+### Changed
+- Priority order now: ENV vars → Package binaries → LLAMA_CPP_DIR → Cache → Project paths → System paths
+- Server manager now checks package installation directory first
+
+### Usage
+```python
+# Suppress llama-server warnings
+engine.load_model("gemma-3-1b-Q4_K_M", silent=True)
+```
+
+### Package Info
+- **Wheel Size**: ~54 KB
+- **Source Size**: ~56 KB
+- **Binary Archive**: Use v1.1.7 binaries (161 MB)
+- **Python Support**: 3.11+
+- **CUDA Support**: 11.0+ and 12.0+ (12.8 recommended)
+
+---
+
 ## [1.1.8] - 2025-01-03
 
 ### 🐛 Bug Fixes - Colab/Kaggle Bootstrap

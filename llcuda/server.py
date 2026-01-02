@@ -75,10 +75,11 @@ class ServerManager:
 
         Searches in the following order:
         1. LLAMA_SERVER_PATH environment variable
-        2. LLAMA_CPP_DIR environment variable + /bin/llama-server
-        3. User's project directory (Ubuntu-Cuda-Llama.cpp-Executable)
-        4. System PATH locations
-        5. ~/.llcuda/bin/llama-server
+        2. Package's installed binaries directory (from bootstrap)
+        3. LLAMA_CPP_DIR environment variable + /bin/llama-server
+        4. Cache directory (~/.cache/llcuda)
+        5. User's project directory (Ubuntu-Cuda-Llama.cpp-Executable)
+        6. System PATH locations
 
         Returns:
             Path to llama-server executable, or None if not found
@@ -91,7 +92,28 @@ class ServerManager:
                 self._setup_library_path(path)
                 return path
 
-        # Priority 2: LLAMA_CPP_DIR
+        # Priority 2: Package's installed binaries (from bootstrap extraction)
+        try:
+            import llcuda
+            package_dir = Path(llcuda.__file__).parent
+            binaries_paths = [
+                package_dir / "binaries" / "cuda12" / "llama-server",
+                package_dir / "binaries" / "llama-server",
+            ]
+            for path in binaries_paths:
+                if path.exists():
+                    # Setup library path for package binaries
+                    lib_dir = package_dir / "lib"
+                    if lib_dir.exists():
+                        lib_path_str = str(lib_dir.absolute())
+                        current_ld_path = os.environ.get("LD_LIBRARY_PATH", "")
+                        if lib_path_str not in current_ld_path:
+                            os.environ["LD_LIBRARY_PATH"] = f"{lib_path_str}:{current_ld_path}" if current_ld_path else lib_path_str
+                    return path
+        except:
+            pass
+
+        # Priority 3: LLAMA_CPP_DIR
         llama_cpp_dir = os.getenv("LLAMA_CPP_DIR")
         if llama_cpp_dir:
             path = Path(llama_cpp_dir) / "bin" / "llama-server"
@@ -99,7 +121,18 @@ class ServerManager:
                 self._setup_library_path(path)
                 return path
 
-        # Priority 3: Project-specific location (Ubuntu-Cuda-Llama.cpp-Executable)
+        # Priority 4: Cache directory (bootstrap download location)
+        cache_paths = [
+            Path.home() / ".cache" / "llcuda" / "bin" / "llama-server",
+            Path("/content/.cache/llcuda/llama-server"),  # Google Colab
+            Path("/kaggle/working/.cache/llcuda/llama-server"),  # Kaggle
+        ]
+        for path in cache_paths:
+            if path.exists():
+                self._setup_library_path(path)
+                return path
+
+        # Priority 5: Project-specific location (Ubuntu-Cuda-Llama.cpp-Executable)
         project_paths = [
             Path(
                 "/media/waqasm86/External1/Project-Nvidia/Ubuntu-Cuda-Llama.cpp-Executable/bin/llama-server"
@@ -116,7 +149,7 @@ class ServerManager:
                 self._setup_library_path(path)
                 return path
 
-        # Priority 4: System locations
+        # Priority 6: System locations
         system_paths = [
             "/usr/local/bin/llama-server",
             "/usr/bin/llama-server",
@@ -129,12 +162,6 @@ class ServerManager:
             if path.exists():
                 self._setup_library_path(path)
                 return path
-
-        # Priority 5: User's home directory
-        home_path = Path.home() / ".llcuda" / "bin" / "llama-server"
-        if home_path.exists():
-            self._setup_library_path(home_path)
-            return home_path
 
         return None
 
@@ -351,6 +378,7 @@ class ServerManager:
         timeout: int = 60,
         verbose: bool = True,
         skip_gpu_check: bool = False,
+        silent: bool = False,
         **kwargs,
     ) -> bool:
         """
@@ -368,6 +396,7 @@ class ServerManager:
             timeout: Max seconds to wait for server startup (default: 60)
             verbose: Print status messages (default: True)
             skip_gpu_check: Skip GPU compatibility check (default: False)
+            silent: Suppress all llama-server output (default: False)
             **kwargs: Additional server arguments (flash_attn, cache_ram, fit, etc.)
 
         Returns:
@@ -488,12 +517,22 @@ class ServerManager:
 
         # Start server process
         try:
-            self.server_process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                start_new_session=True,
-            )
+            if silent:
+                # Suppress all output
+                self.server_process = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    start_new_session=True,
+                )
+            else:
+                # Capture output for error reporting
+                self.server_process = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    start_new_session=True,
+                )
         except Exception as e:
             raise RuntimeError(f"Failed to start llama-server: {e}")
 

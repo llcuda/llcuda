@@ -5,7 +5,7 @@ Streamlined PyTorch-style package with hybrid bootstrap architecture.
 62KB package with auto-download of CUDA binaries and libraries.
 No manual setup required - just pip install and use!
 
-Version 1.1.8 - Fixed Colab/Kaggle bootstrap and removed auto-model download.
+Version 1.1.9 - Fixed llama-server detection and added silent mode.
 
 Examples:
     Basic usage (auto-download model from registry):
@@ -176,7 +176,7 @@ from .utils import (
     validate_model_path,
 )
 
-__version__ = "1.1.8"  # Fixed Colab/Kaggle bootstrap and removed auto-model download
+__version__ = "1.1.9"  # Fixed llama-server detection and added silent mode
 __all__ = [
     # Core classes
     "InferenceEngine",
@@ -281,6 +281,7 @@ class InferenceEngine:
         n_parallel: int = 1,
         verbose: bool = True,
         interactive_download: bool = True,
+        silent: bool = False,
         **kwargs,
     ) -> bool:
         """
@@ -300,6 +301,7 @@ class InferenceEngine:
             n_parallel: Number of parallel sequences (default: 1)
             verbose: Print status messages (default: True)
             interactive_download: Ask for confirmation before downloading (default: True)
+            silent: Suppress all llama-server output/warnings (default: False)
             **kwargs: Additional server parameters (batch_size, ubatch_size, etc.)
 
         Returns:
@@ -399,6 +401,7 @@ class InferenceEngine:
                     batch_size=batch_size,
                     ubatch_size=ubatch_size,
                     verbose=verbose,
+                    silent=silent,
                     **kwargs,
                 )
 

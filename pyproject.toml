@@ -10,7 +10,7 @@ packages = ["llcuda", "llcuda._internal"]
 
 [project]
 name = "llcuda"
-version = "1.1.8"  # Fixed Colab/Kaggle bootstrap and removed auto-download
+version = "1.1.9"  # Fixed llama-server detection and added silent mode
 description = "Clean, ultra-lightweight CUDA-accelerated LLM inference for Python 3.11+. 62KB package with hybrid bootstrap auto-downloads binaries for all NVIDIA GPUs (SM 5.0-8.9). CUDA 12.8 support for modern GPUs and Google Colab/Kaggle."
 readme = "README.md"
 requires-python = ">=3.11"  # Make this explicit

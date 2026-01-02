@@ -10,37 +10,35 @@
 
 ---
 
-## What's New in Version 1.1.8
+## What's New in Version 1.1.9
 
-**Bug Fixes for Google Colab and Kaggle**
+**Fixed llama-server Detection + Silent Mode**
 
-Version 1.1.8 fixes critical bootstrap issues for cloud environments:
+Version 1.1.9 fixes llama-server detection issues and adds silent mode:
 
-- **Fixed Bootstrap**: Corrected v1.1.7 binary download URL (was pointing to v1.1.6)
-- **No Auto-Download**: Models download ONLY when explicitly requested - faster imports!
-- **Memory Efficient**: Prevents automatic 800MB model download on every import
-- **Improved Extraction**: Better handling of binary archive structure
-- **Colab/Kaggle Ready**: Tested and working on T4 GPUs
+- **Fixed Server Detection**: Now finds llama-server in package binaries directory
+- **Silent Mode**: Suppress all llama-server warnings with `silent=True`
+- **Better Path Detection**: Priority given to package-installed binaries
+- **Colab/Kaggle Paths**: Added cloud-specific cache paths
 
 Key Improvements:
-- ✅ `import llcuda` is now instant - no model downloads
-- ✅ Models download only when you call `engine.load_model()`
-- ✅ Fixed 404 errors in Google Colab
-- ✅ Reduced memory footprint during initialization
-- ✅ Better error messages
+- ✅ llama-server properly detected from bootstrap-installed binaries
+- ✅ New `silent=True` parameter to suppress server output
+- ✅ Works in Google Colab and Kaggle without manual paths
+- ✅ Cleaner output for Jupyter notebooks
 
 Example Usage:
 
 ```python
-# Install the latest v1.1.8 package
-pip install llcuda==1.1.8
+# Install the latest v1.1.9 package
+pip install llcuda==1.1.9
 
-# Import is now instant - no model downloads!
+# Import and load model silently (no llama-server warnings!)
 import llcuda
 engine = llcuda.InferenceEngine()
 
-# Model downloads only when you explicitly load it
-engine.load_model("gemma-3-1b-Q4_K_M")  # Downloads on first use
+# Silent mode - no llama-server output
+engine.load_model("gemma-3-1b-Q4_K_M", silent=True)
 result = engine.infer("What is AI?", max_tokens=100)
 print(result.text)
 ```
@@ -52,7 +50,7 @@ print(result.text)
 ### Quick Install (Recommended)
 
 ```bash
-pip install llcuda==1.1.8
+pip install llcuda==1.1.9
 ```
 
 ### Python Requirements
@@ -340,12 +338,11 @@ python -m llcuda.tests.test_end_to_end
 
 ## Changelog
 
-### v1.1.8 (2025-01-03)
-- **Fixed Bootstrap**: Corrected binary download URL for v1.1.7
-- **No Auto-Download**: Models download only when explicitly requested
-- **Colab/Kaggle Fixed**: Resolved 404 errors and import issues
-- **Memory Efficient**: No automatic 800MB model download on import
-- **Better Extraction**: Improved binary archive handling
+### v1.1.9 (2025-01-03)
+- **Fixed Server Detection**: llama-server now found in package binaries
+- **Silent Mode**: New `silent=True` parameter to suppress output
+- **Better Paths**: Priority to package-installed binaries
+- **Colab/Kaggle**: Cloud-specific cache paths added
 
 [View full changelog](CHANGELOG.md)
 
