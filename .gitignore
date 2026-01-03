@@ -1,0 +1,114 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# llcuda specific - Large files and binaries
+# CRITICAL: Keep package under 100MB for GitHub and PyPI
+llcuda/binaries/
+llcuda/lib/
+llcuda/models/
+
+# NEVER upload model files (.gguf) - not even to GitHub releases
+*.gguf
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.onnx
+
+# Binary release packages (upload to GitHub Releases page, not main repo)
+releases/binaries/
+releases/libraries/
+bundles/
+check_binaries/
+llcuda-binaries-*.tar.gz
+llcuda-bins-*.tar.gz
+
+# Archive files
+*.tar.gz
+*.tar.xz
+*.zip
+llcuda-source.tar.gz
+llcuda-*.tar.gz
+llcuda-*.zip
+
+# Large source archives
+llcuda-v1.1.*-source.*
+*-source.tar.gz
+*-source.zip
+
+# Cache
+.cache/
+.cache/*
+!.cache/keep  # Keep empty directory
+
+# Temporary files
+tmp/
+temp/
+
+# Test outputs
+test_outputs/
+
+# Build artifacts
+*.whl
+dist/
+build/
+*.egg-info/
