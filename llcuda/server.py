@@ -550,12 +550,18 @@ class ServerManager:
 
             # Check if process died
             if self.server_process.poll() is not None:
-                stderr = self.server_process.stderr.read().decode(
-                    "utf-8", errors="ignore"
-                )
-                raise RuntimeError(
-                    f"llama-server process died unexpectedly.\nError output:\n{stderr}"
-                )
+                # Read stderr only if it's not DEVNULL (silent mode)
+                if self.server_process.stderr is not None:
+                    stderr = self.server_process.stderr.read().decode(
+                        "utf-8", errors="ignore"
+                    )
+                    raise RuntimeError(
+                        f"llama-server process died unexpectedly.\nError output:\n{stderr}"
+                    )
+                else:
+                    raise RuntimeError(
+                        f"llama-server process died unexpectedly. Run with silent=False for error details."
+                    )
 
             if verbose:
                 print(".", end="", flush=True)

@@ -176,7 +176,7 @@ from .utils import (
     validate_model_path,
 )
 
-__version__ = "1.1.9"  # Fixed llama-server detection and added silent mode
+__version__ = "1.2.0"  # CUDA 12 support for GeForce 940M and Tesla T4, GPU-specific binaries
 __all__ = [
     # Core classes
     "InferenceEngine",

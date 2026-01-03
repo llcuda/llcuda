@@ -61,10 +61,20 @@ venv.bak/
 Thumbs.db
 
 # llcuda specific - Large files and binaries
+# CRITICAL: Keep package under 100MB for GitHub and PyPI
 llcuda/binaries/
 llcuda/lib/
 llcuda/models/
+
+# NEVER upload model files (.gguf) - not even to GitHub releases
 *.gguf
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.onnx
+
+# Binary release packages (upload to GitHub Releases page, not main repo)
 releases/binaries/
 releases/libraries/
 bundles/

@@ -21,9 +21,15 @@ except ImportError:
     HF_AVAILABLE = False
 
 # Configuration
-GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.1.7"
+GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.2.0"
 HF_REPO_ID = "waqasm86/llcuda-models"
-BINARY_BUNDLE_NAME = "llcuda-binaries-cuda12.tar.gz"
+
+# GPU-specific binary bundles
+GPU_BUNDLES = {
+    "940m": "llcuda-binaries-cuda12-940m.tar.gz",  # GeForce 940M (CC 5.0)
+    "t4": "llcuda-binaries-cuda12-t4.tar.gz",      # Tesla T4 (CC 7.5)
+    "default": "llcuda-binaries-cuda12-t4.tar.gz"  # Default to T4 (more common in cloud)
+}
 
 # Paths
 PACKAGE_DIR = Path(__file__).parent.parent
@@ -80,6 +86,56 @@ def detect_platform() -> str:
         return "kaggle"
 
     return "local"
+
+
+def select_binary_bundle(gpu_name: Optional[str], compute_cap: Optional[str]) -> str:
+    """
+    Select appropriate binary bundle based on GPU.
+
+    Args:
+        gpu_name: GPU name from nvidia-smi
+        compute_cap: Compute capability (e.g., "5.0", "7.5")
+
+    Returns:
+        Bundle filename to download
+    """
+    if not gpu_name or not compute_cap:
+        # No GPU detected, use default (T4)
+        print("  No GPU detected, using default binaries (T4 compatible)")
+        return GPU_BUNDLES["default"]
+
+    # Parse compute capability
+    try:
+        cc_float = float(compute_cap)
+    except (ValueError, TypeError):
+        return GPU_BUNDLES["default"]
+
+    # Map GPU to appropriate bundle
+    gpu_lower = gpu_name.lower()
+
+    # GeForce 940M and similar CC 5.0 GPUs (Maxwell architecture)
+    if "940" in gpu_lower or "920" in gpu_lower or "930" in gpu_lower:
+        print(f"  Detected GeForce 940M series (CC {compute_cap})")
+        return GPU_BUNDLES["940m"]
+    elif cc_float >= 5.0 and cc_float < 6.0:
+        # Maxwell architecture (CC 5.x)
+        print(f"  Detected Maxwell GPU (CC {compute_cap}), using 940M binaries")
+        return GPU_BUNDLES["940m"]
+
+    # Tesla T4 and similar CC 7.0+ GPUs (Volta/Turing/Ampere/Ada)
+    elif "t4" in gpu_lower or cc_float >= 7.0:
+        print(f"  Detected modern GPU (CC {compute_cap}), using T4 binaries")
+        return GPU_BUNDLES["t4"]
+
+    # Pascal architecture (CC 6.x) - use T4 binaries (they're compatible)
+    elif cc_float >= 6.0 and cc_float < 7.0:
+        print(f"  Detected Pascal GPU (CC {compute_cap}), using T4 binaries")
+        return GPU_BUNDLES["t4"]
+
+    # Older GPUs (CC < 5.0) - not supported, but try T4 binaries
+    else:
+        print(f"  GPU Compute {compute_cap} may not be fully supported")
+        return GPU_BUNDLES["default"]
 
 
 def download_file(url: str, dest_path: Path, desc: str = "Downloading") -> None:
@@ -165,19 +221,29 @@ def download_binaries() -> None:
         print(f"🎮 GPU Detected: {gpu_name} (Compute {compute_cap})")
     else:
         print("⚠️  No NVIDIA GPU detected (will use CPU)")
+        gpu_name = None
         compute_cap = None
 
     print(f"🌐 Platform: {platform.capitalize()}")
     print()
 
+    # Select appropriate binary bundle for this GPU
+    print("📦 Selecting optimized binaries for your GPU...")
+    binary_bundle_name = select_binary_bundle(gpu_name, compute_cap)
+    print(f"   Selected: {binary_bundle_name}")
+    print()
+
     # Download binary bundle
-    cache_tarball = CACHE_DIR / BINARY_BUNDLE_NAME
-    bundle_url = f"{GITHUB_RELEASE_URL}/{BINARY_BUNDLE_NAME}"
+    cache_tarball = CACHE_DIR / binary_bundle_name
+    bundle_url = f"{GITHUB_RELEASE_URL}/{binary_bundle_name}"
 
     if not cache_tarball.exists():
+        # Determine expected download size
+        download_size = "~30 MB" if "940m" in binary_bundle_name else "~270 MB"
+
         print(f"📥 Downloading optimized binaries from GitHub...")
         print(f"   URL: {bundle_url}")
-        print(f"   This is a one-time download (~120 MB)")
+        print(f"   This is a one-time download ({download_size})")
         print()
 
         download_file(bundle_url, cache_tarball, "Downloading binaries")

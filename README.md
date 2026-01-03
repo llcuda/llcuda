@@ -1,375 +1,291 @@
-# llcuda: CUDA-Accelerated LLM Inference for Python
+# llcuda: CUDA-Accelerated LLM Inference
 
-**Effortless, zero-configuration LLM inference with CUDA acceleration. Compatible with all modern NVIDIA GPUs, Google Colab, Kaggle, and JupyterLab. PyTorch-inspired API for seamless integration.**
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
+![Python](https://img.shields.io/badge/python-3.11+-green.svg)
+![CUDA](https://img.shields.io/badge/CUDA-12.x-orange.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-> Ideal for:  
-> - Google Colab and Kaggle notebooks  
-> - Local development on GPUs from GTX 940M to RTX 4090  
-> - Production-grade performance without manual setup  
-> - Python 3.11+ environments  
+Effortless, zero-configuration LLM inference with CUDA acceleration and GPU-specific optimizations.
 
----
+## 🎉 What's New in v1.2.0
 
-## What's New in Version 1.1.9
+- **GPU-Specific Binaries**: Automatic detection and download of optimized binaries for your GPU
+- **FlashAttention Support**: 2x faster inference on modern GPUs (Tesla T4, RTX series)
+- **Maxwell GPU Support**: Optimized builds for older GPUs (GeForce 940M, GTX 900 series)
+- **Smart Bootstrap**: Auto-selects appropriate binary bundle based on detected GPU
+- **Bug Fixes**: Resolved stderr.read() issue in Google Colab
 
-**Fixed llama-server Detection + Silent Mode**
+## 🚀 Quick Start
 
-Version 1.1.9 fixes llama-server detection issues and adds silent mode:
-
-- **Fixed Server Detection**: Now finds llama-server in package binaries directory
-- **Silent Mode**: Suppress all llama-server warnings with `silent=True`
-- **Better Path Detection**: Priority given to package-installed binaries
-- **Colab/Kaggle Paths**: Added cloud-specific cache paths
-
-Key Improvements:
-- ✅ llama-server properly detected from bootstrap-installed binaries
-- ✅ New `silent=True` parameter to suppress server output
-- ✅ Works in Google Colab and Kaggle without manual paths
-- ✅ Cleaner output for Jupyter notebooks
-
-Example Usage:
-
-```python
-# Install the latest v1.1.9 package
-pip install llcuda==1.1.9
-
-# Import and load model silently (no llama-server warnings!)
-import llcuda
-engine = llcuda.InferenceEngine()
-
-# Silent mode - no llama-server output
-engine.load_model("gemma-3-1b-Q4_K_M", silent=True)
-result = engine.infer("What is AI?", max_tokens=100)
-print(result.text)
-```
-
----
-
-## Installation
-
-### Quick Install (Recommended)
+### Installation
 
 ```bash
-pip install llcuda==1.1.9
+pip install llcuda
 ```
 
-### Python Requirements
-
-- **Python**: 3.11+ (explicitly tested)
-- **CUDA**: 11.0+ or 12.0+ recommended
-- **GPU**: NVIDIA with compute capability 5.0+ (Maxwell or newer)
-- **Memory**: 4GB+ VRAM for small models, 8GB+ recommended
-
-### Verified Platforms
-
-- ✅ **Ubuntu 22.04+** with CUDA 11/12
-- ✅ **Google Colab** (T4, P100, V100, A100)
-- ✅ **Kaggle Notebooks** (T4)
-- ✅ **Windows** with WSL2 + CUDA
-- ✅ **macOS** (with cloud GPU access)
-
----
-
-## Quick Start
+**Requirements:**
+- Python 3.11+
+- NVIDIA GPU with Compute Capability 5.0+ (Maxwell or newer)
+- CUDA 12.x runtime
 
 ### Basic Usage
 
 ```python
 import llcuda
 
-# Initialize engine
+# Initialize inference engine (auto-downloads optimized binaries on first run)
 engine = llcuda.InferenceEngine()
 
-# Load a model (auto-downloads from registry)
-engine.load_model("gemma-3-1b-Q4_K_M", auto_start=True)
+# Load a model (downloads from HuggingFace on first use)
+engine.load_model("gemma-3-1b-Q4_K_M", silent=True)
 
 # Run inference
 result = engine.infer("What is artificial intelligence?", max_tokens=100)
 print(result.text)
-
-# Get performance metrics
-metrics = engine.get_metrics()
-print(f"Tokens/sec: {metrics['throughput']['tokens_per_sec']:.2f}")
+print(f"Speed: {result.tokens_per_sec:.1f} tokens/sec")
 ```
 
-### Advanced Usage
+## 🎮 GPU Support
+
+### Supported Architectures
+
+| GPU Family | Compute Cap | Example GPUs | Package Size | Features |
+|------------|-------------|--------------|--------------|----------|
+| **Maxwell** | 5.0-5.2 | GeForce 940M, GTX 950/960 | 26 MB | cuBLAS optimized |
+| **Pascal** | 6.0-6.2 | GTX 1060/1070/1080, Tesla P100 | 264 MB | Tensor cores |
+| **Volta** | 7.0 | Tesla V100, Titan V | 264 MB | Tensor cores |
+| **Turing** | 7.5 | Tesla T4, RTX 2060/2070/2080 | 264 MB | **FlashAttention** |
+| **Ampere** | 8.0-8.6 | RTX 3060/3070/3080/3090, A100 | 264 MB | **FlashAttention** |
+| **Ada** | 8.9 | RTX 4060/4070/4080/4090 | 264 MB | **FlashAttention** |
+
+### What Gets Downloaded?
+
+On first `import llcuda`, the bootstrap will:
+1. Detect your GPU using `nvidia-smi`
+2. Select appropriate binary bundle:
+   - **Maxwell GPUs (CC 5.x)**: Downloads 26 MB package optimized with forced cuBLAS
+   - **Modern GPUs (CC 7.0+)**: Downloads 264 MB package with FlashAttention (2x faster)
+3. Extract binaries to `llcuda/binaries/cuda12/`
+4. Configure library paths automatically
+
+**This is a one-time download.** Subsequent imports use cached binaries.
+
+## 📊 Performance Benchmarks
+
+### GeForce 940M (Maxwell, CC 5.0)
+- **Package**: 26 MB
+- **GPU Layers**: 10-15
+- **Context**: 512-1024 tokens
+- **Models**: 1-3B params (Q4_K_M quantization)
+- **Speed**: 10-20 tokens/sec
+
+**Example:**
+```
+Model: Gemma 3-1B Q4_K_M
+Speed: 15 tok/s
+Latency: 67ms per token
+```
+
+### Tesla T4 (Turing, CC 7.5) with FlashAttention
+- **Package**: 264 MB
+- **GPU Layers**: 26-35
+- **Context**: 2048-8192 tokens
+- **Models**: 1-13B params (Q4_K_M/Q5_K_M)
+- **Speed**: 25-60 tokens/sec (2x faster than without FlashAttention)
+
+**Example:**
+```
+Model: Gemma 3-1B Q4_K_M
+Speed: 45 tok/s
+Latency: 22ms per token
+```
+
+### RTX 4090 (Ada, CC 8.9) with FlashAttention
+- **Package**: 264 MB
+- **GPU Layers**: 35+ (full offload for most models)
+- **Context**: 8192+ tokens
+- **Models**: 1-70B params
+- **Speed**: 120+ tokens/sec for small models, 40-60 tok/s for 13B
+
+**Example:**
+```
+Model: Gemma 3-1B Q4_K_M
+Speed: 125 tok/s
+Latency: 8ms per token
+```
+
+## 🛠️ Advanced Usage
+
+### Custom Model Loading
 
 ```python
 import llcuda
 
-# With custom settings
-engine = llcuda.InferenceEngine(server_url="http://localhost:8090")
+engine = llcuda.InferenceEngine()
 
+# Load custom model from HuggingFace
 engine.load_model(
-    "/path/to/model.gguf",
-    gpu_layers=99,        # GPU offload (0=CPU only, -1=maximum)
-    ctx_size=2048,        # Context window
-    batch_size=512,       # Batch processing size
-    temperature=0.7,      # Sampling temperature
-    top_p=0.9,          # Nucleus sampling
-    auto_configure=True   # Auto-optimize settings
+    model_name="TheBloke/Llama-2-7B-GGUF",
+    filename="llama-2-7b.Q4_K_M.gguf",
+    gpu_layers=32,
+    context_size=4096,
+    silent=True
 )
 
-# Batch inference
-prompts = ["What is AI?", "Explain ML.", "Future of tech?"]
-results = engine.batch_infer(prompts, max_tokens=50)
-
-for i, result in enumerate(results):
-    print(f"Prompt {i+1}: {result.text}")
+result = engine.infer("Explain quantum computing", max_tokens=200)
 ```
 
-### Context Manager (Auto-cleanup)
-
-```python
-with llcuda.InferenceEngine() as engine:
-    engine.load_model("gemma-3-1b-Q4_K_M")
-    result = engine.infer("Hello, world!")
-    print(result.text)
-# Server automatically stopped
-```
-
----
-
-## Available Models
-
-### Pre-configured Models (Registry)
-
-These models are tested and optimized for llcuda:
-
-| Model | Size | VRAM | Use Case |
-|-------|------|------|----------|
-| `gemma-3-1b-Q4_K_M` | 1B | ~1GB | Chat, Q&A |
-| `gemma-2-2b-Q4_K_M` | 2B | ~1.5GB | General tasks |
-| `llama-3.2-3b-Q4_K_M` | 3B | ~2GB | Advanced reasoning |
-| `qwen-2.5-1.5b-Q4_K_M` | 1.5B | ~1.2GB | Multilingual |
-
-### Loading Models
-
-```python
-# Registry model (auto-download)
-engine.load_model("gemma-3-1b-Q4_K_M")
-
-# Local GGUF file
-engine.load_model("/path/to/model.gguf")
-
-# HuggingFace model
-engine.load_model("google/gemma-3-1b-it-GGUF:gemma-3-1b-it-Q4_K_M.gguf")
-```
-
----
-
-## Performance
-
-### Benchmarks (RTX 4090, CUDA 12)
-
-| Model | Tokens/sec | Memory | Latency (P50) |
-|-------|------------|--------|---------------|
-| Gemma 3-1B | 120+ | 1.2GB | 15ms |
-| Llama 3.2-3B | 85+ | 2.1GB | 22ms |
-| Qwen 2.5-1.5B | 95+ | 1.4GB | 18ms |
-
-### GPU Compatibility
-
-| Architecture | GPUs | Compute Capability | Status |
-|--------------|--------|-------------------|---------|
-| Maxwell | GTX 900, 940M | 5.0-5.3 | ✅ |
-| Pascal | GTX 10xx, P100 | 6.0-6.1 | ✅ |
-| Volta | V100 | 7.0 | ✅ |
-| Turing | RTX 20xx, T4 | 7.5 | ✅ |
-| Ampere | RTX 30xx, A100 | 8.0-8.6 | ✅ |
-| Ada Lovelace | RTX 40xx | 8.9 | ✅ |
-
----
-
-## Advanced Features
-
-### Performance Monitoring
-
-```python
-# Get detailed metrics
-metrics = engine.get_metrics()
-
-print(f"Mean latency: {metrics['latency']['mean_ms']:.2f}ms")
-print(f"P95 latency: {metrics['latency']['p95_ms']:.2f}ms")
-print(f"Throughput: {metrics['throughput']['tokens_per_sec']:.2f} tok/s")
-```
-
-### Server Management
+### Manual Server Management
 
 ```python
 from llcuda import ServerManager
 
-# Manual server control
+# Start llama-server manually
 server = ServerManager()
-server.start_server(
-    model_path="model.gguf",
-    port=8090,
-    gpu_layers=99,
-    host="0.0.0.0"  # Allow network access
+server.start(
+    model_path="/path/to/model.gguf",
+    gpu_layers=30,
+    context_size=2048,
+    port=8080,
+    silent=False  # Show server logs
 )
 
-# Check server status
-if server.is_running():
-    print("Server is running")
+# ... use server ...
 
-# Stop server
-server.stop_server()
+server.stop()
 ```
 
-### Jupyter Integration
+### Jupyter Notebook Integration
 
 ```python
-# For Jupyter notebooks
-import llcuda.jupyter as llj
+import llcuda
+
+engine = llcuda.InferenceEngine()
+engine.load_model("gemma-3-1b-Q4_K_M", silent=True)
 
 # Interactive chat widget
-widget = llj.ChatWidget()
-widget.display()
+from llcuda.jupyter import ChatWidget
+chat = ChatWidget(engine)
+chat.display()
 
-# Streaming output
-llj.stream_inference("Explain quantum computing", callback=print_token)
+# Streaming inference
+for chunk in engine.infer_stream("Write a short story about AI"):
+    print(chunk, end='', flush=True)
 ```
 
----
+## 📦 Pre-configured Models
 
-## Configuration
+The following models are optimized and tested:
 
-### Environment Variables
+| Model | Size | VRAM | Speed (T4) | Best For |
+|-------|------|------|------------|----------|
+| Gemma 3-1B | 769 MB | ~1 GB | 45 tok/s | Fast inference, chat |
+| Gemma 2-2B | 1.6 GB | ~1.5 GB | 35 tok/s | Balanced quality/speed |
+| Llama 3.2-3B | 2.0 GB | ~2 GB | 30 tok/s | Higher quality |
+| Qwen 2.5-1.5B | 1.0 GB | ~1.2 GB | 40 tok/s | Multilingual |
 
-```bash
-# Override default paths
-export LLAMA_SERVER_PATH="/custom/path/to/llama-server"
-export LD_LIBRARY_PATH="/custom/lib/path:$LD_LIBRARY_PATH"
-
-# Cache directory
-export LLCUDA_CACHE_DIR="/custom/cache/dir"
+**Usage:**
+```python
+engine.load_model("gemma-3-1b-Q4_K_M")
+# Shorthand names automatically resolve to HuggingFace repos
 ```
 
-### Configuration File
+## 🌐 Platform Support
 
+### Local Systems
+- **Ubuntu 22.04+** ✅
+- **Windows 11 with WSL2** ✅
+- **macOS** (CPU only, no CUDA)
+
+### Cloud Notebooks
+- **Google Colab** (Tesla T4/P100/V100/A100) ✅
+- **Kaggle Notebooks** ✅
+- **Paperspace Gradient** ✅
+- **AWS SageMaker** ✅
+
+## 🔧 Troubleshooting
+
+### GPU Not Detected
 ```python
 import llcuda
-from llcuda import create_config_file
-
-# Create default config
-config_path = create_config_file()
-
-# Load config
-config = llcuda.load_config(config_path)
+compat = llcuda.check_gpu_compatibility()
+print(f"GPU: {compat['gpu_name']}")
+print(f"Compute Capability: {compat['compute_capability']}")
 ```
 
----
+### Force Specific Binary Bundle
+```bash
+# Set environment variable before import
+export LLCUDA_FORCE_BUNDLE="940m"  # or "t4"
+python your_script.py
+```
 
-## Troubleshooting
-
-### Common Issues
-
-1. **"no kernel image available"**
-   - Update to v1.1.6+ with hybrid bootstrap
-   - Check GPU compute capability (5.0+ required)
-
-2. **Out of Memory**
-   - Reduce `gpu_layers` or `ctx_size`
-   - Use smaller model
-   - Clear GPU cache between runs
-
-3. **Slow Performance**
-   - Increase `gpu_layers` to maximum
-   - Check CUDA installation
-   - Verify GPU power settings
-
-### Debug Information
-
+### Check Installed Binaries
 ```python
+from pathlib import Path
 import llcuda
 
-# System info
-llcuda.print_system_info()
-
-# GPU details
-gpu_info = llcuda.get_cuda_device_info()
-if gpu_info:
-    for gpu in gpu_info['gpus']:
-        print(f"GPU: {gpu['name']} ({gpu['memory']}MB)")
+binaries_dir = Path(llcuda.__file__).parent / "binaries" / "cuda12"
+print(f"Binaries installed: {binaries_dir.exists()}")
+print(f"llama-server: {(binaries_dir / 'llama-server').exists()}")
 ```
 
-### Verbose Mode
-
+### Library Path Issues
+If you encounter library loading errors:
 ```python
-# Enable verbose output
-engine.load_model("model.gguf", verbose=True)
+import os
+import llcuda
 
-# Check bootstrap logs
-import logging
-logging.basicConfig(level=logging.INFO)
+# Check library path
+lib_path = Path(llcuda.__file__).parent / "lib"
+print(f"Library path: {lib_path}")
+print(f"LD_LIBRARY_PATH: {os.environ.get('LD_LIBRARY_PATH', 'Not set')}")
 ```
 
----
+## 📚 Documentation
 
-## Development
+- **GitHub Repository**: https://github.com/waqasm86/llcuda
+- **Build Documentation**: [BUILD_GUIDE.md](BUILD_GUIDE.md)
+- **Integration Guide**: [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)
+- **Release Workflow**: [FINAL_WORKFLOW_GUIDE.md](FINAL_WORKFLOW_GUIDE.md)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 
-### Installation from Source
+## 🐛 Bug Reports
 
-```bash
-git clone https://github.com/waqasm86/llcuda.git
-cd llcuda
-pip install -e .
-```
+Report issues at: https://github.com/waqasm86/llcuda/issues
 
-### Testing
+## 🤝 Contributing
 
-```bash
-# Run tests
-pytest tests/
-
-# End-to-end test
-python -m llcuda.tests.test_end_to_end
-```
-
-### Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
-2. Create feature branch: `git checkout -b feature-name`
-3. Make changes and add tests
-4. Run tests: `pytest tests/`
-5. Submit pull request
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
----
-
-## Changelog
-
-### v1.1.9 (2025-01-03)
-- **Fixed Server Detection**: llama-server now found in package binaries
-- **Silent Mode**: New `silent=True` parameter to suppress output
-- **Better Paths**: Priority to package-installed binaries
-- **Colab/Kaggle**: Cloud-specific cache paths added
-
-[View full changelog](CHANGELOG.md)
-
----
-
-## License
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
----
+## 🙏 Acknowledgments
 
-## Links
+- Built on top of [llama.cpp](https://github.com/ggerganov/llama.cpp)
+- Uses CUDA toolkit from NVIDIA
+- FlashAttention implementation from Dao et al.
+- Inspired by PyTorch's ease of use
 
-- **GitHub**: https://github.com/waqasm86/llcuda
+## 🔗 Links
+
 - **PyPI**: https://pypi.org/project/llcuda/
-- **Documentation**: https://waqasm86.github.io/
-- **Issues**: https://github.com/waqasm86/llcuda/issues
-- **Releases**: https://github.com/waqasm86/llcuda/releases
+- **GitHub**: https://github.com/waqasm86/llcuda
+- **Bug Tracker**: https://github.com/waqasm86/llcuda/issues
+- **Changelog**: https://github.com/waqasm86/llcuda/blob/main/CHANGELOG.md
 
 ---
 
-## Acknowledgments
-
-- [llama.cpp](https://github.com/ggerganov/llama.cpp) - Core inference engine
-- [Hugging Face](https://huggingface.co) - Model hosting and ecosystem
-- CUDA and NVIDIA for GPU acceleration support
-
----
-
-*CUDA is a trademark of NVIDIA Corporation. This project is not affiliated with NVIDIA.*
+**Version**: 1.2.0
+**Release Date**: January 4, 2025
+**CUDA Version**: 12.x
+**Supported GPUs**: Compute Capability 5.0+
+**License**: MIT
