@@ -176,7 +176,7 @@ from .utils import (
     validate_model_path,
 )
 
-__version__ = "1.2.0"  # CUDA 12 support for GeForce 940M and Tesla T4, GPU-specific binaries
+__version__ = "1.2.1"  # Documentation update for PyPI (GeForce 940M and Tesla T4 focus)
 __all__ = [
     # Core classes
     "InferenceEngine",

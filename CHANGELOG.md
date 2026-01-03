@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.1] - 2025-01-04
+
+### Documentation
+- Simplified all documentation to focus exclusively on GeForce 940M and Tesla T4
+- Removed references to Pascal, Volta, Ampere, and Ada GPUs from user-facing documentation
+- Updated README to highlight Ubuntu 22.04 and Google Colab as primary supported platforms
+- Clarified GPU support table to show only GeForce 940M and Tesla T4
+- Updated package description for PyPI consistency
+
+### Note
+- No code changes - this is a documentation-only release
+- All GPU architectures continue to work (Pascal/Volta/Ampere/Ada download T4 binaries)
+- Focus on 940M and T4 provides clearer documentation for primary use cases
+
+---
+
 ## [1.2.0] - 2025-01-04
 
 ### 🚀 GPU-Specific Optimizations and FlashAttention Support
