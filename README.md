@@ -52,11 +52,7 @@ print(f"Speed: {result.tokens_per_sec:.1f} tokens/sec")
 | GPU Family | Compute Cap | Example GPUs | Package Size | Features |
 |------------|-------------|--------------|--------------|----------|
 | **Maxwell** | 5.0-5.2 | GeForce 940M, GTX 950/960 | 26 MB | cuBLAS optimized |
-| **Pascal** | 6.0-6.2 | GTX 1060/1070/1080, Tesla P100 | 264 MB | Tensor cores |
-| **Volta** | 7.0 | Tesla V100, Titan V | 264 MB | Tensor cores |
 | **Turing** | 7.5 | Tesla T4, RTX 2060/2070/2080 | 264 MB | **FlashAttention** |
-| **Ampere** | 8.0-8.6 | RTX 3060/3070/3080/3090, A100 | 264 MB | **FlashAttention** |
-| **Ada** | 8.9 | RTX 4060/4070/4080/4090 | 264 MB | **FlashAttention** |
 
 ### What Gets Downloaded?
 
