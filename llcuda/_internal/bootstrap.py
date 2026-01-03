@@ -21,7 +21,11 @@ except ImportError:
     HF_AVAILABLE = False
 
 # Configuration
+<<<<<<< HEAD
 GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.2.2"
+=======
+GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.2.0"
+>>>>>>> 2bf25c9922fd76c379669cd3cddcbc9feb3c3e7d
 HF_REPO_ID = "waqasm86/llcuda-models"
 
 # GPU-specific binary bundles
