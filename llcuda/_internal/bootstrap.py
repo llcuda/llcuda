@@ -1,6 +1,12 @@
 """
-Bootstrap module for llcuda hybrid architecture.
-Downloads binaries and models on first import based on GPU detection.
+llcuda v2.0 Bootstrap Module - Tesla T4 Only
+
+This module handles first-time setup for llcuda v2.0:
+- Verifies GPU is Tesla T4 or compatible (SM 7.5+)
+- Downloads T4-optimized CUDA 12 binaries (264 MB)
+- Downloads llcuda v2.0 native extension if needed
+
+Designed for Google Colab and modern GPUs with Tensor Core support.
 """
 
 import os
@@ -20,20 +26,16 @@ try:
 except ImportError:
     HF_AVAILABLE = False
 
-# Configuration
-<<<<<<< HEAD
-GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.2.2"
-=======
-GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v1.2.0"
->>>>>>> 2bf25c9922fd76c379669cd3cddcbc9feb3c3e7d
+# Configuration for llcuda v2.0
+GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.0"
 HF_REPO_ID = "waqasm86/llcuda-models"
 
-# GPU-specific binary bundles
-GPU_BUNDLES = {
-    "940m": "llcuda-binaries-cuda12-940m.tar.gz",  # GeForce 940M (CC 5.0)
-    "t4": "llcuda-binaries-cuda12-t4.tar.gz",      # Tesla T4 (CC 7.5)
-    "default": "llcuda-binaries-cuda12-t4.tar.gz"  # Default to T4 (more common in cloud)
-}
+# T4-only binary bundle
+T4_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4.tar.gz"  # 264 MB
+T4_NATIVE_BUNDLE = "llcuda-v2-native-t4.tar.gz"        # ~100 MB
+
+# Minimum compute capability for llcuda v2.0
+MIN_COMPUTE_CAPABILITY = 7.5  # Tesla T4, RTX 20xx+, A100, H100
 
 # Paths
 PACKAGE_DIR = Path(__file__).parent.parent
@@ -92,54 +94,69 @@ def detect_platform() -> str:
     return "local"
 
 
-def select_binary_bundle(gpu_name: Optional[str], compute_cap: Optional[str]) -> str:
+def verify_gpu_compatibility(gpu_name: str, compute_cap: str) -> bool:
     """
-    Select appropriate binary bundle based on GPU.
+    Verify GPU is compatible with llcuda v2.0 (SM 7.5+).
 
     Args:
         gpu_name: GPU name from nvidia-smi
-        compute_cap: Compute capability (e.g., "5.0", "7.5")
+        compute_cap: Compute capability (e.g., "7.5", "8.0")
 
     Returns:
-        Bundle filename to download
-    """
-    if not gpu_name or not compute_cap:
-        # No GPU detected, use default (T4)
-        print("  No GPU detected, using default binaries (T4 compatible)")
-        return GPU_BUNDLES["default"]
+        True if compatible, False otherwise
 
-    # Parse compute capability
+    Raises:
+        RuntimeError if GPU is not compatible
+    """
     try:
         cc_float = float(compute_cap)
     except (ValueError, TypeError):
-        return GPU_BUNDLES["default"]
+        raise RuntimeError(f"Invalid compute capability: {compute_cap}")
 
-    # Map GPU to appropriate bundle
     gpu_lower = gpu_name.lower()
 
-    # GeForce 940M and similar CC 5.0 GPUs (Maxwell architecture)
-    if "940" in gpu_lower or "920" in gpu_lower or "930" in gpu_lower:
-        print(f"  Detected GeForce 940M series (CC {compute_cap})")
-        return GPU_BUNDLES["940m"]
-    elif cc_float >= 5.0 and cc_float < 6.0:
-        # Maxwell architecture (CC 5.x)
-        print(f"  Detected Maxwell GPU (CC {compute_cap}), using 940M binaries")
-        return GPU_BUNDLES["940m"]
+    # Check minimum requirement
+    if cc_float < MIN_COMPUTE_CAPABILITY:
+        print()
+        print("=" * 70)
+        print("❌ INCOMPATIBLE GPU DETECTED")
+        print("=" * 70)
+        print()
+        print(f"  Your GPU: {gpu_name} (SM {compute_cap})")
+        print(f"  Required: SM {MIN_COMPUTE_CAPABILITY}+ (Turing or newer)")
+        print()
+        print("  llcuda v2.0 requires Tensor Core support (SM 7.5+)")
+        print()
+        print("  Compatible GPUs:")
+        print("    - Tesla T4 (SM 7.5) - Google Colab standard")
+        print("    - RTX 20xx series (SM 7.5)")
+        print("    - RTX 30xx series (SM 8.6)")
+        print("    - RTX 40xx series (SM 8.9)")
+        print("    - A100 (SM 8.0)")
+        print("    - H100 (SM 9.0)")
+        print()
+        print("  If you need support for older GPUs, use llcuda v1.x:")
+        print("    pip install llcuda==1.2.2")
+        print()
+        print("=" * 70)
+        raise RuntimeError(f"GPU compute capability {compute_cap} < {MIN_COMPUTE_CAPABILITY} (minimum required)")
 
-    # Tesla T4 and similar CC 7.0+ GPUs (Volta/Turing/Ampere/Ada)
-    elif "t4" in gpu_lower or cc_float >= 7.0:
-        print(f"  Detected modern GPU (CC {compute_cap}), using T4 binaries")
-        return GPU_BUNDLES["t4"]
-
-    # Pascal architecture (CC 6.x) - use T4 binaries (they're compatible)
-    elif cc_float >= 6.0 and cc_float < 7.0:
-        print(f"  Detected Pascal GPU (CC {compute_cap}), using T4 binaries")
-        return GPU_BUNDLES["t4"]
-
-    # Older GPUs (CC < 5.0) - not supported, but try T4 binaries
+    # Optimal performance check
+    if cc_float == 7.5:
+        if "t4" in gpu_lower:
+            print(f"  ✅ Tesla T4 (SM {compute_cap}) - Perfect for llcuda v2.0!")
+        else:
+            print(f"  ✅ {gpu_name} (SM {compute_cap}) - Compatible (Turing architecture)")
+    elif cc_float >= 8.0 and cc_float < 9.0:
+        print(f"  ✅ {gpu_name} (SM {compute_cap}) - Excellent (Ampere/Ada architecture)")
+    elif cc_float >= 9.0:
+        print(f"  ✅ {gpu_name} (SM {compute_cap}) - Excellent (Hopper architecture)")
     else:
-        print(f"  GPU Compute {compute_cap} may not be fully supported")
-        return GPU_BUNDLES["default"]
+        # 7.0-7.4 (Volta) - compatible but not optimal
+        print(f"  ⚠️  {gpu_name} (SM {compute_cap}) - Compatible but not optimal")
+        print(f"      llcuda v2.0 is optimized for SM 7.5+ (Tensor Cores)")
+
+    return True
 
 
 def download_file(url: str, dest_path: Path, desc: str = "Downloading") -> None:
@@ -201,56 +218,71 @@ def extract_tarball(tarball_path: Path, dest_dir: Path) -> None:
     print("✅ Extraction complete!")
 
 
-def download_binaries() -> None:
+def download_t4_binaries() -> None:
     """
-    Download and install binary bundle for detected GPU.
+    Download and install T4-optimized CUDA 12 binaries for llcuda v2.0.
+
+    Includes:
+    - llama-server (6.5 MB)
+    - libggml-cuda.so with FlashAttention (219 MB)
+    - Supporting libraries
+
+    Total size: 264 MB
     """
     # Check if binaries already exist
     llama_server = BINARIES_DIR / "cuda12" / "llama-server"
     if llama_server.exists() and llama_server.stat().st_size > 0:
-        print("✅ Binaries already installed")
+        print("✅ T4 binaries already installed")
         return
 
-    print("=" * 60)
-    print("🎯 llcuda First-Time Setup")
-    print("=" * 60)
+    print("=" * 70)
+    print("🎯 llcuda v2.0 First-Time Setup - Tesla T4 Optimized")
+    print("=" * 70)
     print()
 
-    # Detect GPU
+    # Detect GPU and verify compatibility
     gpu_info = detect_gpu_compute_capability()
     platform = detect_platform()
 
     if gpu_info:
         gpu_name, compute_cap = gpu_info
         print(f"🎮 GPU Detected: {gpu_name} (Compute {compute_cap})")
+
+        # Verify SM 7.5+ compatibility
+        try:
+            verify_gpu_compatibility(gpu_name, compute_cap)
+        except RuntimeError as e:
+            # GPU not compatible, abort
+            raise
     else:
-        print("⚠️  No NVIDIA GPU detected (will use CPU)")
-        gpu_name = None
-        compute_cap = None
+        print("❌ No NVIDIA GPU detected")
+        print()
+        print("llcuda v2.0 requires an NVIDIA GPU with SM 7.5+ (Tesla T4 or newer)")
+        print("Please ensure:")
+        print("  1. NVIDIA drivers are installed")
+        print("  2. nvidia-smi command is available")
+        print("  3. GPU is properly detected by the system")
+        print()
+        raise RuntimeError("No compatible NVIDIA GPU found")
 
     print(f"🌐 Platform: {platform.capitalize()}")
     print()
 
-    # Select appropriate binary bundle for this GPU
-    print("📦 Selecting optimized binaries for your GPU...")
-    binary_bundle_name = select_binary_bundle(gpu_name, compute_cap)
-    print(f"   Selected: {binary_bundle_name}")
+    # Download T4 binary bundle
+    print("📦 Downloading T4-optimized binaries (264 MB)...")
+    print("    Features: FlashAttention + Tensor Cores + CUDA Graphs")
     print()
 
-    # Download binary bundle
-    cache_tarball = CACHE_DIR / binary_bundle_name
-    bundle_url = f"{GITHUB_RELEASE_URL}/{binary_bundle_name}"
+    cache_tarball = CACHE_DIR / T4_BINARY_BUNDLE
+    bundle_url = f"{GITHUB_RELEASE_URL}/{T4_BINARY_BUNDLE}"
 
     if not cache_tarball.exists():
-        # Determine expected download size
-        download_size = "~30 MB" if "940m" in binary_bundle_name else "~270 MB"
-
-        print(f"📥 Downloading optimized binaries from GitHub...")
+        print(f"📥 Downloading from GitHub releases...")
         print(f"   URL: {bundle_url}")
-        print(f"   This is a one-time download ({download_size})")
+        print(f"   This is a one-time download (~264 MB)")
         print()
 
-        download_file(bundle_url, cache_tarball, "Downloading binaries")
+        download_file(bundle_url, cache_tarball, "Downloading T4 binaries")
         print()
     else:
         print(f"✅ Using cached binaries from {cache_tarball}")
@@ -373,8 +405,13 @@ def download_default_model() -> None:
 
 def bootstrap() -> None:
     """
-    Main bootstrap function called on first import.
-    Downloads binaries ONLY. Models are downloaded on-demand when load_model() is called.
+    Main bootstrap function for llcuda v2.0 - called on first import.
+
+    Downloads T4-optimized CUDA 12 binaries (264 MB).
+    Models are downloaded on-demand when load_model() is called.
+
+    Raises:
+        RuntimeError: If GPU is not compatible (SM < 7.5)
     """
     # Check if binaries already installed
     llama_server = BINARIES_DIR / "cuda12" / "llama-server"
@@ -386,25 +423,42 @@ def bootstrap() -> None:
     # Create cache directory
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Download binaries only
+    # Download T4-optimized binaries
     try:
-        download_binaries()
+        download_t4_binaries()
+    except RuntimeError as e:
+        # GPU compatibility error - re-raise to prevent import
+        print()
+        print("❌ llcuda v2.0 cannot run on this system")
+        print()
+        raise
     except Exception as e:
         print(f"❌ Binary download failed: {e}")
-        print("   llcuda may not function correctly")
+        print("   llcuda v2.0 may not function correctly")
         print()
-        return
+        print("   Please check your internet connection and try:")
+        print("     1. pip uninstall llcuda")
+        print("     2. pip install llcuda")
+        print()
+        raise
 
-    print("=" * 60)
-    print("✅ llcuda Setup Complete!")
-    print("=" * 60)
+    print("=" * 70)
+    print("✅ llcuda v2.0 Setup Complete!")
+    print("=" * 70)
     print()
-    print("You can now use llcuda:")
+    print("You can now use llcuda v2.0:")
     print()
+    print("  # V1.x HTTP Server API (GGUF models)")
     print("  import llcuda")
     print("  engine = llcuda.InferenceEngine()")
-    print("  engine.load_model('gemma-3-1b-Q4_K_M')  # Downloads model on first use")
+    print("  engine.load_model('gemma-3-1b-Q4_K_M')")
     print("  result = engine.infer('What is AI?')")
+    print()
+    print("  # V2.0 Native Tensor API (custom operations)")
+    print("  from llcuda.core import Tensor, DType, matmul")
+    print("  A = Tensor.zeros([1024, 1024], dtype=DType.Float32, device=0)")
+    print("  B = Tensor.zeros([1024, 1024], dtype=DType.Float32, device=0)")
+    print("  C = A @ B  # Matrix multiplication on GPU")
     print()
 
 

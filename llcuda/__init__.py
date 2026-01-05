@@ -5,11 +5,7 @@ Streamlined PyTorch-style package with hybrid bootstrap architecture.
 62KB package with auto-download of CUDA binaries and libraries.
 No manual setup required - just pip install and use!
 
-<<<<<<< HEAD
 Version 1.2.2 - Fixed llama-server detection and added silent mode.
-=======
-Version 1.1.9 - Fixed llama-server detection and added silent mode.
->>>>>>> 2bf25c9922fd76c379669cd3cddcbc9feb3c3e7d
 
 Examples:
     Basic usage (auto-download model from registry):
@@ -180,11 +176,7 @@ from .utils import (
     validate_model_path,
 )
 
-<<<<<<< HEAD
 __version__ = "1.2.2"  # Documentation update for PyPI (GeForce 940M and Tesla T4 focus)
-=======
-__version__ = "1.2.1"  # Documentation update for PyPI (GeForce 940M and Tesla T4 focus)
->>>>>>> 2bf25c9922fd76c379669cd3cddcbc9feb3c3e7d
 __all__ = [
     # Core classes
     "InferenceEngine",

@@ -7,11 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-<<<<<<< HEAD
 ## [1.2.2] - 2025-01-04
-=======
-## [1.2.1] - 2025-01-04
->>>>>>> 2bf25c9922fd76c379669cd3cddcbc9feb3c3e7d
 
 ### Documentation
 - Simplified all documentation to focus exclusively on GeForce 940M and Tesla T4
@@ -27,11 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-<<<<<<< HEAD
 ## [1.2.2] - 2025-01-04
-=======
-## [1.2.0] - 2025-01-04
->>>>>>> 2bf25c9922fd76c379669cd3cddcbc9feb3c3e7d
 
 ### 🚀 GPU-Specific Optimizations and FlashAttention Support
 
@@ -80,13 +72,8 @@ Major release introducing GPU-specific binary bundles with automatic detection a
 - **Package structure**: Updated to support multiple binary variants
   - GPU_BUNDLES dictionary maps GPU types to appropriate packages
   - select_binary_bundle() function implements selection logic
-<<<<<<< HEAD
 - **GitHub Release URL**: Updated to v1.2.2 in bootstrap.py
 - **Version**: Bumped to 1.2.2 in __init__.py and pyproject.toml
-=======
-- **GitHub Release URL**: Updated to v1.2.0 in bootstrap.py
-- **Version**: Bumped to 1.2.0 in __init__.py and pyproject.toml
->>>>>>> 2bf25c9922fd76c379669cd3cddcbc9feb3c3e7d
 
 ### Performance
 - **GeForce 940M (CC 5.0)**: 10-20 tokens/sec for 1-3B parameter models
