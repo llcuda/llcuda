@@ -123,38 +123,27 @@ def verify_gpu_compatibility(gpu_name: str, compute_cap: str) -> bool:
         print("=" * 70)
         print()
         print(f"  Your GPU: {gpu_name} (SM {compute_cap})")
-        print(f"  Required: SM {MIN_COMPUTE_CAPABILITY}+ (Turing or newer)")
+        print(f"  Required: Tesla T4 (SM 7.5)")
         print()
-        print("  llcuda v2.0 requires Tensor Core support (SM 7.5+)")
+        print("  llcuda v2.0 is designed exclusively for Tesla T4 GPU")
         print()
-        print("  Compatible GPUs:")
-        print("    - Tesla T4 (SM 7.5) - Google Colab standard")
-        print("    - RTX 20xx series (SM 7.5)")
-        print("    - RTX 30xx series (SM 8.6)")
-        print("    - RTX 40xx series (SM 8.9)")
-        print("    - A100 (SM 8.0)")
-        print("    - H100 (SM 9.0)")
+        print("  Compatible environment:")
+        print("    - Google Colab (free tier with Tesla T4)")
         print()
-        print("  If you need support for older GPUs, use llcuda v1.x:")
-        print("    pip install llcuda==1.2.2")
+        print("  For other GPUs, use llcuda v1.2.2:")
         print()
         print("=" * 70)
         raise RuntimeError(f"GPU compute capability {compute_cap} < {MIN_COMPUTE_CAPABILITY} (minimum required)")
 
-    # Optimal performance check
-    if cc_float == 7.5:
-        if "t4" in gpu_lower:
-            print(f"  ✅ Tesla T4 (SM {compute_cap}) - Perfect for llcuda v2.0!")
-        else:
-            print(f"  ✅ {gpu_name} (SM {compute_cap}) - Compatible (Turing architecture)")
-    elif cc_float >= 8.0 and cc_float < 9.0:
-        print(f"  ✅ {gpu_name} (SM {compute_cap}) - Excellent (Ampere/Ada architecture)")
-    elif cc_float >= 9.0:
-        print(f"  ✅ {gpu_name} (SM {compute_cap}) - Excellent (Hopper architecture)")
+    # Tesla T4 verification
+    if cc_float == 7.5 and "t4" in gpu_lower:
+        print(f"  ✅ Tesla T4 detected - Perfect for llcuda v2.0!")
+    elif cc_float == 7.5:
+        print(f"  ⚠️  {gpu_name} (SM {compute_cap}) - May work but not tested")
+        print(f"      llcuda v2.0 is optimized exclusively for Tesla T4")
     else:
-        # 7.0-7.4 (Volta) - compatible but not optimal
-        print(f"  ⚠️  {gpu_name} (SM {compute_cap}) - Compatible but not optimal")
-        print(f"      llcuda v2.0 is optimized for SM 7.5+ (Tensor Cores)")
+        print(f"  ⚠️  {gpu_name} (SM {compute_cap}) - Not tested")
+        print(f"      llcuda v2.0 is designed for Tesla T4 (SM 7.5)")
 
     return True
 

@@ -28,9 +28,9 @@ authors = [
     {name = "Waqas Muhammad", email = "waqasm86@gmail.com"}
 ]
 keywords = [
-    "llm", "cuda", "inference", "unsloth", "t4", "tensor-cores",
+    "llm", "cuda", "inference", "unsloth", "t4", "tesla-t4", "tensor-cores",
     "flashattention", "nf4", "quantization", "gguf", "pytorch",
-    "deep-learning", "gpu", "colab", "tensor-api", "turing", "ampere"
+    "deep-learning", "gpu", "colab", "tensor-api", "google-colab"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
