@@ -68,15 +68,12 @@ target_include_directories(llcuda_cpp PRIVATE
     ${CUDAToolkit_INCLUDE_DIRS}
 )
 
-# Link libraries
+# Link libraries - Use dynamic libraries for better compatibility
 target_link_libraries(llcuda_cpp PRIVATE
-    CUDA::cudart_static
-    CUDA::cublas_static
-    CUDA::cublasLt_static
-    CUDA::culibos
+    CUDA::cudart
+    CUDA::cublas
+    CUDA::cublasLt
     ${CMAKE_DL_LIBS}
-    pthread
-    rt
 )
 
 # CUDA compilation flags
@@ -84,6 +81,7 @@ set_target_properties(llcuda_cpp PROPERTIES
     CUDA_SEPARABLE_COMPILATION ON
     CUDA_RESOLVE_DEVICE_SYMBOLS ON
     POSITION_INDEPENDENT_CODE ON
+    CUDA_RUNTIME_LIBRARY Shared
 )
 
 # Optimization flags for Tesla T4 (SM 7.5)
