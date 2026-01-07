@@ -30,7 +30,7 @@ llcuda = [
 
 [project]
 name = "llcuda"
-version = "2.0.1"
+version = "2.0.2"
 description = "CUDA 12 inference backend for Unsloth - Tesla T4 optimized. Python-first API with native tensor operations, custom CUDA kernels, FlashAttention, and NF4 quantization."
 readme = "README.md"
 requires-python = ">=3.11"

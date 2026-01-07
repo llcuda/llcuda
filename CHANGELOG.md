@@ -7,7 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.0.1] - 2025-01-07
+## [2.0.2] - 2026-01-08
+
+### 🐛 Critical Bug Fixes
+
+#### Fixed
+- **HTTP 404 Error on Binary Download**: Fixed bootstrap failing with 404 error when downloading binaries on first import
+  - Root cause: Version mismatch between PyPI package (v2.0.0/v2.0.1) and GitHub release URLs
+  - Solution: Updated `bootstrap.py` to use v2.0.2 release URL
+- **Version Number Inconsistency**: Fixed `__version__` incorrectly reporting "1.2.2" instead of actual version
+  - Updated `llcuda/__init__.py` to correctly report "2.0.2"
+- **Tar File Structure Mismatch**: Fixed binary tar extraction failures
+  - Root cause: Tar had unexpected parent directory `llcuda-complete-t4/` instead of root-level `bin/` and `lib/`
+  - Solution: Recreated tar with correct structure for proper extraction by bootstrap code
+
+#### Changed
+- Enhanced `.gitignore` with stronger protection against large binary commits
+  - Added explicit patterns for `*.so.*`, `*.a`, and all shared library variants
+  - Better documentation of file size limits for GitHub/PyPI
+- Updated binary package filename to `llcuda-binaries-cuda12-t4-v2.0.2.tar.gz` (266 MB)
+- SHA256: `1dcf78936f3e0340a288950cbbc0e7bf12339d7b9dfbd1fe0344d44b6ead39b5`
+
+#### Impact
+- Kaggle, Colab, and local installations now work correctly without 404 errors
+- All v2.0.0/v2.0.1 users should upgrade to avoid installation failures
+- No breaking changes - fully backward compatible
+
+---
+
+## [2.0.1] - 2026-01-07
 
 ### Changed
 - **Cleanup Release**: Removed duplicate files, obsolete documentation, and large binaries from repository

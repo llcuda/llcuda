@@ -176,7 +176,7 @@ from .utils import (
     validate_model_path,
 )
 
-__version__ = "1.2.2"  # Documentation update for PyPI (GeForce 940M and Tesla T4 focus)
+__version__ = "2.0.2"  # Fixed bootstrap tar structure and version consistency
 __all__ = [
     # Core classes
     "InferenceEngine",

@@ -27,7 +27,7 @@ except ImportError:
     HF_AVAILABLE = False
 
 # Configuration for llcuda v2.0
-GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.1"
+GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.2"
 HF_REPO_ID = "waqasm86/llcuda-models"
 
 # T4-only binary bundle

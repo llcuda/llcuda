@@ -1,6 +1,6 @@
 # llcuda v2.0: CUDA Inference Backend for Unsloth
 
-![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.11+-green.svg)
 ![CUDA](https://img.shields.io/badge/CUDA-12.x-orange.svg)
 ![GPU](https://img.shields.io/badge/GPU-Tesla%20T4-green.svg)

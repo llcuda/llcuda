@@ -62,9 +62,12 @@ Thumbs.db
 
 # llcuda specific - Large files and binaries
 # CRITICAL: Keep package under 100MB for GitHub and PyPI
+# NEVER commit binaries to git - they go to GitHub Releases only
 llcuda/binaries/
 llcuda/lib/
 llcuda/models/
+llcuda/_internal/binaries/
+llcuda/_internal/lib/
 
 # NEVER upload model files (.gguf) - not even to GitHub releases
 *.gguf
@@ -82,13 +85,18 @@ check_binaries/
 llcuda-binaries-*.tar.gz
 llcuda-bins-*.tar.gz
 
-# Archive files
+# Archive files - NEVER commit large archives to git
 *.tar.gz
 *.tar.xz
+*.tar.bz2
 *.zip
+*.7z
 llcuda-source.tar.gz
 llcuda-*.tar.gz
 llcuda-*.zip
+# Exception: Allow source distributions in dist/ folder
+!dist/*.tar.gz
+!dist/*.zip
 
 # Large source archives
 llcuda-v1.1.*-source.*
@@ -120,12 +128,17 @@ build/
 *.orig
 
 # Compiled binaries (too large for git, GitHub, and PyPI)
+# NEVER commit shared libraries - they go to GitHub Releases only
 *.so
+*.so.*
 *.pyd
 *.dylib
 *.dll
+*.a
 llcuda_cpp*.so
 libggml*.so
+libllama*.so
+libggml-*.so
 
 # CRITICAL: Large binary packages (ONLY for GitHub Releases, NOT main repo or PyPI)
 release-packages/*.tar.gz
