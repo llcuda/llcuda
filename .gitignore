@@ -112,3 +112,28 @@ test_outputs/
 dist/
 build/
 *.egg-info/
+
+# Backup files
+*_backup.py
+*_old.py
+*.bak
+*.orig
+
+# Compiled binaries (too large for git, GitHub, and PyPI)
+*.so
+*.pyd
+*.dylib
+*.dll
+llcuda_cpp*.so
+libggml*.so
+
+# CRITICAL: Large binary packages (ONLY for GitHub Releases, NOT main repo or PyPI)
+release-packages/*.tar.gz
+release-packages/*.zip
+*.tar.gz
+!dist/llcuda-*.tar.gz
+
+# Exclude dist directory from git but keep source distributions
+dist/
+!dist/*.tar.gz
+!dist/*.whl

@@ -1,6 +1,6 @@
 # llcuda v2.0: CUDA Inference Backend for Unsloth
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.1-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.11+-green.svg)
 ![CUDA](https://img.shields.io/badge/CUDA-12.x-orange.svg)
 ![GPU](https://img.shields.io/badge/GPU-Tesla%20T4-green.svg)
@@ -364,7 +364,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Version**: 2.0.0  
-**Target GPU**: **Tesla T4 ONLY** (SM 7.5)  
-**Platform**: Google Colab  
+**Version**: 2.0.1
+**Target GPU**: **Tesla T4 ONLY** (SM 7.5)
+**Platform**: Google Colab
 **License**: MIT

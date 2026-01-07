@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.1] - 2025-01-07
+
+### Changed
+- **Cleanup Release**: Removed duplicate files, obsolete documentation, and large binaries from repository
+- Updated .gitignore to prevent large binary files from being uploaded to PyPI and GitHub
+- Excluded large binaries (*.so, *.tar.gz, *.gguf) from PyPI wheel package
+- Binaries are now downloaded on first use via bootstrap mechanism (not included in wheel)
+- Improved package structure and reduced repository size by ~265 MB
+
+### Removed
+- Duplicate backup files (`__init___backup.py`, `__init___pure.py`)
+- Empty nested directory structure in `llcuda/` package
+- Obsolete CMakeLists.txt and llcuda_py.cpp from package directory
+- 15+ obsolete documentation files from v1.x era
+- Duplicate binary tarballs (kept single copy in release-packages)
+
+### Fixed
+- Package-data configuration to exclude large binaries from PyPI upload
+- .gitignore patterns to prevent accidental uploads of model files (.gguf) to GitHub/PyPI
+
+### Note
+- **IMPORTANT**: Large binaries (llcuda_cpp.so, llcuda-binaries-*.tar.gz) are NOT included in the PyPI package
+- Users must rebuild native extensions or binaries will auto-download on first import
+- This ensures PyPI package stays under 100 MB limit
+
+---
+
+## [2.0.0] - 2025-01-06
+
+### Added
+- **Native Tensor API**: PyTorch-style GPU operations with custom CUDA kernels
+- **Tensor Core Optimization**: Exclusive Tesla T4 (SM 7.5) targeting
+- **Custom CUDA kernels**: Device management, tensor operations, cuBLAS matmul
+- **GGUF Parser**: Zero-copy memory-mapped GGUF file reader
+- **Bootstrap refactor**: T4-only binary downloader with verification
+
+### Changed
+- Refactored to Tesla T4-only architecture (removed multi-GPU support)
+- Updated binary package to 264 MB with FlashAttention and CUDA Graphs
+- Python 3.11+ requirement (was 3.8+)
+
+---
+
 ## [1.2.2] - 2025-01-04
 
 ### Documentation
