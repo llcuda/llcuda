@@ -40,23 +40,13 @@ class ServerManager:
         >>> manager.stop_server()
     """
 
-    _BINARY_BASE_URL = "https://github.com/waqasm86/Ubuntu-Cuda-Llama.cpp-Executable/releases/latest/download/llama.cpp-ubuntu-cuda-x64.tar.xz"
+    # DEPRECATED: Old binary URL - binaries are now downloaded via bootstrap.py
+    # This fallback should rarely be used as binaries are installed during package import
+    _BINARY_BASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.2/llcuda-binaries-cuda12-t4-v2.0.2.tar.gz"
 
-    # Also add this function to get the actual download URL
     def _get_download_url(self):
-        """Get the actual download URL by following redirects"""
-        try:
-            import requests
-
-            # Get the final URL after redirects
-            response = requests.head(
-                self._BINARY_BASE_URL, allow_redirects=True, timeout=10
-            )
-            return response.url
-        except Exception as e:
-            print(f"Warning: Could not get redirect URL: {e}")
-            # Fall back to the base URL
-            return self._BINARY_BASE_URL
+        """Get the actual download URL - now points to llcuda GitHub releases"""
+        return self._BINARY_BASE_URL
 
     def __init__(self, server_url: str = "http://127.0.0.1:8090"):
         """
@@ -132,19 +122,14 @@ class ServerManager:
                 self._setup_library_path(path)
                 return path
 
-        # Priority 5: Project-specific location (Ubuntu-Cuda-Llama.cpp-Executable)
-        project_paths = [
-            Path(
-                "/media/waqasm86/External1/Project-Nvidia/Ubuntu-Cuda-Llama.cpp-Executable/bin/llama-server"
-            ),
-            Path(
-                "/media/waqasm86/External1/Project-Nvidia/llama.cpp/build/bin/llama-server"
-            ),
-            Path.home() / "Ubuntu-Cuda-Llama.cpp-Executable" / "bin" / "llama-server",
-            Path.cwd() / "Ubuntu-Cuda-Llama.cpp-Executable" / "bin" / "llama-server",
+        # Priority 5: Local llama.cpp build directory
+        local_build_paths = [
+            Path.home() / "llama.cpp" / "build" / "bin" / "llama-server",
+            Path.cwd() / "llama.cpp" / "build" / "bin" / "llama-server",
+            Path.cwd() / "build" / "bin" / "llama-server",  # If running from llama.cpp dir
         ]
 
-        for path in project_paths:
+        for path in local_build_paths:
             if path.exists():
                 self._setup_library_path(path)
                 return path
@@ -290,7 +275,7 @@ class ServerManager:
         cache_dir.mkdir(parents=True, exist_ok=True)
 
         # Define paths
-        tar_path = cache_dir / "llama.cpp-ubuntu-cuda-x64.tar.xz"
+        tar_path = cache_dir / "llcuda-binaries-cuda12-t4-v2.0.2.tar.gz"
         extract_dir = cache_dir / "extracted"
 
         # Download the binary archive (with progress indicator)
@@ -330,7 +315,7 @@ class ServerManager:
             shutil.rmtree(extract_dir, ignore_errors=True)  # Clean previous extraction
             extract_dir.mkdir(exist_ok=True)
 
-            with tarfile.open(tar_path, "r:xz") as tar:
+            with tarfile.open(tar_path, "r:gz") as tar:
                 tar.extractall(extract_dir)
 
             # Find the actual binary (it might be in a subdirectory)

@@ -27,11 +27,11 @@ except ImportError:
     HF_AVAILABLE = False
 
 # Configuration for llcuda v2.0
-GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.2"
+GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.3"
 HF_REPO_ID = "waqasm86/llcuda-models"
 
 # T4-only binary bundle
-T4_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4.tar.gz"  # 264 MB
+T4_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.0.3.tar.gz"  # 266 MB
 T4_NATIVE_BUNDLE = "llcuda-v2-native-t4.tar.gz"        # ~100 MB
 
 # Minimum compute capability for llcuda v2.0
@@ -394,61 +394,31 @@ def download_default_model() -> None:
 
 def bootstrap() -> None:
     """
-    Main bootstrap function for llcuda v2.0 - called on first import.
+    Main bootstrap function for llcuda v2.0.3 - called on first import.
 
-    Downloads T4-optimized CUDA 12 binaries (264 MB).
+    Downloads T4-optimized binaries from GitHub Releases on first import.
     Models are downloaded on-demand when load_model() is called.
 
     Raises:
-        RuntimeError: If GPU is not compatible (SM < 7.5)
+        RuntimeError: If GPU is not compatible (SM < 7.5) or download fails
     """
     # Check if binaries already installed
     llama_server = BINARIES_DIR / "cuda12" / "llama-server"
 
-    if llama_server.exists():
+    if llama_server.exists() and llama_server.stat().st_size > 0:
         # Binaries already installed
         return
 
-    # Create cache directory
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    # Download T4 binaries from GitHub Releases
+    print()
+    download_t4_binaries()
 
-    # Download T4-optimized binaries
-    try:
-        download_t4_binaries()
-    except RuntimeError as e:
-        # GPU compatibility error - re-raise to prevent import
-        print()
-        print("❌ llcuda v2.0 cannot run on this system")
-        print()
-        raise
-    except Exception as e:
-        print(f"❌ Binary download failed: {e}")
-        print("   llcuda v2.0 may not function correctly")
-        print()
-        print("   Please check your internet connection and try:")
-        print("     1. pip uninstall llcuda")
-        print("     2. pip install llcuda")
-        print()
-        raise
-
-    print("=" * 70)
-    print("✅ llcuda v2.0 Setup Complete!")
-    print("=" * 70)
-    print()
-    print("You can now use llcuda v2.0:")
-    print()
-    print("  # V1.x HTTP Server API (GGUF models)")
-    print("  import llcuda")
-    print("  engine = llcuda.InferenceEngine()")
-    print("  engine.load_model('gemma-3-1b-Q4_K_M')")
-    print("  result = engine.infer('What is AI?')")
-    print()
-    print("  # V2.0 Native Tensor API (custom operations)")
-    print("  from llcuda.core import Tensor, DType, matmul")
-    print("  A = Tensor.zeros([1024, 1024], dtype=DType.Float32, device=0)")
-    print("  B = Tensor.zeros([1024, 1024], dtype=DType.Float32, device=0)")
-    print("  C = A @ B  # Matrix multiplication on GPU")
-    print()
+    # Verify installation
+    if not llama_server.exists():
+        raise RuntimeError(
+            "Binary installation failed. Please check your internet connection and try again:\n"
+            "pip install --no-cache-dir --force-reinstall llcuda"
+        )
 
 
 if __name__ == "__main__":
