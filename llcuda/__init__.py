@@ -176,7 +176,7 @@ from .utils import (
     validate_model_path,
 )
 
-__version__ = "2.0.2"  # Fixed bootstrap tar structure and version consistency
+__version__ = "2.0.3"  # Bundled binaries in PyPI package - no runtime downloads
 __all__ = [
     # Core classes
     "InferenceEngine",

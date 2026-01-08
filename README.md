@@ -1,137 +1,145 @@
-# llcuda v2.0: CUDA Inference Backend for Unsloth
+# llcuda v2.0.3: CUDA Inference Backend for Unsloth on Tesla T4
 
-![Version](https://img.shields.io/badge/version-2.0.2-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.3-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.11+-green.svg)
 ![CUDA](https://img.shields.io/badge/CUDA-12.x-orange.svg)
-![GPU](https://img.shields.io/badge/GPU-Tesla%20T4-green.svg)
+![GPU](https://img.shields.io/badge/GPU-Tesla%20T4%20ONLY-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-**Python-first CUDA inference backend exposing low-level, quantization-aware GPU execution for Unsloth fine-tuned models.**
-
-> **NEW IN V2.0**: Native Tensor API with custom CUDA kernels, T4-optimized builds, FlashAttention, and direct Unsloth integration.
-
-## 🎯 What is llcuda v2.0?
-
-llcuda v2.0 is a production-ready inference backend designed **exclusively for Tesla T4 GPU** (Google Colab standard) with:
-
-- **Native Tensor API**: PyTorch-style GPU operations with custom CUDA kernels
-- **Tensor Core Optimization**: SM 7.5 targeting for maximum performance
-- **FlashAttention Support**: 2-3x faster attention for long contexts
-- **CUDA Graphs**: Reduced kernel launch overhead
-- **Unsloth Integration**: Direct loading of NF4-quantized fine-tuned models
-- **GGUF Support**: Compatible with llama.cpp model format
-
-### Architecture
-
-llcuda v2.0 provides **two complementary APIs**:
-
-1. **V1.x HTTP Server API** (GGUF models, OpenAI-compatible)
-2. **V2.0 Native Tensor API** (custom operations, quantization-aware)
-
-This dual design enables both easy deployment (HTTP) and low-level control (native) in a single package.
+**Fast LLM inference on Google Colab Tesla T4 GPUs. CUDA 12 binaries bundled. One-step installation, instant import.**
 
 ---
 
-## 🚀 Quick Start (Google Colab)
+## 📦 What is llcuda v2.0.3?
 
-### Installation
+**llcuda v2.0.3** is a production-ready CUDA inference backend **exclusively designed for Tesla T4 GPUs** (Google Colab standard). It provides:
 
-```python
-!pip install llcuda
+- ✅ **Bundled CUDA 12 Binaries** (~270 MB) - no runtime downloads
+- ✅ **Native Tensor API** - PyTorch-style GPU operations with custom CUDA kernels
+- ✅ **Tensor Core Optimization** - SM 7.5 targeting for T4 maximum performance
+- ✅ **FlashAttention Support** - 2-3x faster attention for long contexts
+- ✅ **GGUF Model Support** - Compatible with llama.cpp models
+- ✅ **Unsloth Integration** - Direct loading of NF4-quantized fine-tuned models
+
+---
+
+## 🚀 Quick Start on Google Colab
+
+### 1. Install
+
+```bash
+pip install llcuda
 ```
 
 **Requirements:**
 - Python 3.11+
-- **Google Colab Tesla T4 GPU** (SM 7.5)
-- CUDA 12.x runtime
+- **Google Colab with Tesla T4 GPU** (SM 7.5)
+- CUDA 12.x runtime (pre-installed in Colab)
 
-On first import, llcuda will:
-1. Verify your GPU is Tesla T4 (SM 7.5)
-2. Download T4-optimized binaries (264 MB, one-time)
-3. Extract to `~/.cache/llcuda/`
+### 2. Verify GPU
 
-### V1.x HTTP Server API (GGUF Models)
+```python
+import llcuda
+from llcuda.core import get_device_properties
+
+props = get_device_properties(0)
+print(f"GPU: {props.name}")
+print(f"Compute: SM {props.compute_capability_major}.{props.compute_capability_minor}")
+```
+
+### 3. Run Inference
 
 ```python
 import llcuda
 
-# Initialize inference engine
+# HTTP Server API with GGUF models
 engine = llcuda.InferenceEngine()
-
-# Load GGUF model from HuggingFace
 engine.load_model("gemma-3-1b-Q4_K_M", silent=True)
-
-# Run inference
 result = engine.infer("What is artificial intelligence?", max_tokens=100)
 print(result.text)
 print(f"Speed: {result.tokens_per_sec:.1f} tokens/sec")
 ```
 
-### V2.0 Native Tensor API (Custom Operations)
+### 4. Custom Tensor Operations
 
 ```python
-from llcuda.core import Tensor, DType, matmul, get_device_count
+from llcuda.core import Tensor, DType
 
-# Check GPU
-print(f"GPUs available: {get_device_count()}")
-
-# Create tensors on GPU 0
+# Create tensors on GPU
 A = Tensor.zeros([2048, 2048], dtype=DType.Float16, device=0)
 B = Tensor.zeros([2048, 2048], dtype=DType.Float16, device=0)
 
-# Matrix multiplication (cuBLAS with Tensor Cores)
+# Matrix multiplication (uses Tensor Cores on T4)
 C = A @ B
-
 print(f"Result shape: {C.shape}")
-print(f"Memory: {C.nbytes() / 1024**2:.2f} MB")
 ```
 
 ---
 
-## 🎮 GPU Requirements
+## 🎮 Performance Benchmarks (Tesla T4, CUDA 12)
 
-### Tesla T4 (SM 7.5) - ONLY Supported GPU ✅
+| Model | Quantization | Speed (tok/s) | VRAM | Latency |
+|-------|--------------|---------------|------|---------|
+| Gemma 3-1B | Q4_K_M | 45 | 1.2 GB | 22 ms |
+| Llama 3.2-3B | Q4_K_M | 30 | 2.0 GB | 33 ms |
+| Qwen 2.5-7B | Q4_K_M | 18 | 5.0 GB | 56 ms |
+| Llama 3.1-8B | Q4_K_M | 15 | 5.5 GB | 67 ms |
 
-llcuda v2.0 is **optimized exclusively for Tesla T4**:
-- **Tensor Cores**: INT8/FP16 acceleration
-- **FlashAttention**: Full support
-- **Memory**: 16 GB VRAM
-- **Platform**: Google Colab standard GPU
-
-**Performance on T4:**
-- Gemma 3-1B: **45 tok/s**
-- Llama 3.2-3B: **30 tok/s**
-- Qwen 2.5-7B: **18 tok/s**
-
-### Other GPUs NOT Supported
-
-llcuda v2.0 is Tesla T4-only. For other GPUs, use **llcuda v1.2.2**.
+**Note:** FlashAttention provides 2-3x speedup for contexts > 2048 tokens.
 
 ---
 
-## 📦 What's Included
+## 📋 Version Info
 
-### T4 Binary Package (264 MB)
+- **Version:** 2.0.3
+- **Release Date:** January 8, 2026
+- **Target GPU:** Tesla T4 ONLY (SM 7.5)
+- **CUDA Version:** 12.x
+- **Python:** 3.11+
+- **Platform:** Google Colab (primary), compatible Linux with T4
 
-Downloaded automatically on first import:
+---
 
-- **llama-server** (6.5 MB) - HTTP inference server
-- **libggml-cuda.so** (219 MB) - CUDA kernels with FlashAttention
-- **Supporting libraries** - cuBLAS, CUDA runtime wrappers
+## ⚠️ Supported GPU ONLY
 
-**Features:**
-- FlashAttention (GGML_CUDA_FA=ON)
-- CUDA Graphs (GGML_CUDA_GRAPHS=ON)
-- All quantization types (GGML_CUDA_FA_ALL_QUANTS=ON)
-- SM 7.5 code generation
+**llcuda v2.0.3 works exclusively on Tesla T4 GPU.**
 
-### Native Extension (llcuda_cpp.so)
+✅ **Supported:**
+- Google Colab Tesla T4
+- On-premise Tesla T4 with CUDA 12.x
 
-Built from source or downloaded pre-compiled:
+❌ **Not Supported:**
+- A100, H100, L4, RTX GPUs
+- Older Tesla GPUs (K80, P100)
+- CPU-only systems
 
-- Device management
-- Tensor operations (zeros, copy, transfer)
-- cuBLAS matrix multiplication
+For other GPUs, use **llcuda v1.2.2** (less optimized).
+
+---
+
+## 📦 What's Included in v2.0.3
+
+### Bundled CUDA 12 Binaries (~270 MB)
+
+All binaries are included in the PyPI package - no runtime downloads:
+
+- **llama-server** - Inference server for GGUF models
+- **llama-cli** - Command-line interface
+- **libllama.so** - Llama core library with CUDA support
+- **libggml-cuda.so** - GGML CUDA kernels with FlashAttention
+- **libggml-base.so** - GGML base library
+- **libggml-cpu.so** - GGML CPU fallback
+- **libmtmd.so** - Multithreading library
+
+### Features
+
+- ✅ FlashAttention (GGML_CUDA_FA=ON)
+- ✅ CUDA Graphs (GGML_CUDA_GRAPHS=ON)
+- ✅ All quantization types (INT4, INT8, FP16)
+- ✅ SM 7.5 code generation (Tesla T4 optimized)
+- ✅ Tensor Cores support
+
+---
 
 ---
 
@@ -139,8 +147,12 @@ Built from source or downloaded pre-compiled:
 
 ### Device Management
 
+## 🛠️ API Reference
+
+### Device Management
+
 ```python
-from llcuda.core import Device, get_device_count, get_device_properties
+from llcuda.core import get_device_count, get_device_properties
 
 # Get GPU count
 num_gpus = get_device_count()
@@ -149,147 +161,61 @@ num_gpus = get_device_count()
 props = get_device_properties(0)
 print(f"Device: {props.name}")
 print(f"Compute: SM {props.compute_capability_major}.{props.compute_capability_minor}")
-print(f"Memory: {props.total_memory / 1024**3:.2f} GB")
 ```
 
-### Tensor Creation
+### Tensor Operations
 
 ```python
 from llcuda.core import Tensor, DType
 
-# Create tensor (uninitialized)
-t = Tensor([1024, 1024], dtype=DType.Float32, device=0)
-
-# Create zero-filled tensor
-zeros = Tensor.zeros([512, 512], dtype=DType.Float16, device=0)
-
-# Properties
-print(f"Shape: {t.shape}")
-print(f"Elements: {t.numel()}")
-print(f"Bytes: {t.nbytes()}")
-print(f"Device: {t.device}")
-```
-
-### Matrix Operations
-
-```python
-from llcuda.core import matmul
-
-# Matrix multiplication
+# Create tensors on GPU
 A = Tensor.zeros([2048, 2048], dtype=DType.Float16, device=0)
 B = Tensor.zeros([2048, 2048], dtype=DType.Float16, device=0)
 
-# Using @ operator
-C = A @ B  # Automatically uses Tensor Cores for FP16 on Tesla T4
-```
-
----
-
-## 🌐 Google Colab Complete Example
-
-```python
-# Cell 1: Install
-!pip install llcuda
-
-# Cell 2: Verify GPU
-import llcuda
-from llcuda.core import get_device_properties
-
-props = get_device_properties(0)
-print(f"GPU: {props.name}")
-print(f"Compute: SM {props.compute_capability_major}.{props.compute_capability_minor}")
-
-# Cell 3: Test Tensor API
-from llcuda.core import Tensor, DType
-
-A = Tensor.zeros([1024, 1024], dtype=DType.Float16, device=0)
-B = Tensor.zeros([1024, 1024], dtype=DType.Float16, device=0)
+# Matrix multiplication with Tensor Cores
 C = A @ B
-print("✅ Tensor API works!")
-
-# Cell 4: Test HTTP Server
-engine = llcuda.InferenceEngine()
-engine.load_model("gemma-3-1b-Q4_K_M", silent=True)
-result = engine.infer("Hello, world!", max_tokens=20)
-print(result.text)
-```
-
-**First run** will download 264 MB T4 binaries (5-10 minutes on Colab).
-**Subsequent runs** will use cached binaries (instant).
-
----
-
-## 📊 Performance Benchmarks (Tesla T4)
-
-| Model | VRAM | Speed (tok/s) | Latency | Context |
-|-------|------|---------------|---------|---------|
-| Gemma 3-1B Q4_K_M | 1.2 GB | 45 | 22ms | 2048 |
-| Llama 3.2-3B Q4_K_M | 2.0 GB | 30 | 33ms | 4096 |
-| Qwen 2.5-7B Q4_K_M | 5.0 GB | 18 | 56ms | 8192 |
-| Llama 3.1-8B Q4_K_M | 5.5 GB | 15 | 67ms | 8192 |
-
-**FlashAttention Impact**: 2-3x faster for contexts > 2048 tokens
-
----
-
-## 🔬 Advanced Features
-
-### GGUF Parser
-
-Parse GGUF model files with zero-copy memory mapping:
-
-```python
-from llcuda.gguf_parser import GGUFReader
-
-with GGUFReader("model.gguf") as reader:
-    # Metadata
-    print(f"Model: {reader.metadata.get('general.name', 'unknown')}")
-    
-    # Tensors
-    print(f"Tensors: {len(reader.tensors)}")
-    for name, info in list(reader.tensors.items())[:5]:
-        print(f"  {name}: {info.shape} ({info.ggml_type.name})")
-```
-
-### Custom Model Loading
-
-```python
-engine = llcuda.InferenceEngine()
-
-# Load from HuggingFace with custom settings
-engine.load_model(
-    model_name="TheBloke/Llama-2-7B-GGUF",
-    filename="llama-2-7b.Q4_K_M.gguf",
-    gpu_layers=35,
-    context_size=8192,
-    silent=True
-)
-
-result = engine.infer("Explain quantum computing", max_tokens=200)
 ```
 
 ---
 
-## 🧪 Testing
+## 📚 Documentation
 
-```bash
-# All tests
-python3.11 -m pytest tests/ -v
+- **GitHub:** https://github.com/waqasm86/llcuda
+- **PyPI:** https://pypi.org/project/llcuda/
+- **Issues:** https://github.com/waqasm86/llcuda/issues
 
-# Tensor API tests
-python3.11 -m pytest tests/test_tensor_api.py -v
+---
 
-# GGUF parser tests
-python3.11 -m pytest tests/test_gguf_parser.py -v
+## 🔗 Related Projects
+
+- [llama.cpp](https://github.com/ggml-org/llama.cpp) - Core inference engine
+- [Unsloth](https://github.com/unslothai/unsloth) - Efficient fine-tuning
+- [FlashAttention](https://github.com/Dao-AILab/flash-attention) - Optimized attention kernels
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file
+
+---
+
+## 📝 Citation
+
+If you use llcuda in your research, please cite:
+
+```bibtex
+@software{llcuda2024,
+  author = {Waqas Muhammad},
+  title = {llcuda: CUDA Inference Backend for Unsloth},
+  year = {2024},
+  url = {https://github.com/waqasm86/llcuda}
+}
 ```
 
 ---
 
-## 🗺️ Roadmap
-
-### Phase 1: Core Tensor API ✅ (Complete)
-- [x] CUDA device management
-- [x] Tensor operations
+**llcuda v2.0.3** | Tesla T4 Optimized | CUDA 12 | Google Colab Ready
 - [x] cuBLAS matmul
 
 ### Phase 2: GGUF Integration 🚧 (In Progress)

@@ -1,0 +1,117 @@
+===============================================================================
+llcuda v2.0.3 - EXACT COMMANDS TO RUN
+===============================================================================
+
+⚠️  SECURITY ALERT: REVOKE YOUR EXPOSED PYPI TOKEN IMMEDIATELY!
+    https://pypi.org/manage/account/token/
+
+    The token you shared is publicly exposed. Delete it NOW and create a new
+    one only when ready to upload.
+
+===============================================================================
+STEP 1: BUILD THE PACKAGE
+===============================================================================
+
+cd C:\Users\CS-AprilVenture\Documents\Project-Waqas\Project-Waqas-Programming\Project-Nvidia-Office\Project-Nvidia-Office\llcuda
+
+# Binaries are already prepared ✅ (ran prepare_binaries.py earlier)
+
+# Build the package
+python -m build
+
+# Expected: Creates dist/llcuda-2.0.3-py3-none-any.whl (~270 MB)
+
+===============================================================================
+STEP 2: TEST LOCALLY
+===============================================================================
+
+# Install from local wheel
+pip install dist/llcuda-2.0.3-py3-none-any.whl --force-reinstall
+
+# Test import
+python -c "import llcuda; print(llcuda.__version__)"
+# Expected output: 2.0.3
+
+# Test that import is instant (no downloads)
+python -c "import time; start=time.time(); import llcuda; print(f'Import took {time.time()-start:.2f}s')"
+# Expected: < 1 second
+
+===============================================================================
+STEP 3: UPLOAD TO PYPI (⚠️ CREATE NEW TOKEN FIRST!)
+===============================================================================
+
+# 1. Go to https://pypi.org/manage/account/token/
+# 2. DELETE the old exposed token
+# 3. Create NEW token for llcuda project only
+# 4. Copy the new token
+
+# Upload to PyPI
+python -m twine upload dist/llcuda-2.0.3*
+
+# When prompted:
+# Username: __token__
+# Password: <paste NEW token>
+
+===============================================================================
+STEP 4: UPDATE GITHUB
+===============================================================================
+
+# Check what's staged (binaries should NOT be included)
+git status
+
+# Stage and commit
+git add .
+git commit -m "Release v2.0.3: Bundled binaries
+
+- Bundle CUDA binaries in PyPI wheel
+- No runtime downloads
+- PyTorch-style distribution
+- Fix 404 errors
+"
+
+# Push to GitHub
+git push origin main
+
+# Then manually create GitHub Release at:
+# https://github.com/waqasm86/llcuda/releases/new
+# - Tag: v2.0.3
+# - Copy content from RELEASE_NOTES_v2.0.3.md
+
+===============================================================================
+STEP 5: VERIFY ON GOOGLE COLAB
+===============================================================================
+
+# Wait 5 minutes for PyPI CDN, then test on Colab:
+
+!pip install llcuda==2.0.3
+
+import llcuda
+print(f"Version: {llcuda.__version__}")
+
+# Test inference
+engine = llcuda.InferenceEngine()
+engine.load_model("gemma-3-1b-Q4_K_M")
+result = engine.infer("Test", max_tokens=10)
+print(result.text)
+
+# Expected: Works with T4 GPU, no binary download errors!
+
+===============================================================================
+COMPLETE UPLOAD SEQUENCE (Copy-Paste Ready)
+===============================================================================
+
+cd C:\Users\CS-AprilVenture\Documents\Project-Waqas\Project-Waqas-Programming\Project-Nvidia-Office\Project-Nvidia-Office\llcuda
+python -m build
+pip install dist/llcuda-2.0.3-py3-none-any.whl --force-reinstall
+python -c "import llcuda; print(llcuda.__version__)"
+python -m twine upload dist/llcuda-2.0.3*
+git add .
+git commit -m "Release v2.0.3: Bundled binaries"
+git push origin main
+
+# Then:
+# 1. Create GitHub Release manually
+# 2. Test on Colab
+# 3. Celebrate! 🎉
+
+===============================================================================
