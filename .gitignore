@@ -145,7 +145,14 @@ install_manifest.txt
 
 # Release/packaging (prepare these separately)
 release-packages/
-releases/
+# releases/ - Track checksums only, not binaries (too large for git)
+releases/**/*.tar.gz
+releases/**/*.tar.xz
+releases/**/*.zip
+# Keep release metadata and checksums
+!releases/**/*.sha256
+!releases/**/*.md
+!releases/**/BUILD_INFO.txt
 bundles/
 check_binaries/
 release/

@@ -26,12 +26,12 @@ try:
 except ImportError:
     HF_AVAILABLE = False
 
-# Configuration for llcuda v2.0
-GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.3"
+# Configuration for llcuda v2.0.6
+GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.6"
 HF_REPO_ID = "waqasm86/llcuda-models"
 
 # T4-only binary bundle
-T4_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.0.3.tar.gz"  # 266 MB
+T4_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.0.6.tar.gz"  # 266 MB
 T4_NATIVE_BUNDLE = "llcuda-v2-native-t4.tar.gz"        # ~100 MB
 
 # Minimum compute capability for llcuda v2.0
@@ -394,7 +394,7 @@ def download_default_model() -> None:
 
 def bootstrap() -> None:
     """
-    Main bootstrap function for llcuda v2.0.3 - called on first import.
+    Main bootstrap function for llcuda v2.0.6 - called on first import.
 
     Downloads T4-optimized binaries from GitHub Releases on first import.
     Models are downloaded on-demand when load_model() is called.
@@ -417,7 +417,7 @@ def bootstrap() -> None:
     if not llama_server.exists():
         raise RuntimeError(
             "Binary installation failed. Please check your internet connection and try again:\n"
-            "pip install --no-cache-dir --force-reinstall llcuda"
+            "pip install --no-cache-dir --force-reinstall git+https://github.com/waqasm86/llcuda.git"
         )
 
 

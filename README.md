@@ -28,8 +28,13 @@
 ### 1. Install
 
 ```bash
-pip install llcuda
+pip install git+https://github.com/waqasm86/llcuda.git
 ```
+
+**What happens:**
+- Installs Python package from GitHub
+- CUDA binaries (266 MB) auto-download from GitHub Releases on first import
+- One-time setup, cached for future use
 
 **Requirements:**
 - Python 3.11+
@@ -178,10 +183,34 @@ C = A @ B
 
 ---
 
+## 📦 Installation Options
+
+### Method 1: Direct from GitHub (Recommended)
+```bash
+pip install git+https://github.com/waqasm86/llcuda.git
+```
+
+### Method 2: From Release Wheel
+```bash
+pip install https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-2.0.6-py3-none-any.whl
+```
+
+### Method 3: Development Install
+```bash
+git clone https://github.com/waqasm86/llcuda.git
+cd llcuda
+pip install -e .
+```
+
+📖 **Full installation guide:** [GITHUB_INSTALL_GUIDE.md](GITHUB_INSTALL_GUIDE.md)
+
+---
+
 ## 📚 Documentation
 
-- **GitHub:** https://github.com/waqasm86/llcuda
-- **PyPI:** https://pypi.org/project/llcuda/
+- **GitHub Repository:** https://github.com/waqasm86/llcuda
+- **Releases:** https://github.com/waqasm86/llcuda/releases
+- **Installation Guide:** [GITHUB_INSTALL_GUIDE.md](GITHUB_INSTALL_GUIDE.md)
 - **Issues:** https://github.com/waqasm86/llcuda/issues
 
 ---

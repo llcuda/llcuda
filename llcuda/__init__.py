@@ -176,7 +176,7 @@ from .utils import (
     validate_model_path,
 )
 
-__version__ = "2.0.3"  # Bundled binaries in PyPI package - no runtime downloads
+__version__ = "2.0.6"  # Install from GitHub - binaries downloaded from GitHub Releases
 __all__ = [
     # Core classes
     "InferenceEngine",
@@ -246,11 +246,11 @@ class InferenceEngine:
 
     def check_for_updates():
         try:
-            response = requests.get("https://pypi.org/pypi/llcuda/json", timeout=2)
-            latest = response.json()["info"]["version"]
+            response = requests.get("https://api.github.com/repos/waqasm86/llcuda/releases/latest", timeout=2)
+            latest = response.json()["tag_name"].lstrip("v")
             if latest != __version__:
                 print(
-                    f"llcuda: New version available ({latest}) - pip install --upgrade llcuda"
+                    f"llcuda: New version available ({latest}) - pip install --upgrade git+https://github.com/waqasm86/llcuda.git"
                 )
         except Exception:
             pass  # Silent fail
