@@ -83,12 +83,14 @@ print(f"Result shape: {C.shape}")
 
 ## 🎮 Performance Benchmarks (Tesla T4, CUDA 12)
 
-| Model | Quantization | Speed (tok/s) | VRAM | Latency |
-|-------|--------------|---------------|------|---------|
-| Gemma 3-1B | Q4_K_M | 45 | 1.2 GB | 22 ms |
-| Llama 3.2-3B | Q4_K_M | 30 | 2.0 GB | 33 ms |
-| Qwen 2.5-7B | Q4_K_M | 18 | 5.0 GB | 56 ms |
-| Llama 3.1-8B | Q4_K_M | 15 | 5.5 GB | 67 ms |
+| Model | Quantization | Speed (tok/s) | VRAM | Latency | Status |
+|-------|--------------|---------------|------|---------|--------|
+| Gemma 3-1B | Q4_K_M | **134** | 1.2 GB | ~690 ms | ✅ Verified |
+| Llama 3.2-3B | Q4_K_M | ~30 | 2.0 GB | - | Estimated |
+| Qwen 2.5-7B | Q4_K_M | ~18 | 5.0 GB | - | Estimated |
+| Llama 3.1-8B | Q4_K_M | ~15 | 5.5 GB | - | Estimated |
+
+**✅ Verified Performance**: Gemma 3-1B achieves **134 tok/s** on Tesla T4 with Q4_K_M quantization (see [executed notebook](notebooks/llcuda_v2_0_6_gemma3_1b_unsloth_colab_executed.ipynb)).
 
 **Note:** FlashAttention provides 2-3x speedup for contexts > 2048 tokens.
 
@@ -290,9 +292,31 @@ tar -xzf llcuda-binaries-cuda12-t4.tar.gz -C ~/.cache/llcuda/
 
 ---
 
-## 📚 Documentation
+## 📚 Tutorials & Notebooks
 
-- **Colab Build Notebook**: [notebooks/build_llcuda_v2_t4_colab.ipynb](notebooks/build_llcuda_v2_t4_colab.ipynb)
+### Google Colab Notebooks
+
+1. **[Gemma 3-1B + Unsloth Tutorial](notebooks/llcuda_v2_0_6_gemma3_1b_unsloth_colab.ipynb)** - Complete guide for llcuda v2.0.6
+   - ✅ GitHub installation and binary auto-download
+   - ✅ Loading Gemma 3-1B-IT GGUF from Unsloth
+   - ✅ Inference examples and batch processing
+   - ✅ Performance metrics and optimization
+   - ✅ **134 tok/s on Tesla T4** (verified)
+
+2. **[Gemma 3-1B Executed Example](notebooks/llcuda_v2_0_6_gemma3_1b_unsloth_colab_executed.ipynb)** - Live execution output
+   - ✅ Real Tesla T4 GPU results from Google Colab
+   - ✅ Complete output with all metrics
+   - ✅ Demonstrates 3x faster performance (134 vs 45 tok/s expected)
+   - ✅ Proof of working binary download and model loading
+
+3. **[Build llcuda Binaries](notebooks/build_llcuda_v2_t4_colab.ipynb)** - Build CUDA binaries on T4
+   - Compile llama.cpp with FlashAttention
+   - Create binary packages for release
+
+### Additional Resources
+
+- **Installation Guide**: [GITHUB_INSTALL_GUIDE.md](GITHUB_INSTALL_GUIDE.md)
+- **Release Guide**: [GITHUB_RELEASE_COMPLETE_GUIDE.md](GITHUB_RELEASE_COMPLETE_GUIDE.md)
 - **GitHub Issues**: https://github.com/waqasm86/llcuda/issues
 
 ---

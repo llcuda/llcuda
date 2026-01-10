@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.6] - 2026-01-10
+
+### Added
+- **Comprehensive Gemma 3-1B Tutorial Notebook**: Added complete Google Colab tutorial demonstrating llcuda v2.0.6 with Unsloth
+  - `notebooks/llcuda_v2_0_6_gemma3_1b_unsloth_colab.ipynb` - Full tutorial with 14 steps
+  - `notebooks/llcuda_v2_0_6_gemma3_1b_unsloth_colab_executed.ipynb` - Live execution output from Tesla T4
+  - Demonstrates GitHub installation, binary auto-download, model loading, and inference
+  - Includes batch processing, performance metrics, and advanced generation examples
+  - Documents complete Unsloth fine-tuning → llcuda deployment workflow
+
+### Performance
+- **Verified Tesla T4 Performance**: Real Google Colab execution confirms **134 tok/s** with Gemma 3-1B Q4_K_M
+  - 3x faster than initial estimates (was 45 tok/s)
+  - Median latency: 690ms
+  - Consistent performance across batch inference (130-142 tok/s range)
+  - FlashAttention and Tensor Core optimization delivering exceptional results
+
+### Documentation
+- Updated README with verified performance benchmarks
+- Added dedicated "Tutorials & Notebooks" section to README
+- Enhanced performance table with verified vs estimated metrics
+- Linked to executed notebook as proof of working implementation
+
+### Changed
+- Performance benchmarks updated with real Tesla T4 measurements
+- README now highlights 134 tok/s verified performance for Gemma 3-1B
+
+---
+
 ## [2.0.2] - 2026-01-08
 
 ### 🐛 Critical Bug Fixes
