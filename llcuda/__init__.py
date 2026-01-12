@@ -305,13 +305,16 @@ class InferenceEngine:
             **kwargs: Additional server parameters (batch_size, ubatch_size, etc.)
 
         Returns:
-            True if model loaded successfully
+            True if model loaded successfully, None if user cancelled download
 
         Raises:
             FileNotFoundError: If model file not found
-            ValueError: If model download cancelled
             ConnectionError: If server not running and auto_start=False
             RuntimeError: If server fails to start
+
+        Note:
+            If interactive_download=True and user selects 'No' when prompted,
+            the method returns None gracefully without raising an exception.
 
         Examples:
             >>> # Auto-download from registry
@@ -330,13 +333,15 @@ class InferenceEngine:
         if verbose:
             print(f"Loading model: {model_name_or_path}")
 
-        try:
-            model_path = load_model_smart(
-                model_name_or_path, interactive=interactive_download
-            )
-        except ValueError as e:
-            # User cancelled download or model not found
-            raise ValueError(f"Model loading failed: {e}")
+        model_path = load_model_smart(
+            model_name_or_path, interactive=interactive_download
+        )
+
+        # Check if user cancelled download (returns None)
+        if model_path is None:
+            if not silent:
+                print("\nℹ️  Model loading stopped. No model loaded.")
+            return  # Exit gracefully without raising exception
 
         # Step 2: Auto-configure if requested and no manual settings provided
         auto_settings = {}

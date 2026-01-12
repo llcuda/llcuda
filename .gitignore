@@ -133,6 +133,7 @@ models/
 compile/
 temp_extract/
 builds/
+build-artifacts/
 .cmake
 CMakeCache.txt
 CMakeFiles/

@@ -595,7 +595,9 @@ def load_model_smart(
 
             response = input("\nDownload this model? [Y/n]: ").strip().lower()
             if response and response not in ['y', 'yes']:
-                raise ValueError("Model download cancelled by user")
+                print("\n❌ Model download cancelled by user")
+                print("   To proceed, re-run with 'Y' or pre-download the model manually")
+                return None
 
         # Download
         print(f"\nDownloading {model_info['file']}...")
@@ -659,7 +661,9 @@ def load_model_smart(
 
             response = input("\nDownload this model? [Y/n]: ").strip().lower()
             if response and response not in ['y', 'yes']:
-                raise ValueError("Model download cancelled by user")
+                print("\n❌ Model download cancelled by user")
+                print("   To proceed, re-run with 'Y' or pre-download the model manually")
+                return None
 
         # Download
         print(f"\nDownloading {filename} from {repo_id}...")
