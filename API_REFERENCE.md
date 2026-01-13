@@ -476,7 +476,7 @@ KVCacheConfig(
 ## Version Information
 
 - **API Version**: 2.1+
-- **llcuda Version**: 2.0.6+
+- **llcuda Version**: 2.1.0+
 - **Python**: 3.11+
 - **CUDA**: 12.x
 - **Target GPU**: Tesla T4 (SM 7.5)

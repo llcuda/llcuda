@@ -1,10 +1,10 @@
 """
-llcuda v2.0 Bootstrap Module - Tesla T4 Only
+llcuda v2.1 Bootstrap Module - Tesla T4 Only
 
-This module handles first-time setup for llcuda v2.0:
+This module handles first-time setup for llcuda v2.1:
 - Verifies GPU is Tesla T4 or compatible (SM 7.5+)
 - Downloads T4-optimized CUDA 12 binaries (264 MB)
-- Downloads llcuda v2.0 native extension if needed
+- Downloads llcuda v2.1 native extension if needed
 
 Designed for Google Colab and modern GPUs with Tensor Core support.
 """
@@ -26,15 +26,15 @@ try:
 except ImportError:
     HF_AVAILABLE = False
 
-# Configuration for llcuda v2.0.6
+# Configuration for llcuda v2.1.0 (uses v2.0.6 binaries - 100% compatible)
 GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.6"
 HF_REPO_ID = "waqasm86/llcuda-models"
 
-# T4-only binary bundle
+# T4-only binary bundle (v2.0.6 binaries work with v2.1.0 - pure Python API layer)
 T4_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.0.6.tar.gz"  # 266 MB
 T4_NATIVE_BUNDLE = "llcuda-v2-native-t4.tar.gz"        # ~100 MB
 
-# Minimum compute capability for llcuda v2.0
+# Minimum compute capability for llcuda v2.1
 MIN_COMPUTE_CAPABILITY = 7.5  # Tesla T4, RTX 20xx+, A100, H100
 
 # Paths
@@ -125,7 +125,7 @@ def verify_gpu_compatibility(gpu_name: str, compute_cap: str) -> bool:
         print(f"  Your GPU: {gpu_name} (SM {compute_cap})")
         print(f"  Required: Tesla T4 (SM 7.5)")
         print()
-        print("  llcuda v2.0 is designed exclusively for Tesla T4 GPU")
+        print("  llcuda v2.1 is designed exclusively for Tesla T4 GPU")
         print()
         print("  Compatible environment:")
         print("    - Google Colab (free tier with Tesla T4)")
@@ -137,13 +137,13 @@ def verify_gpu_compatibility(gpu_name: str, compute_cap: str) -> bool:
 
     # Tesla T4 verification
     if cc_float == 7.5 and "t4" in gpu_lower:
-        print(f"  ✅ Tesla T4 detected - Perfect for llcuda v2.0!")
+        print(f"  ✅ Tesla T4 detected - Perfect for llcuda v2.1!")
     elif cc_float == 7.5:
         print(f"  ⚠️  {gpu_name} (SM {compute_cap}) - May work but not tested")
-        print(f"      llcuda v2.0 is optimized exclusively for Tesla T4")
+        print(f"      llcuda v2.1 is optimized exclusively for Tesla T4")
     else:
         print(f"  ⚠️  {gpu_name} (SM {compute_cap}) - Not tested")
-        print(f"      llcuda v2.0 is designed for Tesla T4 (SM 7.5)")
+        print(f"      llcuda v2.1 is designed for Tesla T4 (SM 7.5)")
 
     return True
 
@@ -225,7 +225,7 @@ def download_t4_binaries() -> None:
         return
 
     print("=" * 70)
-    print("🎯 llcuda v2.0 First-Time Setup - Tesla T4 Optimized")
+    print("🎯 llcuda v2.1 First-Time Setup - Tesla T4 Optimized")
     print("=" * 70)
     print()
 
@@ -246,7 +246,7 @@ def download_t4_binaries() -> None:
     else:
         print("❌ No NVIDIA GPU detected")
         print()
-        print("llcuda v2.0 requires an NVIDIA GPU with SM 7.5+ (Tesla T4 or newer)")
+        print("llcuda v2.1 requires an NVIDIA GPU with SM 7.5+ (Tesla T4 or newer)")
         print("Please ensure:")
         print("  1. NVIDIA drivers are installed")
         print("  2. nvidia-smi command is available")
@@ -394,9 +394,10 @@ def download_default_model() -> None:
 
 def bootstrap() -> None:
     """
-    Main bootstrap function for llcuda v2.0.6 - called on first import.
+    Main bootstrap function for llcuda v2.1.0 - called on first import.
 
     Downloads T4-optimized binaries from GitHub Releases on first import.
+    Uses v2.0.6 binaries (100% compatible with v2.1.0 pure Python APIs).
     Models are downloaded on-demand when load_model() is called.
 
     Raises:

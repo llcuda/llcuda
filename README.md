@@ -1,6 +1,6 @@
 # llcuda v2.1+: CUDA Inference Backend for Unsloth on Tesla T4
 
-![Version](https://img.shields.io/badge/version-2.1-blue.svg)
+![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.11+-green.svg)
 ![CUDA](https://img.shields.io/badge/CUDA-12.x-orange.svg)
 ![GPU](https://img.shields.io/badge/GPU-Tesla%20T4%20ONLY-green.svg)
@@ -93,7 +93,7 @@ print(f"Result shape: {C.shape}")
 | Qwen 2.5-7B | Q4_K_M | ~18 | 5.0 GB | - | Estimated |
 | Llama 3.1-8B | Q4_K_M | ~15 | 5.5 GB | - | Estimated |
 
-**✅ Verified Performance**: Gemma 3-1B achieves **134 tok/s** on Tesla T4 with Q4_K_M quantization (see [executed notebook](notebooks/llcuda_v2_0_6_gemma3_1b_unsloth_colab_executed.ipynb)).
+**✅ Verified Performance**: Gemma 3-1B achieves **134 tok/s** on Tesla T4 with Q4_K_M quantization (see [executed notebook](notebooks/llcuda_v2_1_0_gemma3_1b_unsloth_colab_executed.ipynb)).
 
 **Note:** FlashAttention provides 2-3x speedup for contexts > 2048 tokens.
 
@@ -101,8 +101,8 @@ print(f"Result shape: {C.shape}")
 
 ## 📋 Version Info
 
-- **Version:** 2.0.6
-- **Release Date:** January 8, 2026
+- **Version:** 2.1.0
+- **Release Date:** January 13, 2026
 - **Target GPU:** Tesla T4 ONLY (SM 7.5)
 - **CUDA Version:** 12.x
 - **Python:** 3.11+
@@ -112,7 +112,7 @@ print(f"Result shape: {C.shape}")
 
 ## ⚠️ Supported GPU ONLY
 
-**llcuda v2.0.6 works exclusively on Tesla T4 GPU.**
+**llcuda v2.1.0 works exclusively on Tesla T4 GPU.**
 
 ✅ **Supported:**
 - Google Colab Tesla T4
@@ -127,7 +127,7 @@ For other GPUs, use **llcuda v1.2.2** (less optimized).
 
 ---
 
-## 📦 What's Included in v2.0.6
+## 📦 What's Included in v2.1.0
 
 ### Bundled CUDA 12 Binaries (~270 MB)
 
@@ -310,7 +310,7 @@ pip install git+https://github.com/waqasm86/llcuda.git
 
 ### Method 2: From Release Wheel
 ```bash
-pip install https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-2.0.6-py3-none-any.whl
+pip install https://github.com/waqasm86/llcuda/releases/download/v2.1.0/llcuda-2.1.0-py3-none-any.whl
 ```
 
 ### Method 3: Development Install
@@ -362,7 +362,7 @@ If you use llcuda in your research, please cite:
 
 ---
 
-**llcuda v2.0.6* | Tesla T4 Optimized | CUDA 12 | Google Colab Ready
+**llcuda v2.1.0** | Tesla T4 Optimized | CUDA 12 | Google Colab Ready
 - [x] cuBLAS matmul
 
 ### Phase 2: GGUF Integration 🚧 (In Progress)
@@ -391,7 +391,7 @@ If you use llcuda in your research, please cite:
 Your GPU is not Tesla T4
 Required: Tesla T4 (SM 7.5)
 
-llcuda v2.0 requires Tesla T4 GPU.
+llcuda v2.1 requires Tesla T4 GPU.
 Compatible environment: Google Colab
 ```
 
@@ -401,7 +401,7 @@ Compatible environment: Google Colab
 
 ```bash
 # Download T4 binaries manually
-wget https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4.tar.gz
+wget https://github.com/waqasm86/llcuda/releases/download/v2.1.0/llcuda-binaries-cuda12-t4.tar.gz
 mkdir -p ~/.cache/llcuda
 tar -xzf llcuda-binaries-cuda12-t4.tar.gz -C ~/.cache/llcuda/
 ```
@@ -412,14 +412,14 @@ tar -xzf llcuda-binaries-cuda12-t4.tar.gz -C ~/.cache/llcuda/
 
 ### Google Colab Notebooks
 
-1. **[Gemma 3-1B + Unsloth Tutorial](notebooks/llcuda_v2_0_6_gemma3_1b_unsloth_colab.ipynb)** - Complete guide for llcuda v2.0.6
+1. **[Gemma 3-1B + Unsloth Tutorial](notebooks/llcuda_v2_1_0_gemma3_1b_unsloth_colab.ipynb)** - Complete guide for llcuda v2.1.0
    - ✅ GitHub installation and binary auto-download
    - ✅ Loading Gemma 3-1B-IT GGUF from Unsloth
    - ✅ Inference examples and batch processing
    - ✅ Performance metrics and optimization
    - ✅ **134 tok/s on Tesla T4** (verified)
 
-2. **[Gemma 3-1B Executed Example](notebooks/llcuda_v2_0_6_gemma3_1b_unsloth_colab_executed.ipynb)** - Live execution output
+2. **[Gemma 3-1B Executed Example](notebooks/llcuda_v2_1_0_gemma3_1b_unsloth_colab_executed.ipynb)** - Live execution output
    - ✅ Real Tesla T4 GPU results from Google Colab
    - ✅ Complete output with all metrics
    - ✅ Demonstrates 3x faster performance (134 vs 45 tok/s expected)
@@ -459,7 +459,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Version**: 2.0.6
+**Version**: 2.1.0
 **Target GPU**: **Tesla T4 ONLY** (SM 7.5)
 **Platform**: Google Colab
 **License**: MIT

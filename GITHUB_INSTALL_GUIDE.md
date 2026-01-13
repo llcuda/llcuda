@@ -1,4 +1,4 @@
-# llcuda v2.0.6 - GitHub Installation Guide
+# llcuda v2.1.0 - GitHub Installation Guide
 
 **Install directly from GitHub - No PyPI needed!**
 
@@ -20,7 +20,7 @@ This will:
 ### Method 2: Install from Specific Release
 
 ```bash
-pip install https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-2.0.6-py3-none-any.whl
+pip install https://github.com/waqasm86/llcuda/releases/download/v2.1.0/llcuda-2.1.0-py3-none-any.whl
 ```
 
 ### Method 3: Install from Source
@@ -41,11 +41,12 @@ pip install -e .
 - **Contents:** Python package, no binaries included
 
 ### CUDA Binaries (Downloaded Automatically)
-- **Source:** GitHub Releases
+- **Source:** GitHub Releases (v2.0.6 binaries - 100% compatible with v2.1.0)
 - **URL:** https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz
 - **Size:** 266 MB (downloaded once, cached locally)
 - **Downloaded:** On first `import llcuda`
 - **Location:** `~/.cache/llcuda/` or `<package>/binaries/`
+- **Note:** v2.1.0 uses v2.0.6 binaries (pure Python API layer on top)
 
 ---
 
@@ -76,10 +77,10 @@ pip install git+https://github.com/waqasm86/llcuda.git
 
 ```bash
 # Download the wheel first
-wget https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-2.0.6-py3-none-any.whl
+wget https://github.com/waqasm86/llcuda/releases/download/v2.1.0/llcuda-2.1.0-py3-none-any.whl
 
 # Install
-pip install llcuda-2.0.6-py3-none-any.whl
+pip install llcuda-2.1.0-py3-none-any.whl
 ```
 
 **Advantages:**

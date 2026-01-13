@@ -344,7 +344,7 @@ markdown_extensions:
   "url": "https://waqasm86.github.io/llcuda.github.io/",
   "datePublished": "2025-12-01",
   "dateModified": "2026-01-12",
-  "version": "2.0.6",
+  "version": "2.1.0",
   "keywords": "CUDA, LLM inference, Tesla T4, GPU, Python, GGUF, llama.cpp"
 }
 </script>
@@ -415,17 +415,18 @@ markdown_extensions:
 
 ### 12. Create Releases with Detailed Notes
 
-**For v2.0.6 and future releases**:
+**For v2.1.0 and future releases**:
 
 ```markdown
-# llcuda v2.0.6 - Gemma 3-1B Verified Performance
+# llcuda v2.1.0 - New APIs and Unsloth Integration
 
 ## 🚀 What's New
 
-- ✅ Verified 134 tokens/sec on Gemma 3-1B (Tesla T4)
-- ✅ Complete Unsloth integration tutorial
-- ✅ Graceful model download cancellation
-- ✅ Enhanced error handling
+- ✅ Quantization API with 29 GGUF formats
+- ✅ Unsloth Integration API for seamless fine-tuning workflow
+- ✅ CUDA Optimization API with Tensor Cores and CUDA Graphs
+- ✅ Advanced Inference API with FlashAttention and KV-cache
+- ✅ Complete API documentation and examples
 
 ## 📖 Documentation
 
