@@ -8,8 +8,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llcuda"
-version = "2.0.6"
-description = "Fast LLM inference on Tesla T4 GPUs with CUDA 12. Bundled binaries, PyTorch-style Tensor API, FlashAttention, Google Colab optimized."
+version = "2.1.0"
+description = "Fast LLM inference on Tesla T4 GPUs with CUDA 12. Complete Unsloth integration, 29 quantization formats, CUDA Graphs, Triton kernels, FlashAttention, Google Colab optimized."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"

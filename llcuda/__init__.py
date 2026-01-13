@@ -193,11 +193,16 @@ __all__ = [
     "print_system_info",
     "get_llama_cpp_cuda_path",
     "quick_infer",
-    # New modules (lazily imported)
+    # Existing modules (lazily imported)
     "jupyter",
     "chat",
     "embeddings",
     "models",
+    # New API modules (v2.1+)
+    "quantization",
+    "unsloth",
+    "cuda",
+    "inference",
 ]
 
 
