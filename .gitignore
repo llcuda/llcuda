@@ -288,3 +288,12 @@ Session.vim
 tags
 # Persistent undo
 [._]*.un~
+
+# Exclude all compiled binaries and archives
+*.tar.gz
+*.zip
+releases/
+dist/
+build/
+llcuda/binaries/
+llcuda/lib/
