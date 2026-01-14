@@ -255,7 +255,7 @@ class InferenceEngine:
             latest = response.json()["tag_name"].lstrip("v")
             if latest != __version__:
                 print(
-                    f"llcuda: New version available ({latest}) - pip install --upgrade git+https://github.com/waqasm86/llcuda.git"
+                    f"llcuda: New version available ({latest}) - pip install --upgrade git+https://github.com/llcuda/llcuda.git"
                 )
         except Exception:
             pass  # Silent fail

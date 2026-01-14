@@ -42,7 +42,7 @@ class ServerManager:
 
     # DEPRECATED: Old binary URL - binaries are now downloaded via bootstrap.py
     # This fallback should rarely be used as binaries are installed during package import
-    _BINARY_BASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.2/llcuda-binaries-cuda12-t4-v2.0.2.tar.gz"
+    _BINARY_BASE_URL = "https://github.com/llcuda/llcuda/releases/download/v2.0.2/llcuda-binaries-cuda12-t4-v2.0.2.tar.gz"
 
     def _get_download_url(self):
         """Get the actual download URL - now points to llcuda GitHub releases"""

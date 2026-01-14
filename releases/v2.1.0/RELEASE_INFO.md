@@ -54,7 +54,7 @@ llcuda v2.1.0 introduces **four powerful API modules** that seamlessly integrate
 **Filename:** `llcuda-binaries-cuda12-t4-v2.0.6.tar.gz`
 **Size:** 266 MB (278,892,158 bytes)
 **SHA256:** `5a27d2e1a73ae3d2f1d2ba8cf557b76f54200208c8df269b1bd0d9ee176bb49d`
-**Download:** [GitHub Releases](https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz)
+**Download:** [GitHub Releases](https://github.com/llcuda/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz)
 
 ### Binary Contents
 
@@ -129,13 +129,13 @@ llcuda v2.1.0 introduces **four powerful API modules** that seamlessly integrate
 ### Method 1: From GitHub (Recommended)
 
 ```bash
-pip install git+https://github.com/waqasm86/llcuda.git
+pip install git+https://github.com/llcuda/llcuda.git
 ```
 
 ### Method 2: Development Install
 
 ```bash
-git clone https://github.com/waqasm86/llcuda.git
+git clone https://github.com/llcuda/llcuda.git
 cd llcuda
 pip install -e .
 ```
@@ -155,7 +155,7 @@ v2.1.0 is **100% backward compatible** with v2.0.6:
 
 ```bash
 # Simply reinstall from GitHub
-pip install --no-cache-dir --force-reinstall git+https://github.com/waqasm86/llcuda.git
+pip install --no-cache-dir --force-reinstall git+https://github.com/llcuda/llcuda.git
 ```
 
 All existing v2.0.6 code will continue to work without modification.
@@ -216,16 +216,16 @@ print(f"Speed: {result.tokens_per_sec:.1f} tokens/sec")
 
 ## 📖 Documentation
 
-- **GitHub Repository:** https://github.com/waqasm86/llcuda
+- **GitHub Repository:** https://github.com/llcuda/llcuda
 - **Documentation Site:** https://llcuda.github.io/
-- **Changelog:** [CHANGELOG.md](https://github.com/waqasm86/llcuda/blob/main/CHANGELOG.md)
-- **Issues:** https://github.com/waqasm86/llcuda/issues
+- **Changelog:** [CHANGELOG.md](https://github.com/llcuda/llcuda/blob/main/CHANGELOG.md)
+- **Issues:** https://github.com/llcuda/llcuda/issues
 
 ---
 
 ## 📄 License
 
-MIT License - see [LICENSE](https://github.com/waqasm86/llcuda/blob/main/LICENSE) file
+MIT License - see [LICENSE](https://github.com/llcuda/llcuda/blob/main/LICENSE) file
 
 ---
 
@@ -239,7 +239,7 @@ If you use llcuda in your research, please cite:
   title = {llcuda: Fast LLM Inference on Tesla T4 GPUs},
   year = {2026},
   version = {2.1.0},
-  url = {https://github.com/waqasm86/llcuda}
+  url = {https://github.com/llcuda/llcuda}
 }
 ```
 

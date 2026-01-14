@@ -31,7 +31,7 @@
 ### 1. Install
 
 ```bash
-pip install git+https://github.com/waqasm86/llcuda.git
+pip install git+https://github.com/llcuda/llcuda.git
 ```
 
 **What happens:**
@@ -305,17 +305,17 @@ C = A @ B
 
 ### Method 1: Direct from GitHub (Recommended)
 ```bash
-pip install git+https://github.com/waqasm86/llcuda.git
+pip install git+https://github.com/llcuda/llcuda.git
 ```
 
 ### Method 2: From Release Wheel
 ```bash
-pip install https://github.com/waqasm86/llcuda/releases/download/v2.1.0/llcuda-2.1.0-py3-none-any.whl
+pip install https://github.com/llcuda/llcuda/releases/download/v2.1.0/llcuda-2.1.0-py3-none-any.whl
 ```
 
 ### Method 3: Development Install
 ```bash
-git clone https://github.com/waqasm86/llcuda.git
+git clone https://github.com/llcuda/llcuda.git
 cd llcuda
 pip install -e .
 ```
@@ -326,10 +326,10 @@ pip install -e .
 
 ## 📚 Documentation
 
-- **GitHub Repository:** https://github.com/waqasm86/llcuda
-- **Releases:** https://github.com/waqasm86/llcuda/releases
+- **GitHub Repository:** https://github.com/llcuda/llcuda
+- **Releases:** https://github.com/llcuda/llcuda/releases
 - **Installation Guide:** [GITHUB_INSTALL_GUIDE.md](GITHUB_INSTALL_GUIDE.md)
-- **Issues:** https://github.com/waqasm86/llcuda/issues
+- **Issues:** https://github.com/llcuda/llcuda/issues
 
 ---
 
@@ -356,7 +356,7 @@ If you use llcuda in your research, please cite:
   author = {Waqas Muhammad},
   title = {llcuda: CUDA Inference Backend for Unsloth},
   year = {2024},
-  url = {https://github.com/waqasm86/llcuda}
+  url = {https://github.com/llcuda/llcuda}
 }
 ```
 
@@ -401,7 +401,7 @@ Compatible environment: Google Colab
 
 ```bash
 # Download T4 binaries manually
-wget https://github.com/waqasm86/llcuda/releases/download/v2.1.0/llcuda-binaries-cuda12-t4.tar.gz
+wget https://github.com/llcuda/llcuda/releases/download/v2.1.0/llcuda-binaries-cuda12-t4.tar.gz
 mkdir -p ~/.cache/llcuda
 tar -xzf llcuda-binaries-cuda12-t4.tar.gz -C ~/.cache/llcuda/
 ```
@@ -433,7 +433,7 @@ tar -xzf llcuda-binaries-cuda12-t4.tar.gz -C ~/.cache/llcuda/
 
 - **Installation Guide**: [GITHUB_INSTALL_GUIDE.md](GITHUB_INSTALL_GUIDE.md)
 - **Release Guide**: [GITHUB_RELEASE_COMPLETE_GUIDE.md](GITHUB_RELEASE_COMPLETE_GUIDE.md)
-- **GitHub Issues**: https://github.com/waqasm86/llcuda/issues
+- **GitHub Issues**: https://github.com/llcuda/llcuda/issues
 
 ---
 
@@ -454,7 +454,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 🔗 Links
 
 - **PyPI**: https://pypi.org/project/llcuda/
-- **GitHub**: https://github.com/waqasm86/llcuda
+- **GitHub**: https://github.com/llcuda/llcuda
 - **Unsloth**: https://github.com/unslothai/unsloth
 
 ---

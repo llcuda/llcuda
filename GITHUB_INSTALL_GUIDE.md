@@ -9,7 +9,7 @@
 ### Method 1: Direct from GitHub (Recommended)
 
 ```bash
-pip install git+https://github.com/waqasm86/llcuda.git
+pip install git+https://github.com/llcuda/llcuda.git
 ```
 
 This will:
@@ -20,13 +20,13 @@ This will:
 ### Method 2: Install from Specific Release
 
 ```bash
-pip install https://github.com/waqasm86/llcuda/releases/download/v2.1.0/llcuda-2.1.0-py3-none-any.whl
+pip install https://github.com/llcuda/llcuda/releases/download/v2.1.0/llcuda-2.1.0-py3-none-any.whl
 ```
 
 ### Method 3: Install from Source
 
 ```bash
-git clone https://github.com/waqasm86/llcuda.git
+git clone https://github.com/llcuda/llcuda.git
 cd llcuda
 pip install -e .
 ```
@@ -42,7 +42,7 @@ pip install -e .
 
 ### CUDA Binaries (Downloaded Automatically)
 - **Source:** GitHub Releases (v2.0.6 binaries - 100% compatible with v2.1.0)
-- **URL:** https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz
+- **URL:** https://github.com/llcuda/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz
 - **Size:** 266 MB (downloaded once, cached locally)
 - **Downloaded:** On first `import llcuda`
 - **Location:** `~/.cache/llcuda/` or `<package>/binaries/`
@@ -57,7 +57,7 @@ pip install -e .
 **Best for:** Most users, especially on Google Colab
 
 ```bash
-pip install git+https://github.com/waqasm86/llcuda.git
+pip install git+https://github.com/llcuda/llcuda.git
 ```
 
 **Advantages:**
@@ -77,7 +77,7 @@ pip install git+https://github.com/waqasm86/llcuda.git
 
 ```bash
 # Download the wheel first
-wget https://github.com/waqasm86/llcuda/releases/download/v2.1.0/llcuda-2.1.0-py3-none-any.whl
+wget https://github.com/llcuda/llcuda/releases/download/v2.1.0/llcuda-2.1.0-py3-none-any.whl
 
 # Install
 pip install llcuda-2.1.0-py3-none-any.whl
@@ -93,7 +93,7 @@ pip install llcuda-2.1.0-py3-none-any.whl
 **Best for:** Development and testing
 
 ```bash
-git clone https://github.com/waqasm86/llcuda.git
+git clone https://github.com/llcuda/llcuda.git
 cd llcuda
 pip install -e .
 ```
@@ -110,20 +110,20 @@ pip install -e .
 ### Upgrade to Latest Version
 
 ```bash
-pip install --upgrade --no-cache-dir git+https://github.com/waqasm86/llcuda.git
+pip install --upgrade --no-cache-dir git+https://github.com/llcuda/llcuda.git
 ```
 
 ### Upgrade to Specific Version
 
 ```bash
-pip install --upgrade https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-2.0.6-py3-none-any.whl
+pip install --upgrade https://github.com/llcuda/llcuda/releases/download/v2.0.6/llcuda-2.0.6-py3-none-any.whl
 ```
 
 ### Force Reinstall (if having issues)
 
 ```bash
 pip uninstall llcuda -y
-pip install --no-cache-dir git+https://github.com/waqasm86/llcuda.git
+pip install --no-cache-dir git+https://github.com/llcuda/llcuda.git
 ```
 
 ---
@@ -134,7 +134,7 @@ pip install --no-cache-dir git+https://github.com/waqasm86/llcuda.git
 
 ```python
 # Install llcuda
-!pip install -q git+https://github.com/waqasm86/llcuda.git
+!pip install -q git+https://github.com/llcuda/llcuda.git
 
 # Import (binaries download automatically)
 import llcuda
@@ -145,7 +145,7 @@ print(f"llcuda version: {llcuda.__version__}")
 
 ```python
 # In Kaggle notebook
-!pip install -q git+https://github.com/waqasm86/llcuda.git
+!pip install -q git+https://github.com/llcuda/llcuda.git
 
 import llcuda
 ```
@@ -158,7 +158,7 @@ sudo apt-get update
 sudo apt-get install -y python3-pip git
 
 # Install llcuda
-pip3 install git+https://github.com/waqasm86/llcuda.git
+pip3 install git+https://github.com/llcuda/llcuda.git
 ```
 
 ---
@@ -171,7 +171,7 @@ If you prefer to download binaries manually:
 
 ```bash
 # Download the binary package
-wget https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz
+wget https://github.com/llcuda/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz
 
 # Extract to llcuda package directory
 tar -xzf llcuda-binaries-cuda12-t4-v2.0.6.tar.gz -C ~/.cache/llcuda/
@@ -181,7 +181,7 @@ tar -xzf llcuda-binaries-cuda12-t4-v2.0.6.tar.gz -C ~/.cache/llcuda/
 
 ```bash
 # Download checksum
-wget https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz.sha256
+wget https://github.com/llcuda/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz.sha256
 
 # Verify
 sha256sum -c llcuda-binaries-cuda12-t4-v2.0.6.tar.gz.sha256
@@ -235,7 +235,7 @@ All dependencies are automatically installed:
 sudo apt-get install -y git
 
 # Or use wheel install method instead
-pip install https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-2.0.6-py3-none-any.whl
+pip install https://github.com/llcuda/llcuda/releases/download/v2.0.6/llcuda-2.0.6-py3-none-any.whl
 ```
 
 ### Issue: Binary download fails
@@ -243,7 +243,7 @@ pip install https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-2
 **Solution 1:** Check internet connection and retry
 ```bash
 pip uninstall llcuda -y
-pip install --no-cache-dir git+https://github.com/waqasm86/llcuda.git
+pip install --no-cache-dir git+https://github.com/llcuda/llcuda.git
 ```
 
 **Solution 2:** Download binaries manually (see above)
@@ -274,10 +274,10 @@ Each GitHub release includes:
 
 ## 🔗 Links
 
-- **GitHub Repository:** https://github.com/waqasm86/llcuda
-- **Releases:** https://github.com/waqasm86/llcuda/releases
-- **Latest Release:** https://github.com/waqasm86/llcuda/releases/latest
-- **Issues:** https://github.com/waqasm86/llcuda/issues
+- **GitHub Repository:** https://github.com/llcuda/llcuda
+- **Releases:** https://github.com/llcuda/llcuda/releases
+- **Latest Release:** https://github.com/llcuda/llcuda/releases/latest
+- **Issues:** https://github.com/llcuda/llcuda/issues
 
 ---
 

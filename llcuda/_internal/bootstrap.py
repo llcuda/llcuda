@@ -27,7 +27,7 @@ except ImportError:
     HF_AVAILABLE = False
 
 # Configuration for llcuda v2.1.0 (uses v2.0.6 binaries - 100% compatible)
-GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.6"
+GITHUB_RELEASE_URL = "https://github.com/llcuda/llcuda/releases/download/v2.0.6"
 HF_REPO_ID = "waqasm86/llcuda-models"
 
 # T4-only binary bundle (v2.0.6 binaries work with v2.1.0 - pure Python API layer)
@@ -418,7 +418,7 @@ def bootstrap() -> None:
     if not llama_server.exists():
         raise RuntimeError(
             "Binary installation failed. Please check your internet connection and try again:\n"
-            "pip install --no-cache-dir --force-reinstall git+https://github.com/waqasm86/llcuda.git"
+            "pip install --no-cache-dir --force-reinstall git+https://github.com/llcuda/llcuda.git"
         )
 
 

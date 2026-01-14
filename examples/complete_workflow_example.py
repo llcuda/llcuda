@@ -7,7 +7,7 @@ to llcuda deployment with quantization and optimization.
 Requirements:
     - Tesla T4 GPU (16GB VRAM)
     - Python 3.11+
-    - llcuda installed: pip install git+https://github.com/waqasm86/llcuda.git
+    - llcuda installed: pip install git+https://github.com/llcuda/llcuda.git
     - Unsloth (optional, for fine-tuning): pip install unsloth
 
 Workflow:

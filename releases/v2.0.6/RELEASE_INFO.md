@@ -12,7 +12,7 @@
 **File:** `llcuda-binaries-cuda12-t4-v2.0.6.tar.gz`
 **Size:** 266 MB (278,892,158 bytes)
 **SHA256:** `5a27d2e1a73ae3d2f1d2ba8cf557b76f54200208c8df269b1bd0d9ee176bb49d`
-**Download:** https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz
+**Download:** https://github.com/llcuda/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz
 
 **Contents:**
 - llama-server (6.5 MB) - Main inference server
@@ -55,7 +55,7 @@
 ### Direct from GitHub (Recommended)
 
 ```bash
-pip install git+https://github.com/waqasm86/llcuda.git
+pip install git+https://github.com/llcuda/llcuda.git
 ```
 
 Binaries will auto-download from this release on first import.
@@ -64,7 +64,7 @@ Binaries will auto-download from this release on first import.
 
 ```bash
 # Download binary package
-wget https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz
+wget https://github.com/llcuda/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz
 
 # Verify checksum
 echo "5a27d2e1a73ae3d2f1d2ba8cf557b76f54200208c8df269b1bd0d9ee176bb49d  llcuda-binaries-cuda12-t4-v2.0.6.tar.gz" | sha256sum -c
@@ -106,9 +106,9 @@ v2.0.6 uses the **same CUDA binaries as v2.0.3** (proven stable).
 
 ## Links
 
-- **Repository:** https://github.com/waqasm86/llcuda
-- **Installation Guide:** https://github.com/waqasm86/llcuda/blob/main/GITHUB_INSTALL_GUIDE.md
-- **Issues:** https://github.com/waqasm86/llcuda/issues
+- **Repository:** https://github.com/llcuda/llcuda
+- **Installation Guide:** https://github.com/llcuda/llcuda/blob/main/GITHUB_INSTALL_GUIDE.md
+- **Issues:** https://github.com/llcuda/llcuda/issues
 
 ---
 

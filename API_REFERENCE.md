@@ -468,8 +468,8 @@ KVCacheConfig(
 ### Getting Help
 
 - Documentation: https://llcuda.github.io/
-- GitHub Issues: https://github.com/waqasm86/llcuda/issues
-- Examples: https://github.com/waqasm86/llcuda/tree/main/examples
+- GitHub Issues: https://github.com/llcuda/llcuda/issues
+- Examples: https://github.com/llcuda/llcuda/tree/main/examples
 
 ---
 

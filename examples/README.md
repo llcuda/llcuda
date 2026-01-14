@@ -45,5 +45,5 @@ Have an example you'd like to share? Submit a pull request!
 
 **Links:**
 - [llcuda on PyPI](https://pypi.org/project/llcuda/)
-- [llcuda on GitHub](https://github.com/waqasm86/llcuda)
+- [llcuda on GitHub](https://github.com/llcuda/llcuda)
 - [Documentation](https://waqasm86.github.io/)

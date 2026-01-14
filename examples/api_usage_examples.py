@@ -250,8 +250,8 @@ def main():
     print("=" * 70)
     print("\nFor more information:")
     print("  Documentation: https://llcuda.github.io/")
-    print("  GitHub: https://github.com/waqasm86/llcuda")
-    print("  Examples: https://github.com/waqasm86/llcuda/tree/main/examples")
+    print("  GitHub: https://github.com/llcuda/llcuda")
+    print("  Examples: https://github.com/llcuda/llcuda/tree/main/examples")
 
 
 if __name__ == "__main__":

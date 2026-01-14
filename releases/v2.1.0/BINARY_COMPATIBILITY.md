@@ -64,7 +64,7 @@ The v2.0.6 binaries already have everything needed:
 
 **Download URL:**
 ```
-https://github.com/waqasm86/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz
+https://github.com/llcuda/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz
 ```
 
 ### Binary Contents
@@ -158,7 +158,7 @@ The v2.1.0 bootstrap module is configured to use v2.0.6 binaries:
 
 ```python
 # Configuration for llcuda v2.1.0 (uses v2.0.6 binaries - 100% compatible)
-GITHUB_RELEASE_URL = "https://github.com/waqasm86/llcuda/releases/download/v2.0.6"
+GITHUB_RELEASE_URL = "https://github.com/llcuda/llcuda/releases/download/v2.0.6"
 
 # T4-only binary bundle (v2.0.6 binaries work with v2.1.0 - pure Python API layer)
 T4_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.0.6.tar.gz"  # 266 MB
@@ -198,7 +198,7 @@ Advanced Inference       ✅ PASSED  FlashAttn, KV-cache, Batch
 
 ```bash
 # Simply reinstall from GitHub
-pip install --no-cache-dir --force-reinstall git+https://github.com/waqasm86/llcuda.git
+pip install --no-cache-dir --force-reinstall git+https://github.com/llcuda/llcuda.git
 ```
 
 **What happens:**

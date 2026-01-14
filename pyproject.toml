@@ -72,11 +72,11 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/waqasm86/llcuda"
+Homepage = "https://github.com/llcuda/llcuda"
 Documentation = "https://waqasm86.github.io/"
-Repository = "https://github.com/waqasm86/llcuda"
-"Bug Tracker" = "https://github.com/waqasm86/llcuda/issues"
-Changelog = "https://github.com/waqasm86/llcuda/blob/main/CHANGELOG.md"
+Repository = "https://github.com/llcuda/llcuda"
+"Bug Tracker" = "https://github.com/llcuda/llcuda/issues"
+Changelog = "https://github.com/llcuda/llcuda/blob/main/CHANGELOG.md"
 
 # Package discovery configuration
 [tool.setuptools.packages.find]

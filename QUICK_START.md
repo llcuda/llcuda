@@ -6,7 +6,7 @@ Get started with llcuda v2.1+ in 5 minutes!
 
 ```bash
 # Install llcuda from GitHub
-pip install git+https://github.com/waqasm86/llcuda.git
+pip install git+https://github.com/llcuda/llcuda.git
 
 # Optional: Install additional features
 pip install triton flash-attn unsloth
@@ -205,7 +205,7 @@ for prompt in many_prompts:
 ```bash
 # Reinstall from GitHub
 pip uninstall llcuda -y
-pip install git+https://github.com/waqasm86/llcuda.git
+pip install git+https://github.com/llcuda/llcuda.git
 ```
 
 ### Issue: Triton not available
@@ -235,11 +235,11 @@ engine.load_model("model.gguf", context_size=2048)
 1. **Read the full API reference**: [API_REFERENCE.md](./API_REFERENCE.md)
 2. **Try the examples**: [examples/](./examples/)
 3. **Check the documentation**: https://llcuda.github.io/
-4. **Join the community**: https://github.com/waqasm86/llcuda
+4. **Join the community**: https://github.com/llcuda/llcuda
 
 ## Support
 
-- **Issues**: https://github.com/waqasm86/llcuda/issues
+- **Issues**: https://github.com/llcuda/llcuda/issues
 - **Email**: waqasm86@gmail.com
 
 ## License
