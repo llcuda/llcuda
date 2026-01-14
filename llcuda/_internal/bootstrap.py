@@ -18,6 +18,7 @@ import hashlib
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 import subprocess
+from llcuda import __version__
 
 try:
     from huggingface_hub import hf_hub_download
@@ -27,11 +28,13 @@ except ImportError:
     HF_AVAILABLE = False
 
 # Configuration for llcuda v2.1.0 (uses v2.0.6 binaries - 100% compatible)
-GITHUB_RELEASE_URL = "https://github.com/llcuda/llcuda/releases/download/v2.0.6"
+#GITHUB_RELEASE_URL = "https://github.com/llcuda/llcuda/releases/download/v2.1.0"
+GITHUB_RELEASE_URL = f"https://github.com/llcuda/llcuda/releases/download/v{__version__}"
 HF_REPO_ID = "waqasm86/llcuda-models"
 
 # T4-only binary bundle (v2.0.6 binaries work with v2.1.0 - pure Python API layer)
-T4_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.0.6.tar.gz"  # 266 MB
+#T4_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.1.0.tar.gz"  # 266 MB
+T4_BINARY_BUNDLE = f"llcuda-binaries-cuda12-t4-v{__version__}.tar.gz"
 T4_NATIVE_BUNDLE = "llcuda-v2-native-t4.tar.gz"        # ~100 MB
 
 # Minimum compute capability for llcuda v2.1
