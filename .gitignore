@@ -38,6 +38,13 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
+# Archive files
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.rar
+*.7z
 *.prof
 .hypothesis/
 .pytest_cache/

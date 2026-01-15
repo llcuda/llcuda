@@ -12,7 +12,7 @@ version = "2.1.0"
 description = "Fast LLM inference on Tesla T4 GPUs with CUDA 12. Complete Unsloth integration, 29 quantization formats, CUDA Graphs, Triton kernels, FlashAttention, Google Colab optimized."
 readme = "README.md"
 requires-python = ">=3.11"
-license = "MIT"
+license = {text = "MIT"}
 authors = [
     {name = "Waqas Muhammad", email = "waqasm86@gmail.com"}
 ]
