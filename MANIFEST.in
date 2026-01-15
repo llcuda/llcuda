@@ -1,0 +1,35 @@
+# MANIFEST.in for llcuda v2.0.6
+
+# Documentation
+include README.md
+include LICENSE
+include CHANGELOG.md
+
+# Build metadata
+include pyproject.toml
+include setup.py
+
+# Python package files
+recursive-include llcuda *.py
+recursive-include llcuda/_internal *.py
+recursive-include llcuda/core *.py
+recursive-include tests *.py
+
+# EXCLUDE binaries, libraries, models, and archives
+recursive-exclude llcuda/binaries *
+recursive-exclude llcuda/lib *
+recursive-exclude llcuda/models *
+global-exclude *.gguf
+global-exclude *.tar.gz
+global-exclude *.so
+global-exclude *.so.*
+
+# Exclude unwanted files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude .DS_Store
+global-exclude .git*
+global-exclude *.swp
+global-exclude *.bak
+global-exclude *~

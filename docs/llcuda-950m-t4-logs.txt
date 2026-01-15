@@ -1,0 +1,187 @@
+waqasm86@waqasm86-ThinkPad-T450s:/media/waqasm86/External1/Project-Nvidia$ ./CREATE_RELEASE_PACKAGE.sh
+========================================================================
+Create llcuda GitHub Release Package
+========================================================================
+
+Package Configuration:
+  Version:     v1.2.0
+  Output dir:  /media/waqasm86/External1/Project-Nvidia/release-packages
+  CUDA:        12.x
+  Targets:     GeForce 940M (CC 5.0) & Tesla T4 (CC 7.5)
+
+Which build do you want to package?
+  1) GeForce 940M (CC 5.0) - for your local system
+  2) Tesla T4 (CC 7.5) - for Google Colab
+  3) Both (create separate packages)
+
+Enter choice (1/2/3): 3
+
+========================================================================
+Processing: GeForce 940M (940m)
+========================================================================
+
+▶ Checking build directory...
+✓ Build directory found
+
+▶ Checking llama-server binary...
+✓ Found llama-server (6 MB)
+
+▶ Creating package structure...
+✓ Package structure created
+
+▶ Copying binaries...
+✓   llama-server
+✓   llama-cli
+✓   llama-quantize
+✓   llama-embedding
+✓   llama-bench
+  Total binaries: 5
+
+▶ Copying shared libraries...
+✓ Copied 18 library files
+
+ℹ Libraries included:
+    - libggml-base.so
+    - libggml-base.so.0
+    - libggml-base.so.0.9.5
+    - libggml-cpu.so
+    - libggml-cpu.so.0
+    - libggml-cpu.so.0.9.5
+    - libggml-cuda.so
+    - libggml-cuda.so.0
+    - libggml-cuda.so.0.9.5
+    - libggml.so
+    ... and 8 more
+
+▶ Creating README...
+✓ README created
+
+▶ Calculating package size...
+ℹ Package size (uncompressed): 50M
+
+▶ Creating archive: llcuda-binaries-cuda12-940m.tar.gz
+✓ Archive created: llcuda-binaries-cuda12-940m.tar.gz (26M)
+
+▶ Verifying archive...
+✓ Archive is valid (27 files)
+
+▶ Cleaning up temporary files...
+✓ Cleanup complete
+
+========================================================================
+Package Summary: GeForce 940M
+========================================================================
+
+Archive:      llcuda-binaries-cuda12-940m.tar.gz
+Size:         26M
+Location:     /media/waqasm86/External1/Project-Nvidia/release-packages/llcuda-binaries-cuda12-940m.tar.gz
+Binaries:     5
+Libraries:    18
+
+========================================================================
+Processing: Tesla T4 (t4)
+========================================================================
+
+▶ Checking build directory...
+✓ Build directory found
+
+▶ Checking llama-server binary...
+✓ Found llama-server (6 MB)
+
+▶ Creating package structure...
+✓ Package structure created
+
+▶ Copying binaries...
+✓   llama-server
+✓   llama-cli
+✓   llama-quantize
+✓   llama-embedding
+  Total binaries: 4
+
+▶ Copying shared libraries...
+✓ Copied 18 library files
+
+ℹ Libraries included:
+    - libggml-base.so
+    - libggml-base.so.0
+    - libggml-base.so.0.9.5
+    - libggml-cpu.so
+    - libggml-cpu.so.0
+    - libggml-cpu.so.0.9.5
+    - libggml-cuda.so
+    - libggml-cuda.so.0
+    - libggml-cuda.so.0.9.5
+    - libggml.so
+    ... and 8 more
+
+▶ Creating README...
+✓ README created
+
+▶ Calculating package size...
+ℹ Package size (uncompressed): 686M
+
+▶ Creating archive: llcuda-binaries-cuda12-t4.tar.gz
+✓ Archive created: llcuda-binaries-cuda12-t4.tar.gz (264M)
+
+▶ Verifying archive...
+✓ Archive is valid (26 files)
+
+▶ Cleaning up temporary files...
+✓ Cleanup complete
+
+========================================================================
+Package Summary: Tesla T4
+========================================================================
+
+Archive:      llcuda-binaries-cuda12-t4.tar.gz
+Size:         264M
+Location:     /media/waqasm86/External1/Project-Nvidia/release-packages/llcuda-binaries-cuda12-t4.tar.gz
+Binaries:     4
+Libraries:    18
+
+========================================================================
+Release Package Creation Complete!
+========================================================================
+
+Created packages:
+  ✓ llcuda-binaries-cuda12-940m.tar.gz (26M)
+  ✓ llcuda-binaries-cuda12-t4.tar.gz (264M)
+
+Location:
+  /media/waqasm86/External1/Project-Nvidia/release-packages/
+-rw-rw-r-- 1 waqasm86 waqasm86  26M Jan  3 23:24 /media/waqasm86/External1/Project-Nvidia/release-packages/llcuda-binaries-cuda12-940m.tar.gz
+-rw-rw-r-- 1 waqasm86 waqasm86 264M Jan  3 23:25 /media/waqasm86/External1/Project-Nvidia/release-packages/llcuda-binaries-cuda12-t4.tar.gz
+
+Next Steps:
+
+1. Test the package locally:
+   cd /media/waqasm86/External1/Project-Nvidia/release-packages
+   tar -xzf llcuda-binaries-cuda12-940m.tar.gz
+   export LD_LIBRARY_PATH=$(pwd)/lib:$LD_LIBRARY_PATH
+   ./bin/llama-server --help
+
+2. Upload to GitHub Releases:
+   a. Go to: https://github.com/waqasm86/llcuda/releases
+   b. Click 'Draft a new release'
+   c. Tag: v1.2.0
+   d. Title: llcuda v1.2.0 - CUDA 12 Binaries
+   e. Upload these files:
+      - llcuda-binaries-cuda12-940m.tar.gz
+      - llcuda-binaries-cuda12-t4.tar.gz
+
+3. Update bootstrap.py URL (if version changed):
+   Edit: llcuda/llcuda/_internal/bootstrap.py
+   Update GITHUB_RELEASE_URL to: v1.2.0
+
+4. Update package version:
+   Edit: llcuda/llcuda/__init__.py
+   Update __version__ to: '1.2.0'
+
+IMPORTANT:
+  - These binaries go to GitHub RELEASES page (not main repo)
+  - Main repo stays under 100MB for PyPI
+  - NEVER upload .gguf model files anywhere
+
+✓ All done! Archives ready for upload to GitHub Releases.
+waqasm86@waqasm86-ThinkPad-T450s:/media/waqasm86/External1/Project-Nvidia$ 
+

@@ -1,0 +1,286 @@
+import torch
+import sys
+import subprocess
+import os
+
+def get_system_info():
+    """Get system and GPU information"""
+    print("=" * 60)
+    print("SYSTEM INFORMATION")
+    print("=" * 60)
+    
+    # Basic PyTorch info
+    print(f"PyTorch Version: {torch.__version__}")
+    print(f"Python Version: {sys.version}")
+    
+    # CUDA availability
+    print(f"\nCUDA Available: {torch.cuda.is_available()}")
+    
+    if torch.cuda.is_available():
+        # CUDA version
+        print(f"CUDA Version: {torch.version.cuda}")
+        
+        # cuDNN version
+        print(f"cuDNN Version: {torch.backends.cudnn.version()}")
+        
+        # Get GPU details
+        print("\n" + "=" * 60)
+        print("GPU INFORMATION")
+        print("=" * 60)
+        
+        # Number of GPUs
+        gpu_count = torch.cuda.device_count()
+        print(f"Number of GPUs Available: {gpu_count}")
+        
+        for i in range(gpu_count):
+            print(f"\nGPU {i}:")
+            print("-" * 40)
+            
+            # Get GPU properties
+            props = torch.cuda.get_device_properties(i)
+            
+            print(f"  Name: {props.name}")
+            print(f"  Compute Capability: {props.major}.{props.minor}")
+            print(f"  Total Memory: {props.total_memory / 1024**3:.2f} GB")
+            print(f"  Multiprocessors: {props.multi_processor_count}")
+            
+            # Memory info
+            print(f"\n  Memory Information:")
+            print(f"    Allocated: {torch.cuda.memory_allocated(i) / 1024**3:.2f} GB")
+            print(f"    Cached: {torch.cuda.memory_reserved(i) / 1024**3:.2f} GB")
+            
+            # Get current memory stats
+            if torch.cuda.is_available():
+                stats = torch.cuda.memory_stats(i)
+                print(f"    Active: {stats.get('active_bytes.all.current', 0) / 1024**3:.2f} GB")
+                print(f"    Peak Active: {stats.get('active_bytes.all.peak', 0) / 1024**3:.2f} GB")
+    
+    # Additional system information using nvidia-smi
+    try:
+        print("\n" + "=" * 60)
+        print("NVIDIA-SMI INFORMATION")
+        print("=" * 60)
+        
+        # Run nvidia-smi
+        result = subprocess.run(['nvidia-smi'], 
+                              capture_output=True, 
+                              text=True, 
+                              shell=True)
+        if result.returncode == 0:
+            print(result.stdout)
+        else:
+            print("nvidia-smi not available")
+    except Exception as e:
+        print(f"Could not run nvidia-smi: {e}")
+
+def get_detailed_gpu_info():
+    """Get more detailed GPU information"""
+    if not torch.cuda.is_available():
+        print("CUDA is not available")
+        return
+    
+    print("\n" + "=" * 60)
+    print("DETAILED GPU INFORMATION")
+    print("=" * 60)
+    
+    # Get current device
+    current_device = torch.cuda.current_device()
+    print(f"Current GPU Device: {current_device}")
+    
+    # Get device name
+    device_name = torch.cuda.get_device_name(current_device)
+    print(f"Device Name: {device_name}")
+    
+    # Check if it's T4
+    if "T4" in device_name.upper():
+        print("✅ GPU identified as NVIDIA T4")
+    else:
+        print(f"⚠️ GPU is not T4 (it's {device_name})")
+    
+    # Get CUDA capabilities
+    print(f"\nCUDA Capabilities:")
+    print(f"  Device {current_device} capability: {torch.cuda.get_device_capability(current_device)}")
+    
+    # Get device attributes
+    print(f"\nDevice Attributes:")
+    for attr in ['MAX_THREADS_PER_BLOCK', 'MAX_BLOCK_DIM_X', 'MAX_BLOCK_DIM_Y', 
+                 'MAX_BLOCK_DIM_Z', 'MAX_GRID_DIM_X', 'MAX_GRID_DIM_Y', 
+                 'MAX_GRID_DIM_Z', 'MAX_SHARED_MEMORY_PER_BLOCK']:
+        try:
+            value = torch.cuda.get_device_properties(current_device).__getattribute__(attr.lower())
+            print(f"  {attr}: {value}")
+        except:
+            pass
+
+def check_cudnn_features():
+    """Check cuDNN features and capabilities"""
+    print("\n" + "=" * 60)
+    print("cuDNN INFORMATION")
+    print("=" * 60)
+    
+    if torch.cuda.is_available():
+        print(f"cuDNN Enabled: {torch.backends.cudnn.enabled}")
+        print(f"cuDNN Benchmark Enabled: {torch.backends.cudnn.benchmark}")
+        print(f"cuDNN Deterministic: {torch.backends.cudnn.deterministic}")
+        
+        # Check if cuDNN is available
+        try:
+            import torch.backends.cudnn as cudnn
+            print(f"cuDNN Version (full): {cudnn.version()}")
+        except Exception as e:
+            print(f"Error getting cuDNN version: {e}")
+    else:
+        print("CUDA not available - cuDNN cannot be used")
+
+def get_memory_usage():
+    """Get detailed memory usage information"""
+    if not torch.cuda.is_available():
+        return
+    
+    print("\n" + "=" * 60)
+    print("MEMORY USAGE")
+    print("=" * 60)
+    
+    for i in range(torch.cuda.device_count()):
+        print(f"\nGPU {i} Memory Usage:")
+        print(f"  Allocated: {torch.cuda.memory_allocated(i) / 1024**3:.4f} GB")
+        print(f"  Cached: {torch.cuda.memory_reserved(i) / 1024**3:.4f} GB")
+        
+        # Get memory summary
+        print(f"\n  Memory Summary:")
+        summary = torch.cuda.memory_summary(device=i, abbreviated=False)
+        lines = summary.split('\n')
+        for line in lines[:10]:  # Show first 10 lines of summary
+            print(f"    {line}")
+
+# Run all functions
+if __name__ == "__main__":
+    # Check if running in Google Colab
+    try:
+        import google.colab
+        IN_COLAB = True
+        print("✅ Running in Google Colab")
+    except:
+        IN_COLAB = False
+        print("⚠️ Not running in Google Colab")
+    
+    get_system_info()
+    get_detailed_gpu_info()
+    check_cudnn_features()
+    get_memory_usage()
+    
+    # Additional Colab-specific info
+    if IN_COLAB:
+        print("\n" + "=" * 60)
+        print("COLAB-SPECIFIC INFORMATION")
+        print("=" * 60)
+        
+        # Check if GPU is allocated
+        gpu_info = !nvidia-smi
+        gpu_info = '\n'.join(gpu_info)
+        if "T4" in gpu_info:
+            print("✅ NVIDIA T4 GPU allocated in Colab")
+        else:
+            print("⚠️ T4 GPU not found")
+            
+            
+
+//output
+✅ Running in Google Colab
+============================================================
+SYSTEM INFORMATION
+============================================================
+PyTorch Version: 2.9.0+cu126
+Python Version: 3.12.12 (main, Oct 10 2025, 08:52:57) [GCC 11.4.0]
+
+CUDA Available: True
+CUDA Version: 12.6
+cuDNN Version: 91002
+
+============================================================
+GPU INFORMATION
+============================================================
+Number of GPUs Available: 1
+
+GPU 0:
+----------------------------------------
+  Name: Tesla T4
+  Compute Capability: 7.5
+  Total Memory: 14.74 GB
+  Multiprocessors: 40
+
+  Memory Information:
+    Allocated: 0.00 GB
+    Cached: 0.00 GB
+    Active: 0.00 GB
+    Peak Active: 0.00 GB
+
+============================================================
+NVIDIA-SMI INFORMATION
+============================================================
+Sat Jan  3 07:59:03 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 550.54.15              Driver Version: 550.54.15      CUDA Version: 12.4     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |
+| N/A   49C    P8             10W /   70W |       2MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+
+
+============================================================
+DETAILED GPU INFORMATION
+============================================================
+Current GPU Device: 0
+Device Name: Tesla T4
+✅ GPU identified as NVIDIA T4
+
+CUDA Capabilities:
+  Device 0 capability: (7, 5)
+
+Device Attributes:
+
+============================================================
+cuDNN INFORMATION
+============================================================
+cuDNN Enabled: True
+cuDNN Benchmark Enabled: False
+cuDNN Deterministic: False
+cuDNN Version (full): 91002
+
+============================================================
+MEMORY USAGE
+============================================================
+
+GPU 0 Memory Usage:
+  Allocated: 0.0000 GB
+  Cached: 0.0000 GB
+
+  Memory Summary:
+    |===========================================================================|
+    |                  PyTorch CUDA memory summary, device ID 0                 |
+    |---------------------------------------------------------------------------|
+    |            CUDA OOMs: 0            |        cudaMalloc retries: 0         |
+    |===========================================================================|
+    |        Metric         | Cur Usage  | Peak Usage | Tot Alloc  | Tot Freed  |
+    |---------------------------------------------------------------------------|
+    | Allocated memory      |      0 B   |      0 B   |      0 B   |      0 B   |
+    |       from large pool |      0 B   |      0 B   |      0 B   |      0 B   |
+    |       from small pool |      0 B   |      0 B   |      0 B   |      0 B   |
+
+============================================================
+COLAB-SPECIFIC INFORMATION
+============================================================
+✅ NVIDIA T4 GPU allocated in Colab
