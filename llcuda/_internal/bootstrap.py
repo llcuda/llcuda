@@ -18,7 +18,6 @@ from collections import deque
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 import subprocess
-from llcuda import __version__
 
 try:
     from huggingface_hub import hf_hub_download
