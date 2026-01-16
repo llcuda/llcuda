@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.1] - 2026-01-16
+
+### 🎯 Colab-Focused Refresh: Enhanced Reliability
+
+#### Fixed
+- ✅ Fixed llama-server discovery fallback mechanism (no more NameError when primary binary fails)
+- ✅ Improved bootstrap binary download error handling and recovery
+
+#### Updated
+- ✅ Updated Gemma 3-1B Colab notebook for v2.1.1 compatibility
+- ✅ Consistent version numbering across entire project (pyproject.toml, __init__.py, binaries)
+- ✅ Enhanced .gitignore to prevent large binary commits
+
+#### Includes
+- ✅ Tesla T4 binary bundle (v2.1.0 primary with v2.0.6 fallback)
+- ✅ All v2.1.0 stable APIs: Quantization, Unsloth, CUDA Optimization, Advanced Inference
+- ✅ Google Colab optimization and one-command installation
+
+---
+
 ## [2.1.0] - 2026-01-13
 
 ### 🚀 Major Release: Complete Unsloth Integration with Advanced CUDA APIs

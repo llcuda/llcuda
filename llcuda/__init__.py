@@ -176,7 +176,7 @@ from .utils import (
     validate_model_path,
 )
 
-__version__ = "2.1.0"  # Install from GitHub - binaries downloaded from GitHub Releases
+__version__ = "2.1.1"  # Install from GitHub - binaries downloaded from GitHub Releases
 __all__ = [
     # Core classes
     "InferenceEngine",
