@@ -40,14 +40,12 @@ class ServerManager:
         >>> manager.stop_server()
     """
 
-    # DEPRECATED: Old binary URL - binaries are now downloaded via bootstrap.py
-    # This fallback should rarely be used as binaries are installed during package import
-    # Updated to v2.0.6 which is the stable binary release compatible with v2.1.0 Python APIs
-    _BINARY_BASE_URL = "https://github.com/llcuda/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz"
-
-    def _get_download_url(self):
-        """Get the actual download URL - now points to llcuda GitHub releases"""
-        return self._BINARY_BASE_URL
+    # Binary bundles used when bootstrap-installed binaries are missing
+    _BINARY_RELEASE_BASE = "https://github.com/llcuda/llcuda/releases/download"
+    _BINARY_BUNDLES = [
+        {"version": "2.1.0", "filename": "llcuda-binaries-cuda12-t4-v2.1.0.tar.gz", "label": "primary"},
+        {"version": "2.0.6", "filename": "llcuda-binaries-cuda12-t4-v2.0.6.tar.gz", "label": "fallback"},
+    ]
 
     def __init__(self, server_url: str = "http://127.0.0.1:8090"):
         """
@@ -80,77 +78,85 @@ class ServerManager:
         if env_path:
             path = Path(env_path)
             if path.exists() and path.is_file():
-                self._setup_library_path(path)
-                return path
+                errors = []
 
-        # Priority 2: Package's installed binaries (from bootstrap extraction)
-        try:
-            import llcuda
-            package_dir = Path(llcuda.__file__).parent
-            binaries_paths = [
-                package_dir / "binaries" / "cuda12" / "llama-server",
-                package_dir / "binaries" / "llama-server",
-            ]
-            for path in binaries_paths:
-                if path.exists():
-                    # Setup library path for package binaries
-                    lib_dir = package_dir / "lib"
-                    if lib_dir.exists():
-                        lib_path_str = str(lib_dir.absolute())
-                        current_ld_path = os.environ.get("LD_LIBRARY_PATH", "")
-                        if lib_path_str not in current_ld_path:
-                            os.environ["LD_LIBRARY_PATH"] = f"{lib_path_str}:{current_ld_path}" if current_ld_path else lib_path_str
-                    return path
-        except:
-            pass
+                for bundle in self._BINARY_BUNDLES:
+                    tar_filename = bundle["filename"]
+                    tar_path = cache_dir / tar_filename
+                    extract_dir = cache_dir / f"extracted_{bundle['version']}"
+                    download_url = f"{self._BINARY_RELEASE_BASE}/v{bundle['version']}/{tar_filename}"
 
-        # Priority 3: LLAMA_CPP_DIR
-        llama_cpp_dir = os.getenv("LLAMA_CPP_DIR")
-        if llama_cpp_dir:
-            path = Path(llama_cpp_dir) / "bin" / "llama-server"
-            if path.exists():
-                self._setup_library_path(path)
-                return path
+                    print(
+                        f"➡️  Attempting {bundle['label']} bundle (v{bundle['version']}) from {download_url}"
+                    )
 
-        # Priority 4: Cache directory (bootstrap download location)
-        cache_paths = [
-            Path.home() / ".cache" / "llcuda" / "bin" / "llama-server",
-            Path("/content/.cache/llcuda/llama-server"),  # Google Colab
-            Path("/kaggle/working/.cache/llcuda/llama-server"),  # Kaggle
-        ]
-        for path in cache_paths:
-            if path.exists():
-                self._setup_library_path(path)
-                return path
+                    # Download the binary archive (with progress indicator)
+                    try:
+                        response = requests.get(download_url, stream=True, timeout=60)
+                        response.raise_for_status()
 
-        # Priority 5: Local llama.cpp build directory
-        local_build_paths = [
-            Path.home() / "llama.cpp" / "build" / "bin" / "llama-server",
-            Path.cwd() / "llama.cpp" / "build" / "bin" / "llama-server",
-            Path.cwd() / "build" / "bin" / "llama-server",  # If running from llama.cpp dir
-        ]
+                        total_size = int(response.headers.get("content-length", 0))
+                        downloaded = 0
 
-        for path in local_build_paths:
-            if path.exists():
-                self._setup_library_path(path)
-                return path
+                        with open(tar_path, "wb") as f:
+                            for chunk in response.iter_content(chunk_size=8192):
+                                f.write(chunk)
+                                downloaded += len(chunk)
+                                if total_size > 0:
+                                    percent = (downloaded / total_size) * 100
+                                    sys.stdout.write(
+                                        f"\rDownloading: {percent:.1f}% ({downloaded}/{total_size} bytes)"
+                                    )
+                                    sys.stdout.flush()
 
-        # Priority 6: System locations
-        system_paths = [
-            "/usr/local/bin/llama-server",
-            "/usr/bin/llama-server",
-            "/opt/llama.cpp/bin/llama-server",
-            "/opt/homebrew/bin/llama-server",  # macOS Homebrew
-        ]
+                        print("\n✓ Download complete")
 
+                    except requests.exceptions.RequestException as e:
+                        message = f"Download failed for v{bundle['version']}: {e}"
+                        print(f"⚠️  {message}")
+                        errors.append(message)
+                        continue
+
+                    # Extract the archive
+                    print("Extracting binary...")
+                    try:
+                        shutil.rmtree(extract_dir, ignore_errors=True)
+                        extract_dir.mkdir(exist_ok=True)
+
+                        with tarfile.open(tar_path, "r:gz") as tar:
+                            tar.extractall(extract_dir)
+
+                        possible_paths = list(extract_dir.rglob("llama-server"))
+                        if not possible_paths:
+                            possible_paths = list(extract_dir.rglob("bin/llama-server"))
+
+                        if not possible_paths:
+                            raise FileNotFoundError(
+                                "Could not find llama-server in downloaded archive"
+                            )
+
+                        server_binary = possible_paths[0]
+                        print(f"✓ Found binary at: {server_binary}")
+
+                        if tar_path.exists():
+                            tar_path.unlink()
+
+                        if bundle["label"] == "fallback":
+                            print("ℹ️  Primary bundle unavailable; using fallback binaries.")
+
+                        return server_binary
+
+                    except Exception as e:
+                        message = f"Extraction failed for v{bundle['version']}: {e}"
+                        print(f"⚠️  {message}")
+                        errors.append(message)
+                        continue
+
+                raise RuntimeError(
+                    "Failed to download and extract llama-server binaries.\n" + "\n".join(errors)
+                )
         for path_str in system_paths:
-            path = Path(path_str)
-            if path.exists():
-                self._setup_library_path(path)
-                return path
-
-        return None
-
+                return server_binary
     def _setup_library_path(self, server_path: Path):
         """
         Setup LD_LIBRARY_PATH for the llama-server executable.
@@ -269,87 +275,89 @@ class ServerManager:
         elif platform_info["platform"] == "kaggle":
             cache_dir = Path("/kaggle/working/.cache/llcuda")
         else:
-            # Local machine
             cache_dir = Path.home() / ".cache" / "llcuda"
 
-        # Create cache directory
         cache_dir.mkdir(parents=True, exist_ok=True)
 
-        # Define paths
-        tar_path = cache_dir / "llcuda-binaries-cuda12-t4-v2.0.6.tar.gz"
-        extract_dir = cache_dir / "extracted"
+        errors = []
 
-        # Download the binary archive (with progress indicator)
-        try:
-            download_url = self._get_download_url()
-            print(f"Downloading from: {download_url}")
+        for bundle in self._BINARY_BUNDLES:
+            tar_filename = bundle["filename"]
+            tar_path = cache_dir / tar_filename
+            extract_dir = cache_dir / f"extracted_{bundle['version']}"
+            download_url = f"{self._BINARY_RELEASE_BASE}/v{bundle['version']}/{tar_filename}"
 
-            response = requests.get(download_url, stream=True, timeout=60)
-            response.raise_for_status()
-
-            total_size = int(response.headers.get("content-length", 0))
-            downloaded = 0
-
-            with open(tar_path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-                    downloaded += len(chunk)
-                    if total_size > 0:
-                        percent = (downloaded / total_size) * 100
-                        sys.stdout.write(
-                            f"\rDownloading: {percent:.1f}% ({downloaded}/{total_size} bytes)"
-                        )
-                        sys.stdout.flush()
-
-            print("\n✓ Download complete")
-
-        except requests.exceptions.RequestException as e:
-            raise RuntimeError(
-                f"Failed to download binary: {e}\n"
-                "Check your internet connection or download manually from:\n"
-                f"{self._BINARY_BASE_URL}"
+            print(
+                f"➡️  Attempting {bundle['label']} bundle (v{bundle['version']}) from {download_url}"
             )
 
-        # Extract the archive
-        print("Extracting binary...")
-        try:
-            shutil.rmtree(extract_dir, ignore_errors=True)  # Clean previous extraction
-            extract_dir.mkdir(exist_ok=True)
+            try:
+                response = requests.get(download_url, stream=True, timeout=60)
+                response.raise_for_status()
 
-            with tarfile.open(tar_path, "r:gz") as tar:
-                tar.extractall(extract_dir)
+                total_size = int(response.headers.get("content-length", 0))
+                downloaded = 0
 
-            # Find the actual binary (it might be in a subdirectory)
-            possible_paths = list(extract_dir.rglob("llama-server"))
-            if not possible_paths:
-                # Try bin/ subdirectory
-                possible_paths = list(extract_dir.rglob("bin/llama-server"))
+                with open(tar_path, "wb") as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                        if total_size > 0:
+                            percent = (downloaded / total_size) * 100
+                            sys.stdout.write(
+                                f"\rDownloading: {percent:.1f}% ({downloaded}/{total_size} bytes)"
+                            )
+                            sys.stdout.flush()
 
-            if not possible_paths:
-                raise FileNotFoundError(
-                    "Could not find llama-server in downloaded archive"
-                )
+                print("\n✓ Download complete")
 
-            server_binary = possible_paths[0]
-            print(f"✓ Found binary at: {server_binary}")
+            except requests.exceptions.RequestException as e:
+                message = f"Download failed for v{bundle['version']}: {e}"
+                print(f"⚠️  {message}")
+                errors.append(message)
+                continue
 
-            # Clean up the tar file
-            if tar_path.exists():
-                tar_path.unlink()
+            print("Extracting binary...")
+            try:
+                shutil.rmtree(extract_dir, ignore_errors=True)
+                extract_dir.mkdir(exist_ok=True)
 
-            # Set and return the binary path
-            final_path = cache_dir / "llama-server"
-            shutil.copy2(server_binary, final_path)
-            os.chmod(final_path, 0o755)
+                with tarfile.open(tar_path, "r:gz") as tar:
+                    tar.extractall(extract_dir)
 
-            # Clean up extraction directory
-            shutil.rmtree(extract_dir, ignore_errors=True)
+                possible_paths = list(extract_dir.rglob("llama-server"))
+                if not possible_paths:
+                    possible_paths = list(extract_dir.rglob("bin/llama-server"))
 
-            print(f"✓ Binary installed at: {final_path}")
-            return str(final_path)
+                if not possible_paths:
+                    raise FileNotFoundError("Could not find llama-server in downloaded archive")
 
-        except (tarfile.TarError, OSError) as e:
-            raise RuntimeError(f"Failed to extract binary: {e}")
+                server_binary = possible_paths[0]
+                final_path = cache_dir / "llama-server"
+                shutil.copy2(server_binary, final_path)
+                os.chmod(final_path, 0o755)
+
+                if tar_path.exists():
+                    tar_path.unlink()
+
+                shutil.rmtree(extract_dir, ignore_errors=True)
+
+                if bundle["label"] == "fallback":
+                    print("ℹ️  Primary bundle unavailable; using fallback binaries.")
+
+                print(f"✓ Binary installed at: {final_path}")
+                return str(final_path)
+
+            except (tarfile.TarError, OSError, FileNotFoundError) as e:
+                message = f"Extraction failed for v{bundle['version']}: {e}"
+                print(f"⚠️  {message}")
+                errors.append(message)
+                shutil.rmtree(extract_dir, ignore_errors=True)
+                continue
+
+        raise RuntimeError(
+            "Failed to download and extract llama-server binaries.\n" + "\n".join(errors)
+        )
 
     def start_server(
         self,

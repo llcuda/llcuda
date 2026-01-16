@@ -399,12 +399,15 @@ Compatible environment: Google Colab
 
 ### Binary Download Failed
 
+tar -xzf llcuda-binaries-cuda12-t4.tar.gz -C ~/.cache/llcuda/
 ```bash
 # Download T4 binaries manually
-wget https://github.com/llcuda/llcuda/releases/download/v2.1.0/llcuda-binaries-cuda12-t4.tar.gz
+wget https://github.com/llcuda/llcuda/releases/download/v2.1.0/llcuda-binaries-cuda12-t4-v2.1.0.tar.gz
 mkdir -p ~/.cache/llcuda
-tar -xzf llcuda-binaries-cuda12-t4.tar.gz -C ~/.cache/llcuda/
+tar -xzf llcuda-binaries-cuda12-t4-v2.1.0.tar.gz -C ~/.cache/llcuda/
 ```
+
+If that asset is temporarily unavailable, download `https://github.com/llcuda/llcuda/releases/download/v2.0.6/llcuda-binaries-cuda12-t4-v2.0.6.tar.gz` instead and extract it to the same cache directory.
 
 ---
 

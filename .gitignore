@@ -106,6 +106,12 @@ build/
 *.7z
 
 # Large binaries - NEVER in git repo
+# (GitHub hard-limits uploads >=50 MB, so block common bundle names)
+llcuda-binaries-*.tar
+llcuda-binaries-*.tar.gz
+llcuda-binaries-*.tar.xz
+llcuda-binaries-*.zip
+llcuda-binaries-*/
 llcuda/binaries/
 llcuda/lib/
 llcuda/models/

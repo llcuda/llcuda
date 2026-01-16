@@ -14,7 +14,7 @@ import sys
 import json
 import shutil
 import tarfile
-import hashlib
+from collections import deque
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 import subprocess
@@ -28,13 +28,21 @@ except ImportError:
     HF_AVAILABLE = False
 
 
-# Configuration for llcuda v2.1.0 (now uses v2.1.0 binaries)
-BINARY_VERSION = "2.1.0"  # Use v2.1.0 binaries
-GITHUB_RELEASE_URL = f"https://github.com/llcuda/llcuda/releases/download/v{BINARY_VERSION}"
+# Configuration for llcuda v2.1.0 (now uses dedicated v2.1.0 binaries with fallback)
+BINARY_VERSION = "2.1.0"
+PRIMARY_BINARY_BUNDLE = f"llcuda-binaries-cuda12-t4-v{BINARY_VERSION}.tar.gz"
+FALLBACK_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.0.6.tar.gz"
+GITHUB_RELEASE_URL = "https://github.com/llcuda/llcuda/releases/download"
 HF_REPO_ID = "waqasm86/llcuda-models"
 
-# T4-only binary bundle (v2.1.0 binaries)
-T4_BINARY_BUNDLE = f"llcuda-binaries-cuda12-t4-v{BINARY_VERSION}.tar.gz"  # ~270 MB
+# Binary bundle preference order (primary → fallback)
+BINARY_BUNDLE_CANDIDATES = [
+    {"version": BINARY_VERSION, "filename": PRIMARY_BINARY_BUNDLE, "label": "primary"},
+    {"version": "2.0.6", "filename": FALLBACK_BINARY_BUNDLE, "label": "fallback"},
+]
+
+# Legacy constant retained for downstream tooling/documentation
+T4_BINARY_BUNDLE = PRIMARY_BINARY_BUNDLE
 T4_NATIVE_BUNDLE = "llcuda-v2-native-t4.tar.gz"        # ~100 MB
 
 # Minimum compute capability for llcuda v2.1
@@ -210,6 +218,38 @@ def extract_tarball(tarball_path: Path, dest_dir: Path) -> None:
     print("✅ Extraction complete!")
 
 
+def locate_bin_and_lib_dirs(extract_root: Path) -> Optional[Tuple[Path, Path]]:
+    """Locate bin/ and lib/ directories within an extracted archive."""
+
+    queue = deque([extract_root])
+    visited = set()
+
+    while queue:
+        current = queue.popleft()
+
+        try:
+            current_resolved = current.resolve()
+        except FileNotFoundError:
+            continue
+
+        if current_resolved in visited:
+            continue
+
+        visited.add(current_resolved)
+
+        bin_dir = current / "bin"
+        lib_dir = current / "lib"
+
+        if bin_dir.exists() and lib_dir.exists():
+            return bin_dir, lib_dir
+
+        for child in current.iterdir():
+            if child.is_dir():
+                queue.append(child)
+
+    return None
+
+
 def download_t4_binaries() -> None:
     """
     Download and install T4-optimized CUDA 12 binaries for llcuda v2.1.
@@ -256,71 +296,96 @@ def download_t4_binaries() -> None:
     print(f"🌐 Platform: {platform.capitalize()}")
     print()
 
-    # Download T4 binary bundle (using BINARY_VERSION defined at top of file)
-    print("📦 Downloading T4-optimized binaries (264 MB)...")
+    # Download T4 binary bundle (primary bundle with fallback)
+    print("📦 Downloading T4-optimized binaries (primary v2.1.0, fallback v2.0.6)...")
     print("    Features: FlashAttention + Tensor Cores + CUDA Graphs")
     print()
 
-    version = BINARY_VERSION  # Use global constant
-    url_version = f"v{BINARY_VERSION}"
-    bundle_name = f"llcuda-binaries-cuda12-t4-v{version}.tar.gz"
-    cache_tarball = CACHE_DIR / bundle_name
-    bundle_url = f"https://github.com/llcuda/llcuda/releases/download/{url_version}/{bundle_name}"
+    install_success = False
+    bundle_used: Optional[Dict[str, str]] = None
+    failures = []
 
-    if not cache_tarball.exists():
-        print(f"📥 Downloading from GitHub releases...")
-        print(f"   URL: {bundle_url}")
-        print(f"   This is a one-time download (~264 MB)")
-        print()
+    for idx, bundle in enumerate(BINARY_BUNDLE_CANDIDATES):
+        version = bundle["version"]
+        bundle_name = bundle["filename"]
+        bundle_url = f"{GITHUB_RELEASE_URL}/v{version}/{bundle_name}"
+        cache_tarball = CACHE_DIR / bundle_name
+
+        print(f"➡️  Attempt {idx + 1}: {bundle['label'].title()} bundle ({bundle_name})")
+        print(f"   Source: {bundle_url}")
+
+        if not cache_tarball.exists():
+            print(f"📥 Downloading binaries v{version} (~264 MB)...")
+            try:
+                download_file(bundle_url, cache_tarball, f"Downloading T4 binaries v{version}")
+                print()
+            except Exception as e:
+                failures.append(f"Download failed for v{version}: {e}")
+                print(f"   ⚠️  Download error: {e}")
+                continue
+        else:
+            print(f"✅ Using cached archive: {cache_tarball}")
+
+        temp_extract_dir = CACHE_DIR / f"extract_{version}"
+        if temp_extract_dir.exists():
+            shutil.rmtree(temp_extract_dir, ignore_errors=True)
+        temp_extract_dir.mkdir(parents=True, exist_ok=True)
+
         try:
-            download_file(bundle_url, cache_tarball, f"Downloading T4 binaries v{version}")
-            print()
+            extract_tarball(cache_tarball, temp_extract_dir)
+            located = locate_bin_and_lib_dirs(temp_extract_dir)
+            if not located:
+                raise RuntimeError("Expected 'bin' and 'lib' directories were not found in the archive")
+
+            bin_dir, lib_dir = located
+            print(f"  Found bin/ and lib/ under {bin_dir.parent}")
+
+            cuda12_dir = BINARIES_DIR / "cuda12"
+            cuda12_dir.mkdir(parents=True, exist_ok=True)
+            copied_bins = 0
+            for item in bin_dir.iterdir():
+                if item.is_file():
+                    dest = cuda12_dir / item.name
+                    shutil.copy2(item, dest)
+                    copied_bins += 1
+                    if not item.suffix or item.suffix == '.sh':
+                        try:
+                            dest.chmod(0o755)
+                        except Exception:
+                            pass
+
+            LIB_DIR.mkdir(parents=True, exist_ok=True)
+            copied_libs = 0
+            for item in lib_dir.iterdir():
+                if item.is_file():
+                    shutil.copy2(item, LIB_DIR / item.name)
+                    copied_libs += 1
+
+            print(f"  Copied {copied_bins} binaries to {cuda12_dir}")
+            print(f"  Copied {copied_libs} libraries to {LIB_DIR}")
+
+            install_success = True
+            bundle_used = bundle
+            break
+
         except Exception as e:
-            raise RuntimeError(f"Download failed for v{version}: {e}. Please check your internet connection.")
-    else:
-        print(f"✅ Using cached binaries from {cache_tarball}")
-        print()
+            failures.append(f"Extraction failed for v{version}: {e}")
+            print(f"   ⚠️  Extraction error: {e}")
+        finally:
+            shutil.rmtree(temp_extract_dir, ignore_errors=True)
 
-    # Extract binaries
-    temp_extract_dir = CACHE_DIR / f"extract_{version}"
-    temp_extract_dir.mkdir(parents=True, exist_ok=True)
+    if not install_success:
+        failure_report = "\n".join(failures) if failures else "Unknown error"
+        raise RuntimeError(
+            "Unable to install llcuda binaries. Tried all available bundles but each failed:\n"
+            f"{failure_report}"
+        )
 
-    try:
-        extract_tarball(cache_tarball, temp_extract_dir)
-    except Exception as e:
-        raise RuntimeError(f"Extraction failed for v{version}: {e}")
-
-    print("📂 Installing binaries and libraries...")
-
-    # The v2.0.6 archive contains bin/ and lib/ directories
-    bin_dir = temp_extract_dir / "bin"
-    lib_dir = temp_extract_dir / "lib"
-
-    if bin_dir.exists() and lib_dir.exists():
-        print(f"  Found bin/ and lib/ directories in {bin_dir.parent.name}")
-        cuda12_dir = BINARIES_DIR / "cuda12"
-        cuda12_dir.mkdir(parents=True, exist_ok=True)
-        for item in bin_dir.iterdir():
-            if item.is_file():
-                dest = cuda12_dir / item.name
-                shutil.copy2(item, dest)
-                if not item.suffix or item.suffix == '.sh':
-                    try:
-                        dest.chmod(0o755)
-                    except:
-                        pass
-        print(f"  Copied {len(list(bin_dir.iterdir()))} binaries to {cuda12_dir}")
-        LIB_DIR.mkdir(parents=True, exist_ok=True)
-        for item in lib_dir.iterdir():
-            if item.is_file():
-                shutil.copy2(item, LIB_DIR / item.name)
-        print(f"  Copied {len(list(lib_dir.iterdir()))} libraries to {LIB_DIR}")
-        print("✅ Binaries installed successfully!")
-    else:
-        raise RuntimeError(f"Extraction failed: Expected 'bin' and 'lib' directories not found in archive for v{version}.")
-
-    # Cleanup
-    shutil.rmtree(temp_extract_dir, ignore_errors=True)
+    print("✅ Binaries installed successfully!")
+    if bundle_used and bundle_used["version"] != BINARY_VERSION:
+        print(
+            f"ℹ️  Primary bundle unavailable. Installed fallback binaries v{bundle_used['version']} instead."
+        )
     print()
 
 
