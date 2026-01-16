@@ -59,104 +59,85 @@ class ServerManager:
         self._server_path: Optional[Path] = None
 
     def find_llama_server(self) -> Optional[Path]:
-        """
-        Find llama-server executable in common locations.
+        """Locate the llama-server executable or download it if missing."""
 
-        Searches in the following order:
-        1. LLAMA_SERVER_PATH environment variable
-        2. Package's installed binaries directory (from bootstrap)
-        3. LLAMA_CPP_DIR environment variable + /bin/llama-server
-        4. Cache directory (~/.cache/llcuda)
-        5. User's project directory (Ubuntu-Cuda-Llama.cpp-Executable)
-        6. System PATH locations
-
-        Returns:
-            Path to llama-server executable, or None if not found
-        """
-        # Priority 1: Explicit path from environment
-        env_path = os.getenv("LLAMA_SERVER_PATH")
-        if env_path:
-            path = Path(env_path)
+        def _validate(candidate: Optional[Path]) -> Optional[Path]:
+            if not candidate:
+                return None
+            path = Path(candidate)
             if path.exists() and path.is_file():
-                errors = []
+                os.chmod(path, 0o755)
+                self._setup_library_path(path)
+                self._server_path = path
+                return path
+            return None
 
-                for bundle in self._BINARY_BUNDLES:
-                    tar_filename = bundle["filename"]
-                    tar_path = cache_dir / tar_filename
-                    extract_dir = cache_dir / f"extracted_{bundle['version']}"
-                    download_url = f"{self._BINARY_RELEASE_BASE}/v{bundle['version']}/{tar_filename}"
+        if self._server_path and self._server_path.exists():
+            return self._server_path
 
-                    print(
-                        f"➡️  Attempting {bundle['label']} bundle (v{bundle['version']}) from {download_url}"
-                    )
+        # 1) Explicit env override
+        env_path = os.getenv("LLAMA_SERVER_PATH")
+        if _validate(env_path):
+            return self._server_path
 
-                    # Download the binary archive (with progress indicator)
-                    try:
-                        response = requests.get(download_url, stream=True, timeout=60)
-                        response.raise_for_status()
+        # 2) Package bootstrap directory (installed via llcuda bootstrap)
+        package_dir = Path(__file__).resolve().parent
+        bootstrap_candidates = [
+            package_dir / "binaries" / "bin" / "llama-server",
+            package_dir / "binaries" / "llama-server",
+            package_dir / "bin" / "llama-server",
+        ]
 
-                        total_size = int(response.headers.get("content-length", 0))
-                        downloaded = 0
+        for candidate in bootstrap_candidates:
+            if _validate(candidate):
+                return self._server_path
 
-                        with open(tar_path, "wb") as f:
-                            for chunk in response.iter_content(chunk_size=8192):
-                                f.write(chunk)
-                                downloaded += len(chunk)
-                                if total_size > 0:
-                                    percent = (downloaded / total_size) * 100
-                                    sys.stdout.write(
-                                        f"\rDownloading: {percent:.1f}% ({downloaded}/{total_size} bytes)"
-                                    )
-                                    sys.stdout.flush()
+        # 3) User-provided llama.cpp directory
+        llama_cpp_dir = os.getenv("LLAMA_CPP_DIR")
+        if llama_cpp_dir:
+            custom_candidates = [
+                Path(llama_cpp_dir) / "bin" / "llama-server",
+                Path(llama_cpp_dir) / "llama-server",
+            ]
+            for candidate in custom_candidates:
+                if _validate(candidate):
+                    return self._server_path
 
-                        print("\n✓ Download complete")
+        # 4) Cache directory (where we download binaries)
+        cache_dir = Path.home() / ".cache" / "llcuda"
+        cache_candidates = [
+            cache_dir / "llama-server",
+            cache_dir / "bin" / "llama-server",
+        ]
+        for candidate in cache_candidates:
+            if _validate(candidate):
+                return self._server_path
 
-                    except requests.exceptions.RequestException as e:
-                        message = f"Download failed for v{bundle['version']}: {e}"
-                        print(f"⚠️  {message}")
-                        errors.append(message)
-                        continue
+        # 5) Common project directories inside repo (dev installs)
+        repo_root = Path(__file__).resolve().parents[2]
+        repo_candidates = [
+            repo_root / "Ubuntu-Cuda-Llama.cpp-Executable" / "llama-server",
+            repo_root / "Ubuntu-Cuda-Llama.cpp-Executable" / "bin" / "llama-server",
+        ]
+        for candidate in repo_candidates:
+            if _validate(candidate):
+                return self._server_path
 
-                    # Extract the archive
-                    print("Extracting binary...")
-                    try:
-                        shutil.rmtree(extract_dir, ignore_errors=True)
-                        extract_dir.mkdir(exist_ok=True)
-
-                        with tarfile.open(tar_path, "r:gz") as tar:
-                            tar.extractall(extract_dir)
-
-                        possible_paths = list(extract_dir.rglob("llama-server"))
-                        if not possible_paths:
-                            possible_paths = list(extract_dir.rglob("bin/llama-server"))
-
-                        if not possible_paths:
-                            raise FileNotFoundError(
-                                "Could not find llama-server in downloaded archive"
-                            )
-
-                        server_binary = possible_paths[0]
-                        print(f"✓ Found binary at: {server_binary}")
-
-                        if tar_path.exists():
-                            tar_path.unlink()
-
-                        if bundle["label"] == "fallback":
-                            print("ℹ️  Primary bundle unavailable; using fallback binaries.")
-
-                        return server_binary
-
-                    except Exception as e:
-                        message = f"Extraction failed for v{bundle['version']}: {e}"
-                        print(f"⚠️  {message}")
-                        errors.append(message)
-                        continue
-
-                raise RuntimeError(
-                    "Failed to download and extract llama-server binaries.\n" + "\n".join(errors)
-                )
+        # 6) System PATH lookup
+        system_paths = os.environ.get("PATH", "").split(os.pathsep)
         for path_str in system_paths:
-                return server_binary
+            if not path_str:
+                continue
+            candidate = Path(path_str) / "llama-server"
+            if _validate(candidate):
+                return self._server_path
+
+        # 7) Download fresh bundle as last resort
+        downloaded = self._download_llama_server()
+        if downloaded:
+            return _validate(Path(downloaded))
+
+        return None
     def _setup_library_path(self, server_path: Path):
         """
         Setup LD_LIBRARY_PATH for the llama-server executable.
