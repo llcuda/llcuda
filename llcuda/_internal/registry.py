@@ -86,6 +86,100 @@ MODEL_REGISTRY: Dict[str, Dict[str, Any]] = {
         "min_vram_gb": 0.5,
         "description": "TinyLlama 1.1B Chat (Q5_K_M) - Very small for testing"
     },
+
+    # ========================================================================
+    # UNSLOTH MODELS - Optimized GGUF exports from Unsloth
+    # https://huggingface.co/unsloth
+    # ========================================================================
+
+    # Gemma 3 (Unsloth optimized)
+    "gemma-3-4b-Q4_K_M": {
+        "repo": "unsloth/gemma-3-4b-it-GGUF",
+        "file": "gemma-3-4b-it-Q4_K_M.gguf",
+        "size_mb": 2400,
+        "min_vram_gb": 2.5,
+        "description": "Gemma 3 4B instruct (Q4_K_M) - Unsloth optimized"
+    },
+    "gemma-3-12b-Q4_K_M": {
+        "repo": "unsloth/gemma-3-12b-it-GGUF",
+        "file": "gemma-3-12b-it-Q4_K_M.gguf",
+        "size_mb": 7200,
+        "min_vram_gb": 8.0,
+        "description": "Gemma 3 12B instruct (Q4_K_M) - High quality"
+    },
+
+    # Llama 3.2 (Unsloth)
+    "llama-3.2-1b-Q4_K_M": {
+        "repo": "unsloth/Llama-3.2-1B-Instruct-GGUF",
+        "file": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+        "size_mb": 700,
+        "min_vram_gb": 0.5,
+        "description": "Llama 3.2 1B instruct (Q4_K_M) - Lightweight"
+    },
+    "llama-3.2-3b-Q4_K_M": {
+        "repo": "unsloth/Llama-3.2-3B-Instruct-GGUF",
+        "file": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+        "size_mb": 1800,
+        "min_vram_gb": 2.0,
+        "description": "Llama 3.2 3B instruct (Q4_K_M) - Balanced"
+    },
+
+    # Qwen 2.5 (Unsloth)
+    "qwen-2.5-1.5b-Q4_K_M": {
+        "repo": "unsloth/Qwen2.5-1.5B-Instruct-GGUF",
+        "file": "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
+        "size_mb": 900,
+        "min_vram_gb": 1.0,
+        "description": "Qwen 2.5 1.5B instruct (Q4_K_M) - Efficient"
+    },
+    "qwen-2.5-3b-Q4_K_M": {
+        "repo": "unsloth/Qwen2.5-3B-Instruct-GGUF",
+        "file": "Qwen2.5-3B-Instruct-Q4_K_M.gguf",
+        "size_mb": 1900,
+        "min_vram_gb": 2.0,
+        "description": "Qwen 2.5 3B instruct (Q4_K_M) - Good balance"
+    },
+    "qwen-2.5-7b-Q4_K_M": {
+        "repo": "unsloth/Qwen2.5-7B-Instruct-GGUF",
+        "file": "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
+        "size_mb": 4300,
+        "min_vram_gb": 4.5,
+        "description": "Qwen 2.5 7B instruct (Q4_K_M) - High quality"
+    },
+
+    # DeepSeek (Unsloth)
+    "deepseek-r1-1.5b-Q4_K_M": {
+        "repo": "unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF",
+        "file": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+        "size_mb": 900,
+        "min_vram_gb": 1.0,
+        "description": "DeepSeek R1 1.5B distill (Q4_K_M) - Reasoning model"
+    },
+    "deepseek-r1-7b-Q4_K_M": {
+        "repo": "unsloth/DeepSeek-R1-Distill-Qwen-7B-GGUF",
+        "file": "DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf",
+        "size_mb": 4300,
+        "min_vram_gb": 4.5,
+        "description": "DeepSeek R1 7B distill (Q4_K_M) - Strong reasoning"
+    },
+
+    # Phi-4 (Unsloth)
+    "phi-4-Q4_K_M": {
+        "repo": "unsloth/phi-4-GGUF",
+        "file": "phi-4-Q4_K_M.gguf",
+        "size_mb": 8000,
+        "min_vram_gb": 8.0,
+        "description": "Phi-4 (Q4_K_M) - Microsoft's best small model"
+    },
+
+    # Mistral (Unsloth)
+    "mistral-7b-v0.3-Q4_K_M": {
+        "repo": "unsloth/Mistral-7B-Instruct-v0.3-GGUF",
+        "file": "Mistral-7B-Instruct-v0.3-Q4_K_M.gguf",
+        "size_mb": 4100,
+        "min_vram_gb": 4.0,
+        "description": "Mistral 7B Instruct v0.3 (Q4_K_M) - Latest Mistral"
+    },
 }
 
 

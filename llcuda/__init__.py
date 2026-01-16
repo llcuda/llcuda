@@ -213,10 +213,114 @@ __all__ = [
     "unsloth",
     "cuda",
     "inference",
+    # NEW: Graphistry + Louie integration (v2.2.0)
+    "graphistry",
+    "louie",
+    # NEW: Split-GPU utilities (v2.2.0)
+    "split_gpu",
+    "SplitGPUConfig",
 ]
 
 # Import the API module for easy access
 from . import api
+
+# Import new modules for easy access
+try:
+    from . import graphistry
+    from . import louie
+except ImportError:
+    pass  # Optional dependencies not installed
+
+
+# ============================================================================
+# SPLIT-GPU CONFIGURATION API (v2.2.0)
+# Simplified API for LLM + Graphistry split-GPU workloads
+# ============================================================================
+
+class SplitGPUConfig:
+    """
+    Configuration for split-GPU workloads (LLM + Graphistry).
+    
+    Designed for Kaggle 2× T4 environment:
+    - GPU 0: llama-server with GGUF model (LLM inference)
+    - GPU 1: RAPIDS + Graphistry (graph visualization)
+    
+    Example:
+        >>> import llcuda
+        >>> 
+        >>> # Configure split-GPU workload
+        >>> config = llcuda.SplitGPUConfig()
+        >>> 
+        >>> # Start LLM on GPU 0
+        >>> llm_env = config.llm_env()
+        >>> # CUDA_VISIBLE_DEVICES=0
+        >>> 
+        >>> # Start graph workload on GPU 1
+        >>> graph_env = config.graph_env()
+        >>> # CUDA_VISIBLE_DEVICES=1
+    """
+    
+    def __init__(self, llm_gpu: int = 0, graph_gpu: int = 1):
+        """
+        Initialize split-GPU configuration.
+        
+        Args:
+            llm_gpu: GPU for LLM inference (default: 0)
+            graph_gpu: GPU for graph operations (default: 1)
+        """
+        self.llm_gpu = llm_gpu
+        self.graph_gpu = graph_gpu
+    
+    def llm_env(self) -> Dict[str, str]:
+        """Get environment variables for LLM workload."""
+        return {"CUDA_VISIBLE_DEVICES": str(self.llm_gpu)}
+    
+    def graph_env(self) -> Dict[str, str]:
+        """Get environment variables for graph workload."""
+        return {"CUDA_VISIBLE_DEVICES": str(self.graph_gpu)}
+    
+    def llama_server_cmd(self, model_path: str, port: int = 8080) -> str:
+        """
+        Generate llama-server command for GPU 0.
+        
+        Args:
+            model_path: Path to GGUF model
+            port: Server port
+            
+        Returns:
+            Shell command string
+        """
+        return (
+            f"CUDA_VISIBLE_DEVICES={self.llm_gpu} "
+            f"./bin/llama-server -m {model_path} -ngl 99 "
+            f"-fa --host 0.0.0.0 --port {port}"
+        )
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Export configuration as dict."""
+        return {
+            "llm_gpu": self.llm_gpu,
+            "graph_gpu": self.graph_gpu,
+            "architecture": "split-workload"
+        }
+
+
+def split_gpu(llm_gpu: int = 0, graph_gpu: int = 1) -> SplitGPUConfig:
+    """
+    Quick helper to create split-GPU configuration.
+    
+    Args:
+        llm_gpu: GPU for LLM inference
+        graph_gpu: GPU for graph operations
+        
+    Returns:
+        SplitGPUConfig instance
+        
+    Example:
+        >>> import llcuda
+        >>> config = llcuda.split_gpu()  # Uses defaults: LLM=GPU0, Graph=GPU1
+    """
+    return SplitGPUConfig(llm_gpu, graph_gpu)
 
 
 class InferenceEngine:
