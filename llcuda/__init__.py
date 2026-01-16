@@ -1,11 +1,14 @@
 """
 llcuda - Clean, Ultra-Lightweight CUDA-Accelerated LLM Inference for Python 3.11+
 
-Streamlined PyTorch-style package with hybrid bootstrap architecture.
-62KB package with auto-download of CUDA binaries and libraries.
-No manual setup required - just pip install and use!
+Version 2.1.2 - Multi-GPU Support, Full llama.cpp Server API, GGUF Tools
 
-Version 1.2.2 - Fixed llama-server detection and added silent mode.
+Features:
+    - Multi-GPU inference (Kaggle 2×T4, multi-GPU setups)
+    - Full llama.cpp server API coverage (OpenAI-compatible)
+    - GGUF model utilities (parsing, quantization, conversion)
+    - 62KB package with auto-download of CUDA binaries
+    - No manual setup required - just pip install and use!
 
 Examples:
     Basic usage (auto-download model from registry):
@@ -15,10 +18,15 @@ Examples:
     >>> result = engine.infer("What is AI?", max_tokens=100)
     >>> print(result.text)
 
-    Using local model:
-    >>> engine = llcuda.InferenceEngine()
-    >>> engine.load_model("/path/to/model.gguf", auto_start=True)
-    >>> result = engine.infer("What is AI?")
+    Multi-GPU inference (Kaggle):
+    >>> from llcuda.api import LlamaCppClient, kaggle_t4_dual_config
+    >>> config = kaggle_t4_dual_config()
+    >>> # Start server with: llama-server -m model.gguf {config.to_cli_args()}
+    >>> client = LlamaCppClient("http://localhost:8080")
+    >>> response = client.chat.completions.create(
+    ...     messages=[{"role": "user", "content": "Hello!"}],
+    ...     max_tokens=100
+    ... )
 
 Key Features:
     - Ultra-lightweight 62KB package
@@ -176,7 +184,7 @@ from .utils import (
     validate_model_path,
 )
 
-__version__ = "2.1.1"  # Install from GitHub - binaries downloaded from GitHub Releases
+__version__ = "2.2.0"  # Unsloth inference backend + Kaggle dual-T4 + Full llama.cpp API
 __all__ = [
     # Core classes
     "InferenceEngine",
@@ -193,6 +201,8 @@ __all__ = [
     "print_system_info",
     "get_llama_cpp_cuda_path",
     "quick_infer",
+    # API module (v2.1.2+)
+    "api",
     # Existing modules (lazily imported)
     "jupyter",
     "chat",
@@ -204,6 +214,9 @@ __all__ = [
     "cuda",
     "inference",
 ]
+
+# Import the API module for easy access
+from . import api
 
 
 class InferenceEngine:

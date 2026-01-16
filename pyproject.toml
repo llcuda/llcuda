@@ -8,8 +8,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llcuda"
-version = "2.1.1"
-description = "Fast LLM inference on Tesla T4 GPUs with CUDA 12. Complete Unsloth integration, 29 quantization formats, CUDA Graphs, Triton kernels, FlashAttention, Google Colab optimized."
+version = "2.2.0"
+description = "CUDA 12 inference backend for Unsloth. Multi-GPU llama.cpp server (Kaggle 2×T4), GGUF quantization, 29 formats, FlashAttention, OpenAI-compatible API."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -17,9 +17,9 @@ authors = [
     {name = "Waqas Muhammad", email = "waqasm86@gmail.com"}
 ]
 keywords = [
-    "llm", "cuda", "inference", "unsloth", "t4", "tesla-t4", "tensor-cores",
-    "flashattention", "nf4", "quantization", "gguf", "pytorch",
-    "deep-learning", "gpu", "colab", "tensor-api", "google-colab"
+    "llm", "cuda", "inference", "llama-cpp", "t4", "tesla-t4", "tensor-cores",
+    "flashattention", "nf4", "quantization", "gguf", "pytorch", "multi-gpu",
+    "deep-learning", "gpu", "colab", "kaggle", "nccl", "openai-api"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -42,6 +42,7 @@ dependencies = [
     "requests>=2.31.0",
     "huggingface_hub>=0.20.0",
     "tqdm>=4.65.0",
+    "sseclient-py>=1.7.0",
 ]
 
 [project.optional-dependencies]

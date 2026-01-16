@@ -7,6 +7,148 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0] - 2026-01-17
+
+### 🎯 Unsloth Inference Backend + Kaggle Dual T4 Multi-GPU
+
+This release positions llcuda as the **CUDA 12 inference backend for Unsloth**.
+Unsloth handles training and fine-tuning, llcuda handles quantization and inference.
+
+### ✨ Highlights
+- **Unsloth Integration**: Seamless workflow from Unsloth training → GGUF → llcuda inference
+- **Kaggle 2× T4 Build Notebook**: Complete build script producing production-ready binaries
+- **Clarified Multi-GPU Architecture**: Native llama.cpp tensor splitting (NOT NCCL)
+
+### Added
+
+#### 1. Kaggle Build Notebook (`notebooks/build_llcuda_v2_2_0_kaggle_t4x2_complete.ipynb`)
+- **Complete build pipeline** for Kaggle's 2× Tesla T4 environment
+- GPU verification, CMake configuration, build, test, and packaging
+- Produces `llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz` distribution
+- Includes helper scripts: `start-server.sh`, `quantize.sh`
+- Full metadata with SHA256 checksums
+
+#### 2. Unsloth Workflow Documentation
+- End-to-end pipeline: Unsloth (train) → GGUF (export) → llcuda (serve)
+- Recommended models table for 30GB total VRAM
+- Integration examples with Unsloth's `save_pretrained_gguf()`
+
+### Technical Clarification
+> **Multi-GPU Architecture**: llama.cpp uses **native CUDA multi-GPU** via
+> `--tensor-split` and `--split-mode`, NOT NCCL. NCCL is for distributed
+> training (AllReduce, Broadcast), which llama.cpp inference doesn't use.
+> 
+> The `llcuda.api.nccl` module remains available for users who want to
+> integrate with PyTorch distributed or other NCCL-based workflows.
+
+### Changed
+- **Version**: Updated to 2.2.0
+- **Description**: Updated to emphasize "Unsloth inference backend" positioning
+- **Build Targets**: Primary focus on Kaggle 2× T4 with SM 7.5 optimization
+
+### Build Configuration
+```bash
+cmake -B build -G Ninja \
+    -DGGML_CUDA=ON \
+    -DCMAKE_CUDA_ARCHITECTURES="75" \
+    -DGGML_CUDA_FA_ALL_QUANTS=ON \
+    -DGGML_NATIVE=OFF \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DLLAMA_BUILD_SERVER=ON
+```
+
+### Multi-GPU CLI Reference
+| Flag | Description | Kaggle Default |
+|------|-------------|----------------|
+| `-ngl 99` | Offload all layers | Required |
+| `--tensor-split` | VRAM per GPU | `0.5,0.5` |
+| `--split-mode` | Split strategy | `layer` |
+| `-fa` | FlashAttention | Recommended |
+
+---
+
+## [2.1.2] - 2026-01-17
+
+### 🚀 Major Release: Multi-GPU Support, Full llama.cpp Server API, GGUF Tools
+
+This major release adds comprehensive multi-GPU support for Kaggle (2× Tesla T4), 
+complete llama.cpp server API coverage, and advanced GGUF model utilities.
+
+### Added
+
+#### 1. Multi-GPU Support (`llcuda.api.multigpu`)
+- **Kaggle Dual T4 Configuration**: Pre-configured for Kaggle's 2× Tesla T4 GPUs
+  - `kaggle_t4_dual_config()`: Get optimal configuration for 30GB total VRAM
+  - `colab_t4_single_config()`: Configuration for Google Colab single T4
+  - `auto_config()`: Automatic GPU detection and configuration
+- **GPU Detection**: Comprehensive GPU information
+  - `detect_gpus()`: Detect all NVIDIA GPUs with full specs
+  - `get_total_vram()`, `get_free_vram()`: VRAM queries
+  - `is_multi_gpu()`, `gpu_count()`: Quick checks
+- **VRAM Estimation**: Plan model deployments
+  - `estimate_model_vram()`: Estimate VRAM for model+quantization+context
+  - `can_fit_model()`: Check if model fits in available VRAM
+  - `recommend_quantization()`: Get best quant for available VRAM
+
+#### 2. Full llama.cpp Server API (`llcuda.api.client`)
+- **LlamaCppClient**: Comprehensive Python client for all server endpoints
+  - OpenAI-compatible `/v1/chat/completions`, `/v1/completions`, `/v1/embeddings`
+  - Native llama.cpp `/completion` with full sampling parameters
+  - Streaming support with SSE
+- **Advanced Sampling**: All llama.cpp sampling parameters
+  - Temperature, top_k, top_p, min_p, typical_p
+  - Mirostat 1 & 2 with tau/eta control
+  - DRY (Don't Repeat Yourself) sampling
+  - XTC (eXtended Token Control) sampling
+  - Dynamic temperature
+- **Specialized Endpoints**:
+  - `client.chat.completions.create()`: OpenAI-style chat
+  - `client.complete()`: Native completion with all params
+  - `client.tokenize()`, `client.detokenize()`: Tokenization
+  - `client.embed()`, `client.rerank()`: Embeddings & reranking
+  - `client.apply_template()`: Inspect formatted prompts
+  - `client.infill()`: Fill-in-the-middle code completion
+  - `client.health()`, `client.metrics()`: Monitoring
+- **Management APIs**:
+  - `client.models.list()`, `.load()`, `.unload()`: Model management
+  - `client.slots.list()`, `.save()`, `.restore()`, `.erase()`: KV cache control
+  - `client.lora.list()`, `.set_scales()`: LoRA adapter management
+
+#### 3. GGUF Model Utilities (`llcuda.api.gguf`)
+- **Model Parsing**: Read GGUF file metadata without loading
+  - `parse_gguf_header()`: Extract all metadata and tensor info
+  - `get_model_summary()`: Human-readable model description
+  - `validate_gguf()`: Verify GGUF file integrity
+  - `compare_models()`: Compare two GGUF models
+- **Quantization Tools**: Wrap llama.cpp quantization tools
+  - `quantize()`: Quantize models to different precisions
+  - `generate_imatrix()`: Create importance matrix for better quants
+  - `merge_lora()`: Merge LoRA adapter into base model
+- **Conversion**: HuggingFace to GGUF
+  - `convert_hf_to_gguf()`: Convert HF models to GGUF format
+  - `find_gguf_models()`: Discover GGUF files in directories
+
+#### 4. NCCL Integration (`llcuda.api.nccl`)
+- **NCCL Support**: Multi-GPU communication primitives
+  - `is_nccl_available()`, `get_nccl_version()`: Check NCCL availability
+  - `NCCLCommunicator`: High-level communicator interface
+  - `kaggle_nccl_config()`: Pre-configured for Kaggle
+  - `setup_nccl_environment()`: Configure NCCL env variables
+
+### Changed
+- **Version**: Updated to 2.1.2
+- **Dependencies**: Added `sseclient-py>=1.7.0` for streaming support
+- **Keywords**: Added multi-gpu, kaggle, nccl, openai-api
+
+### Build
+- **Kaggle Build Notebook**: `notebooks/build_llcuda_v2_1_2_kaggle_t4x2.ipynb`
+  - Complete build script for Kaggle 2× T4
+  - Builds with `-DCMAKE_CUDA_ARCHITECTURES="75"` for Turing
+  - FlashAttention enabled for all quantization types
+  - Multi-GPU tensor parallelism support
+
+---
+
 ## [2.1.1] - 2026-01-16
 
 ### 🎯 Colab-Focused Refresh: Enhanced Reliability
