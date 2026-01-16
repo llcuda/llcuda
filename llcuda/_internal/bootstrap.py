@@ -27,24 +27,24 @@ except ImportError:
     HF_AVAILABLE = False
 
 
-# Configuration for llcuda v2.1.1 (now uses dedicated v2.1.1 binaries with fallback)
-BINARY_VERSION = "2.1.1"
-PRIMARY_BINARY_BUNDLE = f"llcuda-binaries-cuda12-t4-v{BINARY_VERSION}.tar.gz"
-FALLBACK_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.0.6.tar.gz"
+# Configuration for llcuda v2.2.0 (Kaggle dual T4 with fallback to Colab single T4)
+BINARY_VERSION = "2.2.0"
+PRIMARY_BINARY_BUNDLE = f"llcuda-v{BINARY_VERSION}-cuda12-kaggle-t4x2.tar.gz"
+FALLBACK_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.1.1.tar.gz"
 GITHUB_RELEASE_URL = "https://github.com/llcuda/llcuda/releases/download"
 HF_REPO_ID = "waqasm86/llcuda-models"
 
 # Binary bundle preference order (primary → fallback)
 BINARY_BUNDLE_CANDIDATES = [
     {"version": BINARY_VERSION, "filename": PRIMARY_BINARY_BUNDLE, "label": "primary"},
-    {"version": "2.0.6", "filename": FALLBACK_BINARY_BUNDLE, "label": "fallback"},
+    {"version": "2.1.1", "filename": FALLBACK_BINARY_BUNDLE, "label": "fallback"},
 ]
 
 # Legacy constant retained for downstream tooling/documentation
 T4_BINARY_BUNDLE = PRIMARY_BINARY_BUNDLE
 T4_NATIVE_BUNDLE = "llcuda-v2-native-t4.tar.gz"        # ~100 MB
 
-# Minimum compute capability for llcuda v2.1
+# Minimum compute capability for llcuda v2.2
 MIN_COMPUTE_CAPABILITY = 7.5  # Tesla T4, RTX 20xx+, A100, H100
 
 # Paths
@@ -289,15 +289,15 @@ def download_t4_binaries() -> None:
     else:
         print("❌ No NVIDIA GPU detected")
         print()
-        print("llcuda v2.1 requires an NVIDIA GPU with SM 7.5+ (Tesla T4 or newer)")
+        print("llcuda v2.2 requires an NVIDIA GPU with SM 7.5+ (Tesla T4 or newer)")
         raise RuntimeError("No compatible NVIDIA GPU found")
 
     print(f"🌐 Platform: {platform.capitalize()}")
     print()
 
     # Download T4 binary bundle (primary bundle with fallback)
-    print("📦 Downloading T4-optimized binaries (primary v2.1.1, fallback v2.0.6)...")
-    print("    Features: FlashAttention + Tensor Cores + CUDA Graphs")
+    print("📦 Downloading T4-optimized binaries (primary v2.2.0, fallback v2.1.1)...")
+    print("    Features: FlashAttention + Tensor Cores + Multi-GPU Support")
     print()
 
     install_success = False
@@ -429,10 +429,10 @@ def download_default_model() -> None:
 
 def bootstrap() -> None:
     """
-    Main bootstrap function for llcuda v2.1.1 - called on first import.
+    Main bootstrap function for llcuda v2.2.0 - called on first import.
 
     Downloads T4-optimized binaries from GitHub Releases on first import.
-    Uses v2.0.6 binaries (100% compatible with v2.1.1 pure Python APIs).
+    Uses v2.2.0 Kaggle dual-T4 binaries (with v2.1.1 fallback).
     Models are downloaded on-demand when load_model() is called.
 
     Raises:

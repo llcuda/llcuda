@@ -59,7 +59,9 @@ share/python-wheels/
 build/
 build-artifacts/
 release-packages/
-releases/
+# Release tarballs are uploaded to GitHub Releases, not committed
+releases/**/*.tar.gz
+releases/**/*.sha256
 dist/
 *.egg-info/
 logs/
@@ -122,7 +124,8 @@ desktop.ini
 *.bak
 *.log
 
-# Old version files (v2.1.x and earlier)
+# Old version files (v2.1.x and earlier) - archived, not committed
+archive/
 *v2.0*
 *v2.1.0*
 *v2.1.1*
