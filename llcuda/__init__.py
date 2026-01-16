@@ -1,14 +1,14 @@
 """
-llcuda - Clean, Ultra-Lightweight CUDA-Accelerated LLM Inference for Python 3.11+
+llcuda - CUDA 12 Inference Backend for Unsloth
 
-Version 2.1.2 - Multi-GPU Support, Full llama.cpp Server API, GGUF Tools
+Version 2.2.0 - Unsloth Inference Backend + Kaggle Dual T4 Multi-GPU
 
 Features:
-    - Multi-GPU inference (Kaggle 2×T4, multi-GPU setups)
+    - Multi-GPU inference (Kaggle 2×T4, native --tensor-split)
     - Full llama.cpp server API coverage (OpenAI-compatible)
     - GGUF model utilities (parsing, quantization, conversion)
     - 62KB package with auto-download of CUDA binaries
-    - No manual setup required - just pip install and use!
+    - Seamless Unsloth → GGUF → llcuda inference workflow
 
 Examples:
     Basic usage (auto-download model from registry):
