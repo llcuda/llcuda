@@ -43,7 +43,7 @@ class ServerManager:
     # Binary bundles used when bootstrap-installed binaries are missing
     _BINARY_RELEASE_BASE = "https://github.com/llcuda/llcuda/releases/download"
     _BINARY_BUNDLES = [
-        {"version": "2.1.0", "filename": "llcuda-binaries-cuda12-t4-v2.1.0.tar.gz", "label": "primary"},
+        {"version": "2.1.1", "filename": "llcuda-binaries-cuda12-t4-v2.1.1.tar.gz", "label": "primary"},
         {"version": "2.0.6", "filename": "llcuda-binaries-cuda12-t4-v2.0.6.tar.gz", "label": "fallback"},
     ]
 

@@ -28,8 +28,8 @@ except ImportError:
     HF_AVAILABLE = False
 
 
-# Configuration for llcuda v2.1.0 (now uses dedicated v2.1.0 binaries with fallback)
-BINARY_VERSION = "2.1.0"
+# Configuration for llcuda v2.1.1 (now uses dedicated v2.1.1 binaries with fallback)
+BINARY_VERSION = "2.1.1"
 PRIMARY_BINARY_BUNDLE = f"llcuda-binaries-cuda12-t4-v{BINARY_VERSION}.tar.gz"
 FALLBACK_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.0.6.tar.gz"
 GITHUB_RELEASE_URL = "https://github.com/llcuda/llcuda/releases/download"
@@ -297,7 +297,7 @@ def download_t4_binaries() -> None:
     print()
 
     # Download T4 binary bundle (primary bundle with fallback)
-    print("📦 Downloading T4-optimized binaries (primary v2.1.0, fallback v2.0.6)...")
+    print("📦 Downloading T4-optimized binaries (primary v2.1.1, fallback v2.0.6)...")
     print("    Features: FlashAttention + Tensor Cores + CUDA Graphs")
     print()
 
@@ -430,10 +430,10 @@ def download_default_model() -> None:
 
 def bootstrap() -> None:
     """
-    Main bootstrap function for llcuda v2.1.0 - called on first import.
+    Main bootstrap function for llcuda v2.1.1 - called on first import.
 
     Downloads T4-optimized binaries from GitHub Releases on first import.
-    Uses v2.0.6 binaries (100% compatible with v2.1.0 pure Python APIs).
+    Uses v2.0.6 binaries (100% compatible with v2.1.1 pure Python APIs).
     Models are downloaded on-demand when load_model() is called.
 
     Raises:
