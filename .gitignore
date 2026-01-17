@@ -88,9 +88,6 @@ dmypy.json
 .ipynb_checkpoints/
 */.ipynb_checkpoints/
 
-# Build notebooks (kept private - not for public distribution)
-notebooks/*.ipynb
-
 # Local notebooks - personal/development notebooks (not for GitHub)
 notebooks-local/
 
