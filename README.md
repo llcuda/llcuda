@@ -4,17 +4,54 @@
 [![Python](https://img.shields.io/badge/python-3.11+-brightgreen.svg)](https://python.org)
 [![CUDA](https://img.shields.io/badge/CUDA-12.x-green.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Kaggle](https://img.shields.io/badge/Kaggle-2×T4-orange.svg)](https://kaggle.com)
 
-**CUDA 12 inference backend for Unsloth** — lightweight Python package with auto-download binaries for Tesla T4 and multi-GPU inference.
+**CUDA 12 inference backend for Unsloth** — lightweight Python package with auto-download binaries for Tesla T4 and multi-GPU inference on Kaggle.
+
+---
+
+## 📖 Table of Contents
+
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Multi-GPU Inference](#-multi-gpu-kaggle-2-t4)
+- [Unsloth Integration](#-unsloth-integration)
+- [Split-GPU Architecture](#-split-gpu-architecture)
+- [Features](#-features)
+- [Performance](#-performance)
+- [Tutorial Notebooks](#-tutorial-notebooks)
+- [Documentation](#-documentation)
+- [Requirements](#-requirements)
+
+---
 
 ## 🚀 Installation
 
+### From GitHub (Recommended)
 ```bash
 pip install git+https://github.com/llcuda/llcuda.git@v2.2.0
 ```
 
+### Development Install
+```bash
+git clone https://github.com/llcuda/llcuda.git
+cd llcuda
+pip install -e .
+```
+
+### Verify Installation
+```python
+import llcuda
+print(f"llcuda {llcuda.__version__}")  # 2.2.0
+```
+
+📘 **[Full Installation Guide →](docs/INSTALLATION.md)**
+
+---
+
 ## ⚡ Quick Start
 
+### Basic Inference
 ```python
 import llcuda
 
@@ -24,16 +61,65 @@ result = engine.infer("What is AI?", max_tokens=100)
 print(result.text)
 ```
 
+### Using llama-server
+```python
+from llcuda.server import ServerManager, ServerConfig
+
+config = ServerConfig(
+    model_path="model.gguf",
+    n_gpu_layers=99,
+    flash_attn=True,
+)
+
+server = ServerManager()
+server.start_with_config(config)
+server.wait_until_ready()
+
+# Now use OpenAI API at http://127.0.0.1:8080
+```
+
+📘 **[Quick Start Guide →](QUICK_START.md)**
+
+---
+
 ## 🎯 Multi-GPU (Kaggle 2× T4)
 
+### Architecture
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              KAGGLE DUAL T4 MULTI-GPU INFERENCE                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   GPU 0: Tesla T4 (15GB)    GPU 1: Tesla T4 (15GB)             │
+│   ├─ Model Layers 0-39      ├─ Model Layers 40-79              │
+│   └─ ~14GB VRAM             └─ ~14GB VRAM                      │
+│                                                                 │
+│           ← tensor-split 0.5,0.5 (native CUDA) →               │
+│                                                                 │
+│   Total: 30GB VRAM for models up to 70B (IQ3_XS)              │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Start Multi-GPU Server
+```bash
+./bin/llama-server \
+    -m model.gguf \
+    -ngl 99 \
+    --tensor-split 0.5,0.5 \
+    --split-mode layer \
+    -fa \
+    --host 0.0.0.0 \
+    --port 8080
+```
+
+### Python API
 ```python
 from llcuda.api import LlamaCppClient, kaggle_t4_dual_config
 
-# Get optimal config for Kaggle dual T4
 config = kaggle_t4_dual_config()
 print(config.to_cli_args())
 
-# Connect to server
 client = LlamaCppClient("http://localhost:8080")
 response = client.chat.completions.create(
     messages=[{"role": "user", "content": "Hello!"}],
@@ -42,14 +128,71 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-Start the server with:
-```bash
-./bin/llama-server -m model.gguf -ngl 99 --tensor-split 0.5,0.5 --split-mode layer -fa on --host 0.0.0.0 --port 8080
+> **Note:** llama.cpp uses **native CUDA tensor-split**, NOT NCCL.
+> NCCL is available for PyTorch distributed workloads.
+
+📘 **[Kaggle Multi-GPU Guide →](docs/KAGGLE_GUIDE.md)**
+
+---
+
+## 🔗 Unsloth Integration
+
+Complete workflow from fine-tuning to deployment:
+
+```python
+# ═══════════════════════════════════════════════════════════════
+# STEP 1: Fine-tune with Unsloth
+# ═══════════════════════════════════════════════════════════════
+from unsloth import FastLanguageModel
+
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name="unsloth/Qwen2.5-1.5B-Instruct",
+    max_seq_length=2048,
+    load_in_4bit=True,
+)
+
+# Add LoRA and train...
+
+# ═══════════════════════════════════════════════════════════════
+# STEP 2: Export to GGUF
+# ═══════════════════════════════════════════════════════════════
+model.save_pretrained_gguf(
+    "my_model",
+    tokenizer,
+    quantization_method="q4_k_m"  # Recommended for T4
+)
+
+# ═══════════════════════════════════════════════════════════════
+# STEP 3: Deploy with llcuda
+# ═══════════════════════════════════════════════════════════════
+from llcuda.server import ServerManager, ServerConfig
+
+server = ServerManager()
+server.start_with_config(ServerConfig(
+    model_path="my_model-Q4_K_M.gguf",
+    n_gpu_layers=99,
+    tensor_split="0.5,0.5",  # Dual T4
+    flash_attn=True,
+))
 ```
+
+📘 **[Unsloth Integration Guide →](notebooks/05-unsloth-integration-llcuda-v2.2.0.ipynb)**
+
+---
 
 ## 🔧 Split-GPU Architecture
 
-For combined LLM + Graph workloads on Kaggle:
+Run LLM inference on GPU 0 while using GPU 1 for RAPIDS/Graphistry analytics:
+
+```
+┌─────────────────┐      ┌─────────────────┐
+│   GPU 0 (T4)    │      │   GPU 1 (T4)    │
+├─────────────────┤      ├─────────────────┤
+│ llama-server    │      │ RAPIDS cuDF     │
+│ LLM Inference   │      │ cuGraph         │
+│ ~5-12 GB        │      │ Graphistry      │
+└─────────────────┘      └─────────────────┘
+```
 
 ```python
 from llcuda import SplitGPUConfig
@@ -58,6 +201,10 @@ config = SplitGPUConfig(llm_gpu=0, graph_gpu=1)
 # GPU 0: llama-server (LLM inference)
 # GPU 1: RAPIDS cuGraph (graph visualization)
 ```
+
+📘 **[Split-GPU Tutorial →](notebooks/06-split-gpu-graphistry-llcuda-v2.2.0.ipynb)**
+
+---
 
 ## ✨ Features
 
@@ -68,15 +215,94 @@ config = SplitGPUConfig(llm_gpu=0, graph_gpu=1)
 | **Split-GPU** | LLM + RAPIDS/Graphistry workloads |
 | **OpenAI API** | Full llama.cpp server compatibility |
 | **GGUF Tools** | Parse, quantize, convert models |
-| **Auto-download** | 62KB package, 961MB binaries fetched on first run |
+| **Auto-download** | 62KB package, binaries fetched on first run |
+| **70B Support** | IQ3_XS quantization fits dual T4 |
+| **Streaming** | Server-sent events for real-time output |
+
+---
 
 ## 📊 Performance
 
-| Platform | GPU | Model | Tokens/sec |
-|----------|-----|-------|------------|
-| Colab | T4 | Gemma 3-1B | ~45 tok/s |
-| Kaggle | 2× T4 | Gemma 2-2B | ~60 tok/s |
-| Kaggle | 2× T4 | Llama 3.1 70B IQ3_XS | ~12 tok/s |
+| Platform | GPU | Model | Quantization | Tokens/sec |
+|----------|-----|-------|--------------|------------|
+| Colab | T4 | Gemma 3-1B | Q4_K_M | ~45 tok/s |
+| Kaggle | 2× T4 | Gemma 2-2B | Q4_K_M | ~60 tok/s |
+| Kaggle | 2× T4 | Qwen2.5-7B | Q4_K_M | ~35 tok/s |
+| Kaggle | 2× T4 | Llama-3.1-70B | IQ3_XS | ~8-12 tok/s |
+
+### VRAM Requirements
+
+| Model Size | Quantization | VRAM | Fits Kaggle? |
+|------------|--------------|------|--------------|
+| 1-3B | Q4_K_M | 2-3 GB | ✅ Single T4 |
+| 7-8B | Q4_K_M | 5-6 GB | ✅ Single T4 |
+| 13B | Q4_K_M | 8-9 GB | ✅ Single T4 |
+| 32-34B | Q4_K_M | 20-22 GB | ✅ Dual T4 |
+| 70B | IQ3_XS | 25-27 GB | ✅ Dual T4 |
+
+---
+
+## 📓 Tutorial Notebooks
+
+Comprehensive Kaggle-ready tutorials in [`notebooks/`](notebooks/):
+
+| # | Notebook | Description |
+|---|----------|-------------|
+| 01 | [Quick Start](notebooks/01-quickstart-llcuda-v2.2.0.ipynb) | 5-minute introduction |
+| 02 | [Server Setup](notebooks/02-llama-server-setup-llcuda-v2.2.0.ipynb) | Advanced server configuration |
+| 03 | [Multi-GPU](notebooks/03-multi-gpu-inference-llcuda-v2.2.0.ipynb) | Dual T4 tensor-split |
+| 04 | [GGUF Quantization](notebooks/04-gguf-quantization-llcuda-v2.2.0.ipynb) | Complete quantization guide |
+| 05 | [Unsloth Integration](notebooks/05-unsloth-integration-llcuda-v2.2.0.ipynb) | Train → Export → Deploy |
+| 06 | [Split-GPU + Graphistry](notebooks/06-split-gpu-graphistry-llcuda-v2.2.0.ipynb) | LLM + RAPIDS analytics |
+| 07 | [OpenAI API Client](notebooks/07-openai-api-client-llcuda-v2.2.0.ipynb) | Full API reference |
+| 08 | [NCCL + PyTorch](notebooks/08-nccl-pytorch-llcuda-v2.2.0.ipynb) | Distributed training |
+| 09 | [Large Models](notebooks/09-large-models-kaggle-llcuda-v2.2.0.ipynb) | 70B on dual T4 |
+| 10 | [Complete Workflow](notebooks/10-complete-workflow-llcuda-v2.2.0.ipynb) | End-to-end tutorial |
+
+📘 **[Notebooks Index →](notebooks/README.md)**
+
+---
+
+## 📚 Documentation
+
+### Core Documentation
+| Document | Description |
+|----------|-------------|
+| [QUICK_START.md](QUICK_START.md) | Get started in 5 minutes |
+| [INSTALL.md](INSTALL.md) | Detailed installation guide |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
+
+### In-Depth Guides
+| Document | Description |
+|----------|-------------|
+| [docs/INSTALLATION.md](docs/INSTALLATION.md) | Complete installation reference |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Server & client configuration |
+| [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | Python API documentation |
+| [docs/KAGGLE_GUIDE.md](docs/KAGGLE_GUIDE.md) | Kaggle-specific guide |
+| [docs/GGUF_GUIDE.md](docs/GGUF_GUIDE.md) | GGUF format & quantization |
+| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues & solutions |
+
+### Contributing
+| Document | Description |
+|----------|-------------|
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
+| [docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md) | Building from source |
+
+---
+
+## 📋 Requirements
+
+- **Python:** 3.11+
+- **CUDA:** 12.x
+- **GPU:** Tesla T4 or compatible (SM 7.5+)
+- **Platform:** Linux (Kaggle, Colab, or local)
+
+### Recommended Kaggle Settings
+- GPU: T4 × 2
+- Internet: Enabled
+- Persistence: Enabled (for builds)
+
+---
 
 ## 📦 Binary Package
 
@@ -84,18 +310,58 @@ config = SplitGPUConfig(llm_gpu=0, graph_gpu=1)
 |------|------|----------|
 | `llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz` | 961 MB | Kaggle 2× T4 |
 
-**Contents:** 13 binaries (llama-server, llama-cli, llama-quantize, etc.)
+**Build Info:**
+- CUDA 12.5, SM 7.5 (Turing)
+- llama.cpp b7760 (commit 388ce82)
+- Build Date: 2026-01-16
+- Contents: 13 binaries (llama-server, llama-cli, llama-quantize, etc.)
 
-## 📋 Requirements
+---
 
-- Python 3.11+
-- CUDA 12.x
-- Tesla T4 or compatible (SM 7.5+)
+## 🤝 Contributing
 
-## 📚 Documentation
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-- [Quick Start](QUICK_START.md) · [Installation](INSTALL.md) · [Changelog](CHANGELOG.md)
+```bash
+# Development setup
+git clone https://github.com/llcuda/llcuda.git
+cd llcuda
+pip install -e ".[dev]"
+pytest tests/
+```
+
+---
 
 ## 📄 License
 
 MIT — see [LICENSE](LICENSE)
+
+---
+
+## 📓 Tutorial Notebooks (10 notebooks)
+
+Complete tutorial series for llcuda v2.2.0 on Kaggle dual T4 GPUs. Click the badges to open directly in Kaggle or view on GitHub.
+
+| # | Notebook | Open in Kaggle | Description |
+|---|----------|----------------|-------------|
+| 01 | [Quick Start](notebooks/01-quickstart-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/01-quickstart-llcuda-v2.2.0.ipynb) | 5-minute introduction to llcuda |
+| 02 | [Llama Server Setup](notebooks/02-llama-server-setup-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/02-llama-server-setup-llcuda-v2.2.0.ipynb) | Server configuration & lifecycle |
+| 03 | [Multi-GPU Inference](notebooks/03-multi-gpu-inference-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/03-multi-gpu-inference-llcuda-v2.2.0.ipynb) | Dual T4 tensor-split configuration |
+| 04 | [GGUF Quantization](notebooks/04-gguf-quantization-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/04-gguf-quantization-llcuda-v2.2.0.ipynb) | K-quants, I-quants, GGUF parsing |
+| 05 | [Unsloth Integration](notebooks/05-unsloth-integration-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/05-unsloth-integration-llcuda-v2.2.0.ipynb) | Fine-tune → GGUF → Deploy |
+| 06 | [Split-GPU + Graphistry](notebooks/06-split-gpu-graphistry-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/06-split-gpu-graphistry-llcuda-v2.2.0.ipynb) | LLM on GPU 0 + RAPIDS on GPU 1 |
+| 07 | [OpenAI API Client](notebooks/07-openai-api-client-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/07-openai-api-client-llcuda-v2.2.0.ipynb) | Drop-in OpenAI SDK replacement |
+| 08 | [NCCL + PyTorch](notebooks/08-nccl-pytorch-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/08-nccl-pytorch-llcuda-v2.2.0.ipynb) | NCCL for distributed PyTorch |
+| 09 | [Large Models (70B)](notebooks/09-large-models-kaggle-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/09-large-models-kaggle-llcuda-v2.2.0.ipynb) | 70B models on Kaggle with IQ3_XS |
+| 10 | [Complete Workflow](notebooks/10-complete-workflow-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/10-complete-workflow-llcuda-v2.2.0.ipynb) | End-to-end production workflow |
+
+### 🎯 Learning Paths
+
+| Path | Notebooks | Time | Focus |
+|------|-----------|------|-------|
+| **Quick Start** | 01 → 02 → 03 | 1 hour | Get running fast |
+| **Full Course** | 01 → 10 (all) | 3 hours | Complete mastery |
+| **Unsloth Focus** | 01 → 04 → 05 → 10 | 2 hours | Fine-tuning workflow |
+| **Large Models** | 01 → 03 → 09 | 1.5 hours | 70B on Kaggle |
+
+📘 **[Full Notebook Guide →](notebooks/README.md)**

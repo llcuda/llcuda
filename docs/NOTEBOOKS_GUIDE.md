@@ -1,25 +1,26 @@
-# Google Colab Notebooks Guide - llcuda + Unsloth
+# Google Colab & Kaggle Notebooks Guide - llcuda + Unsloth
 
 **Created**: January 7, 2026
-**Purpose**: Build and use llcuda v2.0.1 with Unsloth on Tesla T4
+**Updated**: January 17, 2026
+**Purpose**: Build and use llcuda v2.2.0 with Unsloth on Kaggle 2× T4
 
 ---
 
 ## 📚 Available Notebooks
 
-I've created two comprehensive Google Colab notebooks for you:
+I've created comprehensive notebooks for Kaggle and Google Colab:
 
-### 1. **Build Notebook** (Complete CUDA 12 Binary Build)
-**File**: `llcuda_unsloth_t4_complete_build.ipynb`
+### 1. **Build Notebook** (Complete CUDA 12.5 Binary Build)
+**File**: `build_llcuda_v2_2_0_kaggle_t4x2_complete.ipynb`
 
 **What it does**:
 - ✅ Clones llama.cpp and llcuda repositories
-- ✅ Builds llama.cpp with CUDA 12 + FlashAttention for Tesla T4
-- ✅ Builds llcuda v2.0.1 Python package
+- ✅ Builds llama.cpp with CUDA 12.5 + FlashAttention for Kaggle 2× T4
+- ✅ Builds llcuda v2.2.0 Python package
 - ✅ Creates **ONE unified tar file** containing everything
-- ✅ Downloads the complete package (~350-400 MB)
+- ✅ Downloads the complete package (~961 MB)
 
-**Output**: `llcuda-complete-cuda12-t4.tar.gz`
+**Output**: `llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz`
 
 **Time required**: ~15-20 minutes
 
@@ -27,17 +28,17 @@ I've created two comprehensive Google Colab notebooks for you:
 
 ---
 
-### 2. **Tutorial Notebook** (Usage with Unsloth)
-**File**: `llcuda_unsloth_tutorial.ipynb`
+### 2. **Tutorial Notebooks** (Usage with Unsloth)
+**Files**: `notebooks/01-quickstart-llcuda-v2.2.0.ipynb` through `10-complete-workflow-llcuda-v2.2.0.ipynb`
 
-**What it does**:
-- ✅ Installs llcuda v2.0.1 (auto-downloads binaries)
-- ✅ Loads Unsloth GGUF models (Gemma 3-1B)
-- ✅ Demonstrates fast inference on Tesla T4
-- ✅ Shows batch processing and performance metrics
-- ✅ Explains Unsloth → llcuda workflow
+**What they do**:
+- ✅ Install llcuda v2.2.0 (auto-downloads ~961 MB binaries)
+- ✅ Load Unsloth GGUF models (Gemma 3-1B, 70B, etc.)
+- ✅ Demonstrate fast inference on Kaggle 2× T4
+- ✅ Show multi-GPU, split-GPU, and RAPIDS integration
+- ✅ Explain Unsloth → llcuda workflow
 
-**Time required**: ~5-10 minutes
+**Time required**: ~5-30 minutes depending on notebook
 
 **When to use**: When you want to use llcuda with Unsloth models
 
@@ -62,9 +63,9 @@ I've created two comprehensive Google Colab notebooks for you:
    - Test inference with Unsloth models
 
 4. **Expected Results**:
-   - llcuda v2.0.1 installed
-   - Binaries auto-downloaded (~140 MB, one-time)
-   - Gemma 3-1B running at ~45 tok/s
+   - llcuda v2.2.0 installed
+   - Binaries auto-downloaded (~961 MB, one-time)
+   - Gemma 3-1B running at ~45-60 tok/s
 
 ---
 

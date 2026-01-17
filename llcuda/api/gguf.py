@@ -111,6 +111,59 @@ QUANT_TYPE_NAMES = {
 
 
 # =============================================================================
+# Quantization Type Information (from gguf-docs by Julia Turc)
+# =============================================================================
+
+@dataclass
+class QuantTypeInfo:
+    """
+    Quantization type information.
+    
+    Based on gguf-docs (https://github.com/iuliaturc/gguf-docs)
+    """
+    name: str
+    generation: str  # "legacy", "k-quant", "i-quant"
+    bits_per_weight: float  # Approximate bits per weight
+    quality_score: int  # 1-10 relative quality
+    requires_imatrix: bool  # Whether importance matrix is recommended
+    description: str
+
+
+# Quantization type details for user guidance
+QUANT_TYPE_INFO = {
+    # Legacy quants (1st generation) - affine scalar quantization
+    "Q4_0": QuantTypeInfo("Q4_0", "legacy", 4.0, 5, False, "4-bit symmetric quantization"),
+    "Q4_1": QuantTypeInfo("Q4_1", "legacy", 4.5, 6, False, "4-bit asymmetric quantization with offset"),
+    "Q5_0": QuantTypeInfo("Q5_0", "legacy", 5.0, 6, False, "5-bit symmetric quantization"),
+    "Q5_1": QuantTypeInfo("Q5_1", "legacy", 5.5, 7, False, "5-bit asymmetric quantization with offset"),
+    "Q8_0": QuantTypeInfo("Q8_0", "legacy", 8.0, 9, False, "8-bit symmetric quantization (near-lossless)"),
+    "Q8_1": QuantTypeInfo("Q8_1", "legacy", 8.5, 9, False, "8-bit asymmetric quantization"),
+    
+    # K-quants (2nd generation) - double quantization + mixed precision
+    "Q2_K": QuantTypeInfo("Q2_K", "k-quant", 2.6, 3, True, "2-bit K-quant with super-blocks"),
+    "Q3_K_S": QuantTypeInfo("Q3_K_S", "k-quant", 3.4, 5, True, "3-bit K-quant, small variant"),
+    "Q3_K_M": QuantTypeInfo("Q3_K_M", "k-quant", 3.9, 6, True, "3-bit K-quant, medium variant"),
+    "Q3_K_L": QuantTypeInfo("Q3_K_L", "k-quant", 4.3, 6, False, "3-bit K-quant, large variant"),
+    "Q4_K_S": QuantTypeInfo("Q4_K_S", "k-quant", 4.5, 7, False, "4-bit K-quant, small variant"),
+    "Q4_K_M": QuantTypeInfo("Q4_K_M", "k-quant", 4.8, 8, False, "4-bit K-quant, medium (RECOMMENDED)"),
+    "Q5_K_S": QuantTypeInfo("Q5_K_S", "k-quant", 5.5, 8, False, "5-bit K-quant, small variant"),
+    "Q5_K_M": QuantTypeInfo("Q5_K_M", "k-quant", 5.7, 9, False, "5-bit K-quant, medium variant"),
+    "Q6_K": QuantTypeInfo("Q6_K", "k-quant", 6.6, 9, False, "6-bit K-quant (best K-quant quality)"),
+    
+    # I-quants (3rd generation) - vector quantization
+    "IQ1_S": QuantTypeInfo("IQ1_S", "i-quant", 1.5, 1, True, "~1.5 bpw vector quant (experimental)"),
+    "IQ2_XXS": QuantTypeInfo("IQ2_XXS", "i-quant", 2.0, 2, True, "~2.0 bpw, extra extra small"),
+    "IQ2_XS": QuantTypeInfo("IQ2_XS", "i-quant", 2.3, 3, True, "~2.3 bpw, extra small"),
+    "IQ2_S": QuantTypeInfo("IQ2_S", "i-quant", 2.5, 4, True, "~2.5 bpw, small"),
+    "IQ3_XXS": QuantTypeInfo("IQ3_XXS", "i-quant", 3.0, 5, True, "~3.0 bpw, extra extra small"),
+    "IQ3_XS": QuantTypeInfo("IQ3_XS", "i-quant", 3.3, 6, True, "~3.3 bpw, extra small (good for 70B)"),
+    "IQ3_S": QuantTypeInfo("IQ3_S", "i-quant", 3.5, 6, True, "~3.5 bpw, small"),
+    "IQ4_XS": QuantTypeInfo("IQ4_XS", "i-quant", 4.0, 7, False, "~4.0 bpw, near Q4_K quality"),
+    "IQ4_NL": QuantTypeInfo("IQ4_NL", "i-quant", 4.5, 8, False, "~4.5 bpw, non-linear"),
+}
+
+
+# =============================================================================
 # Data Classes
 # =============================================================================
 
@@ -814,3 +867,157 @@ def get_recommended_quant(
             return quant
     
     return "F16"
+
+
+# =============================================================================
+# Kaggle T4 Quantization Helpers
+# =============================================================================
+
+def estimate_gguf_size(
+    param_count: int,
+    quant_type: str
+) -> float:
+    """
+    Estimate GGUF file size for a given model and quantization.
+    
+    Args:
+        param_count: Number of model parameters
+        quant_type: Quantization type (Q4_K_M, IQ3_XS, etc.)
+        
+    Returns:
+        Estimated file size in GB
+        
+    Example:
+        >>> size = estimate_gguf_size(7_000_000_000, "Q4_K_M")  # 7B model
+        >>> print(f"{size:.1f} GB")  # ~4.0 GB
+    """
+    # Get bits per weight from QUANT_TYPE_INFO
+    if quant_type in QUANT_TYPE_INFO:
+        bpw = QUANT_TYPE_INFO[quant_type].bits_per_weight
+    else:
+        # Default estimates
+        bpw_map = {
+            "F32": 32.0, "F16": 16.0, "BF16": 16.0,
+            "Q8_0": 8.0, "Q6_K": 6.6, "Q5_K_M": 5.7,
+            "Q4_K_M": 4.8, "Q4_0": 4.0, "Q3_K_M": 3.9,
+        }
+        bpw = bpw_map.get(quant_type, 4.8)
+    
+    # Size = params * bits_per_weight / 8 (bytes) / 1e9 (GB)
+    # Add ~10% overhead for metadata and quantization constants
+    size_gb = (param_count * bpw / 8 / 1e9) * 1.1
+    return size_gb
+
+
+def recommend_quant_for_kaggle(
+    param_count: int,
+    dual_t4: bool = True,
+    context_size: int = 4096,
+    prefer_quality: bool = True
+) -> Dict[str, Any]:
+    """
+    Recommend quantization for Kaggle T4 environment.
+    
+    Based on gguf-docs by Julia Turc.
+    
+    Args:
+        param_count: Number of model parameters (e.g., 7_000_000_000 for 7B)
+        dual_t4: Whether using dual T4 (30GB total) or single (15GB)
+        context_size: Target context window size
+        prefer_quality: Prefer quality over fitting larger models
+        
+    Returns:
+        Dictionary with recommendation details
+        
+    Example:
+        >>> rec = recommend_quant_for_kaggle(70_000_000_000, dual_t4=True)
+        >>> print(rec["quant_type"])  # "IQ3_XS"
+        >>> print(rec["fits"])  # True
+    """
+    available_vram = 30.0 if dual_t4 else 15.0
+    
+    # Reserve VRAM for KV cache: ~1GB per 4096 context for 7B model
+    # Scale proportionally with model size
+    kv_cache_gb = (context_size / 4096) * (param_count / 7e9) * 1.0
+    usable_vram = available_vram - kv_cache_gb - 1.0  # 1GB safety margin
+    
+    # Try quantizations in order of quality (descending)
+    quality_order = [
+        "Q8_0", "Q6_K", "Q5_K_M", "Q5_K_S",
+        "Q4_K_M", "Q4_K_S", "Q3_K_M", "Q3_K_S",
+        "IQ4_XS", "IQ3_XS", "IQ3_S", "IQ2_S", "IQ2_XS"
+    ]
+    
+    # If not preferring quality, try smaller quants first for large models
+    if not prefer_quality and param_count > 30e9:
+        quality_order = [
+            "IQ3_XS", "IQ3_S", "IQ4_XS", "Q3_K_M",
+            "Q4_K_M", "Q4_K_S", "Q5_K_M", "Q6_K"
+        ]
+    
+    for quant in quality_order:
+        estimated_size = estimate_gguf_size(param_count, quant)
+        if estimated_size <= usable_vram:
+            info = QUANT_TYPE_INFO.get(quant)
+            return {
+                "quant_type": quant,
+                "fits": True,
+                "estimated_size_gb": round(estimated_size, 1),
+                "usable_vram_gb": round(usable_vram, 1),
+                "headroom_gb": round(usable_vram - estimated_size, 1),
+                "quality_score": info.quality_score if info else 7,
+                "requires_imatrix": info.requires_imatrix if info else False,
+                "description": info.description if info else "",
+                "generation": info.generation if info else "k-quant",
+            }
+    
+    # Nothing fits
+    smallest_quant = "IQ2_XS"
+    return {
+        "quant_type": smallest_quant,
+        "fits": False,
+        "estimated_size_gb": round(estimate_gguf_size(param_count, smallest_quant), 1),
+        "usable_vram_gb": round(usable_vram, 1),
+        "headroom_gb": -1,
+        "quality_score": 3,
+        "requires_imatrix": True,
+        "description": "Model too large for Kaggle T4",
+        "generation": "i-quant",
+    }
+
+
+def print_quant_guide():
+    """
+    Print a guide to GGUF quantization types.
+    
+    Useful for interactive sessions in Kaggle notebooks.
+    """
+    print("=" * 70)
+    print("GGUF Quantization Guide for Kaggle T4")
+    print("=" * 70)
+    print()
+    print("LEGEND:")
+    print("  BPW = Bits Per Weight (lower = smaller file)")
+    print("  Quality = Relative quality score (1-10, higher = better)")
+    print("  Imatrix = Whether importance matrix is recommended")
+    print()
+    print("-" * 70)
+    print(f"{'Type':<12} {'Gen':<8} {'BPW':<6} {'Quality':<8} {'Imatrix':<8} Description")
+    print("-" * 70)
+    
+    # Group by generation
+    for gen in ["legacy", "k-quant", "i-quant"]:
+        for name, info in QUANT_TYPE_INFO.items():
+            if info.generation == gen:
+                imat = "Yes" if info.requires_imatrix else "No"
+                print(f"{name:<12} {info.generation:<8} {info.bits_per_weight:<6.1f} "
+                      f"{info.quality_score:<8} {imat:<8} {info.description}")
+    
+    print("-" * 70)
+    print()
+    print("KAGGLE RECOMMENDATIONS:")
+    print("  Single T4 (15GB): Q4_K_M for 7B, Q3_K_M for 13B")
+    print("  Dual T4 (30GB):   Q6_K for 7B, Q4_K_M for 13B, IQ3_XS for 70B")
+    print()
+    print("See: https://github.com/iuliaturc/gguf-docs")
+    print("=" * 70)

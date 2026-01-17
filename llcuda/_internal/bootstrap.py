@@ -1,12 +1,12 @@
 """
-llcuda v2.1 Bootstrap Module - Tesla T4 Only
+llcuda v2.2.0 Bootstrap Module - Kaggle Dual T4 GPUs
 
-This module handles first-time setup for llcuda v2.1:
+This module handles first-time setup for llcuda v2.2.0:
 - Verifies GPU is Tesla T4 or compatible (SM 7.5+)
-- Downloads T4-optimized CUDA 12 binaries (264 MB)
-- Downloads llcuda v2.1 native extension if needed
+- Downloads Kaggle dual T4 CUDA 12.5 binaries (~961 MB)
+- Downloads llcuda native extension if needed
 
-Designed for Google Colab and modern GPUs with Tensor Core support.
+Designed for Kaggle 2× T4 and modern GPUs with Tensor Core support.
 """
 
 import os
@@ -18,6 +18,7 @@ from collections import deque
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 import subprocess
+from llcuda import __version__
 
 try:
     from huggingface_hub import hf_hub_download
@@ -27,24 +28,24 @@ except ImportError:
     HF_AVAILABLE = False
 
 
-# Configuration for llcuda v2.2.0 (Kaggle dual T4 with fallback to Colab single T4)
+# Configuration for llcuda v2.2.0 (Kaggle dual T4 with fallback to v2.1.0)
 BINARY_VERSION = "2.2.0"
 PRIMARY_BINARY_BUNDLE = f"llcuda-v{BINARY_VERSION}-cuda12-kaggle-t4x2.tar.gz"
-FALLBACK_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.1.1.tar.gz"
+FALLBACK_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.1.0.tar.gz"
 GITHUB_RELEASE_URL = "https://github.com/llcuda/llcuda/releases/download"
 HF_REPO_ID = "waqasm86/llcuda-models"
 
 # Binary bundle preference order (primary → fallback)
 BINARY_BUNDLE_CANDIDATES = [
     {"version": BINARY_VERSION, "filename": PRIMARY_BINARY_BUNDLE, "label": "primary"},
-    {"version": "2.1.1", "filename": FALLBACK_BINARY_BUNDLE, "label": "fallback"},
+    {"version": "2.1.0", "filename": FALLBACK_BINARY_BUNDLE, "label": "fallback"},
 ]
 
 # Legacy constant retained for downstream tooling/documentation
 T4_BINARY_BUNDLE = PRIMARY_BINARY_BUNDLE
 T4_NATIVE_BUNDLE = "llcuda-v2-native-t4.tar.gz"        # ~100 MB
 
-# Minimum compute capability for llcuda v2.2
+# Minimum compute capability for llcuda v2.1
 MIN_COMPUTE_CAPABILITY = 7.5  # Tesla T4, RTX 20xx+, A100, H100
 
 # Paths
@@ -251,15 +252,16 @@ def locate_bin_and_lib_dirs(extract_root: Path) -> Optional[Tuple[Path, Path]]:
 
 def download_t4_binaries() -> None:
     """
-    Download and install T4-optimized CUDA 12 binaries for llcuda v2.1.
+    Download and install Kaggle 2× T4 optimized CUDA 12.5 binaries for llcuda v2.2.0.
 
-    This version uses the compatible v2.0.6 binaries as intended.
+    This version uses the v2.2.0 binaries built for Kaggle dual T4.
     Includes:
-    - llama-server (6.5 MB)
-    - libggml-cuda.so with FlashAttention (219 MB)
-    - Supporting libraries
+    - llama-server with multi-GPU support
+    - libggml-cuda.so with FlashAttention
+    - 13 binaries total (llama-cli, llama-quantize, etc.)
 
-    Total size: 264 MB
+    Total size: ~961 MB
+    Build: CUDA 12.5, SM 7.5 (Turing), llama.cpp b7760 (388ce82)
     """
     # Check if binaries already exist
     llama_server = BINARIES_DIR / "cuda12" / "llama-server"
@@ -268,7 +270,7 @@ def download_t4_binaries() -> None:
         return
 
     print("=" * 70)
-    print("🎯 llcuda v2.1 First-Time Setup - Tesla T4 Optimized")
+    print("🎯 llcuda v2.2.0 First-Time Setup - Kaggle 2× T4 Multi-GPU")
     print("=" * 70)
     print()
 
@@ -289,15 +291,15 @@ def download_t4_binaries() -> None:
     else:
         print("❌ No NVIDIA GPU detected")
         print()
-        print("llcuda v2.2 requires an NVIDIA GPU with SM 7.5+ (Tesla T4 or newer)")
+        print("llcuda v2.1 requires an NVIDIA GPU with SM 7.5+ (Tesla T4 or newer)")
         raise RuntimeError("No compatible NVIDIA GPU found")
 
     print(f"🌐 Platform: {platform.capitalize()}")
     print()
 
     # Download T4 binary bundle (primary bundle with fallback)
-    print("📦 Downloading T4-optimized binaries (primary v2.2.0, fallback v2.1.1)...")
-    print("    Features: FlashAttention + Tensor Cores + Multi-GPU Support")
+    print("📦 Downloading Kaggle 2× T4 binaries (primary v2.2.0, fallback v2.1.0)...")
+    print("    Features: FlashAttention + Tensor Cores + Multi-GPU tensor-split")
     print()
 
     install_success = False
@@ -314,7 +316,7 @@ def download_t4_binaries() -> None:
         print(f"   Source: {bundle_url}")
 
         if not cache_tarball.exists():
-            print(f"📥 Downloading binaries v{version} (~264 MB)...")
+            print(f"📥 Downloading binaries v{version} (~961 MB)...")
             try:
                 download_file(bundle_url, cache_tarball, f"Downloading T4 binaries v{version}")
                 print()
@@ -429,10 +431,10 @@ def download_default_model() -> None:
 
 def bootstrap() -> None:
     """
-    Main bootstrap function for llcuda v2.2.0 - called on first import.
+    Main bootstrap function for llcuda v2.1.0 - called on first import.
 
     Downloads T4-optimized binaries from GitHub Releases on first import.
-    Uses v2.2.0 Kaggle dual-T4 binaries (with v2.1.1 fallback).
+    Uses v2.0.6 binaries (100% compatible with v2.1.0 pure Python APIs).
     Models are downloaded on-demand when load_model() is called.
 
     Raises:

@@ -46,6 +46,19 @@ Unsloth handles training and fine-tuning, llcuda handles quantization and infere
 - **Description**: Updated to emphasize "Unsloth inference backend" positioning
 - **Build Targets**: Primary focus on Kaggle 2× T4 with SM 7.5 optimization
 
+### Binary Package
+| Asset | Size | SHA256 (prefix) |
+|-------|------|-----------------|
+| `llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz` | 961 MB | `489f3df54...` |
+| `llcuda-v2.2.0-source.tar.gz` | 203 KB | `e861eb9c2...` |
+
+### Build Info
+- **CUDA**: 12.5
+- **Compute Capability**: SM 7.5 (Turing)
+- **llama.cpp**: b7760 (commit 388ce82)
+- **Build Date**: 2026-01-16
+- **Contents**: 13 binaries (llama-server, llama-cli, llama-quantize, etc.)
+
 ### Build Configuration
 ```bash
 cmake -B build -G Ninja \
@@ -56,6 +69,12 @@ cmake -B build -G Ninja \
     -DBUILD_SHARED_LIBS=OFF \
     -DLLAMA_BUILD_SERVER=ON
 ```
+
+### Performance Benchmarks
+| Platform | GPU | Model | Tokens/sec |
+|----------|-----|-------|------------|
+| Kaggle | 2× T4 | Gemma 2-2B | ~60 tok/s |
+| Kaggle | 2× T4 | Llama 3.1 70B IQ3_XS | ~12 tok/s |
 
 ### Multi-GPU CLI Reference
 | Flag | Description | Kaggle Default |

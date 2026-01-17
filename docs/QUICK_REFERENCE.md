@@ -1,8 +1,9 @@
 # llcuda + Unsloth - Quick Reference Card
 
-**Version**: 2.0.1
-**Target**: Tesla T4 (SM 7.5)
-**Date**: January 7, 2026
+**Version**: 2.2.0
+**Target**: Kaggle 2× Tesla T4 (SM 7.5)
+**Build**: CUDA 12.5, llama.cpp b7760 (388ce82)
+**Date**: January 17, 2026
 
 ---
 
@@ -32,11 +33,11 @@
 
 ### 1. Build Notebook (25 KB)
 ```python
-# Creates: llcuda-complete-cuda12-t4.tar.gz (~350 MB)
+# Creates: llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz (~961 MB)
 
 Contains:
-- llama.cpp binaries (llama-server + FlashAttention)
-- CUDA libraries (libggml-cuda.so ~174 MB)
+- llama.cpp binaries (llama-server + 12 more tools)
+- CUDA libraries with FlashAttention
 - llcuda Python wheel
 - Installation scripts
 ```
@@ -46,7 +47,7 @@ Contains:
 
 ### 2. Tutorial Notebook (17 KB)
 ```python
-# Uses: pip install llcuda (auto-downloads binaries)
+# Uses: pip install llcuda (auto-downloads binaries ~961 MB)
 
 Demonstrates:
 - Load Unsloth GGUF models
@@ -166,7 +167,7 @@ C:\Users\CS-AprilVenture\Documents\Project-Waqas\
 
 ## 🔗 Links
 
-- **llcuda**: https://github.com/waqasm86/llcuda
+- **llcuda**: https://github.com/llcuda/llcuda
 - **Unsloth**: https://github.com/unslothai/unsloth
 - **Unsloth GGUF**: https://unsloth.ai/docs/basics/inference-and-deployment/saving-to-gguf
 - **llama.cpp**: https://github.com/ggml-org/llama.cpp
@@ -176,19 +177,19 @@ C:\Users\CS-AprilVenture\Documents\Project-Waqas\
 ## ✅ Quick Checklist
 
 Before running notebooks:
-- [ ] Google Colab account
-- [ ] Runtime set to GPU (T4)
-- [ ] Notebook uploaded to Colab
+- [ ] Kaggle account (or Google Colab)
+- [ ] Runtime set to GPU T4 × 2 (Kaggle) or T4 (Colab)
+- [ ] Notebook uploaded
 
 After running build notebook:
-- [ ] Downloaded tar file (~350 MB)
+- [ ] Downloaded tar file (~961 MB)
 - [ ] Extracted package
 - [ ] Ran install.sh (if deploying elsewhere)
 
 After running tutorial:
-- [ ] llcuda v2.0.1 installed
+- [ ] llcuda v2.2.0 installed
 - [ ] Tested with Gemma 3-1B
-- [ ] Speed ~45 tok/s on T4
+- [ ] Speed ~60 tok/s on Kaggle 2× T4
 
 ---
 

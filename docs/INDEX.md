@@ -216,7 +216,7 @@ import llcuda (first time)
    ↓
 Triggers bootstrap.py
    ↓
-Downloads llcuda-binaries-cuda12.tar.gz from GitHub Releases (~150MB)
+Downloads llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz from GitHub Releases (~961 MB)
    ↓
 Extracts to llcuda/binaries/cuda12/ and llcuda/lib/
    ↓

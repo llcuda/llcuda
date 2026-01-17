@@ -333,12 +333,12 @@ Check:
 python3.11 -m venv fresh_env
 source fresh_env/bin/activate
 
-# Install from PyPI
-pip install llcuda
+# Install from GitHub
+pip install git+https://github.com/llcuda/llcuda.git@v2.2.0
 
 # This should:
-# 1. Download Python package from PyPI (~500KB)
-# 2. On first import, download binaries from GitHub (~150MB)
+# 1. Download Python package (~500KB)
+# 2. On first import, download binaries from GitHub (~961 MB)
 ```
 
 ### Test 2: Verify Auto-Download
@@ -348,9 +348,9 @@ import llcuda
 
 # First import triggers bootstrap
 # Should see:
-# "Downloading optimized binaries from GitHub..."
-# "Extracting llcuda-binaries-cuda12.tar.gz..."
-# "✓ Setup Complete!"
+# "🎯 llcuda v2.2.0 First-Time Setup - Kaggle 2× T4 Multi-GPU"
+# "📥 Downloading binaries v2.2.0 (~961 MB)..."
+# "✅ Setup Complete!"
 
 # Check version
 print(f"Version: {llcuda.__version__}")

@@ -28,7 +28,7 @@ pip install -e .
 
 ## Binary Download
 
-On first import, llcuda automatically downloads CUDA binaries (~270 MB) from GitHub Releases:
+On first import, llcuda automatically downloads CUDA binaries (~961 MB) from GitHub Releases:
 
 ```python
 import llcuda  # Downloads binaries to ~/.cache/llcuda/
@@ -36,9 +36,9 @@ import llcuda  # Downloads binaries to ~/.cache/llcuda/
 
 ### Manual Binary Download
 ```bash
-wget https://github.com/llcuda/llcuda/releases/download/v2.2.0/llcuda-binaries-cuda12-t4x2-v2.2.0.tar.gz
+wget https://github.com/llcuda/llcuda/releases/download/v2.2.0/llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz
 mkdir -p ~/.cache/llcuda
-tar -xzf llcuda-binaries-cuda12-t4x2-v2.2.0.tar.gz -C ~/.cache/llcuda/
+tar -xzf llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz -C ~/.cache/llcuda/
 ```
 
 ## Verification

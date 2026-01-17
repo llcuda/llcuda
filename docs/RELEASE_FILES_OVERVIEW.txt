@@ -1,21 +1,26 @@
 ╔═══════════════════════════════════════════════════════════════════════════════╗
-║                   llcuda v2.0.1 Release - Files Overview                      ║
+║                   llcuda v2.2.0 Release - Files Overview                      ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 
-📁 LOCATION: C:\Users\CS-AprilVenture\Documents\Project-Waqas\
-             Project-Waqas-Programming\Project-Nvidia\
+📁 LOCATION: GitHub Releases at https://github.com/llcuda/llcuda/releases
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ 🎯 MAIN RELEASE FILE (Upload to GitHub)                                     │
+│ 🎯 MAIN RELEASE FILE (v2.2.0)                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-  📦 llcuda-binaries-cuda12-t4.tar.gz             [140 MB]
-     ├─ SHA256: 54bb904f213b38aec4a2c85baa2fab8256200966...
-     ├─ Contents: bin/ (llama-server + tools)
+  📦 llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz      [961 MB]
+     ├─ SHA256: 489f3df54... (full hash in .sha256 file)
+     ├─ Contents: bin/ (llama-server + 12 more tools)
      └─ Contents: lib/ (CUDA libraries with FlashAttention)
      
-     ✅ READY FOR UPLOAD
-     👉 This is the file to attach to GitHub release v2.0.1
+     Build Info:
+     ├─ CUDA: 12.5
+     ├─ Compute: SM 7.5 (Turing)
+     ├─ llama.cpp: b7760 (388ce82)
+     └─ Build Date: 2026-01-16
+     
+     ✅ UPLOADED TO GitHub Releases v2.2.0
+     👉 https://github.com/llcuda/llcuda/releases/tag/v2.2.0
 
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
