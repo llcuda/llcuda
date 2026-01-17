@@ -5,8 +5,11 @@
 [![CUDA](https://img.shields.io/badge/CUDA-12.x-green.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Kaggle](https://img.shields.io/badge/Kaggle-2×T4-orange.svg)](https://kaggle.com)
+[![Documentation](https://img.shields.io/badge/docs-llcuda.github.io-blue.svg)](https://llcuda.github.io)
 
 **CUDA 12 inference backend for Unsloth** — lightweight Python package with auto-download binaries for Tesla T4 and multi-GPU inference on Kaggle.
+
+🌐 **[Official Documentation](https://llcuda.github.io/)** | 📖 **[Tutorial Notebooks](https://llcuda.github.io/tutorials/index/)** | 🚀 **[Quick Start](https://llcuda.github.io/guides/quickstart/)** | 🔧 **[API Reference](https://llcuda.github.io/api/overview/)**
 
 ---
 
