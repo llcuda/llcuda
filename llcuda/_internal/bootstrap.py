@@ -18,7 +18,9 @@ from collections import deque
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 import subprocess
-from llcuda import __version__
+
+# Note: Do NOT import from llcuda here to avoid circular imports
+# Use BINARY_VERSION constant instead for version info
 
 try:
     from huggingface_hub import hf_hub_download
