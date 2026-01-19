@@ -35,12 +35,37 @@ BINARY_VERSION = "2.2.0"
 PRIMARY_BINARY_BUNDLE = f"llcuda-v{BINARY_VERSION}-cuda12-kaggle-t4x2.tar.gz"
 FALLBACK_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.1.0.tar.gz"
 GITHUB_RELEASE_URL = "https://github.com/llcuda/llcuda/releases/download"
-HF_REPO_ID = "waqasm86/llcuda-models"
 
-# Binary bundle preference order (primary → fallback)
+# HuggingFace repos (faster CDN, better for large files)
+HF_BINARIES_REPO = "waqasm86/llcuda-binaries"  # Binary bundles (~961 MB)
+HF_MODELS_REPO = "waqasm86/llcuda-models"      # GGUF models
+
+# SHA256 checksums for integrity verification
+BINARY_CHECKSUMS = {
+    "llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz": "489f3df54bac24d3801af3149c346402bea099d2bd8793897aa606c5c8af0025",
+}
+
+# Binary bundle preference order (HuggingFace primary → GitHub fallback)
 BINARY_BUNDLE_CANDIDATES = [
-    {"version": BINARY_VERSION, "filename": PRIMARY_BINARY_BUNDLE, "label": "primary"},
-    {"version": "2.1.0", "filename": FALLBACK_BINARY_BUNDLE, "label": "fallback"},
+    {
+        "version": BINARY_VERSION,
+        "filename": PRIMARY_BINARY_BUNDLE,
+        "label": "HuggingFace",
+        "source": "huggingface",
+        "hf_path": f"v{BINARY_VERSION}/{PRIMARY_BINARY_BUNDLE}",
+    },
+    {
+        "version": BINARY_VERSION,
+        "filename": PRIMARY_BINARY_BUNDLE,
+        "label": "GitHub",
+        "source": "github",
+    },
+    {
+        "version": "2.1.0",
+        "filename": FALLBACK_BINARY_BUNDLE,
+        "label": "GitHub-fallback",
+        "source": "github",
+    },
 ]
 
 # Legacy constant retained for downstream tooling/documentation
@@ -252,10 +277,65 @@ def locate_bin_and_lib_dirs(extract_root: Path) -> Optional[Tuple[Path, Path]]:
     return None
 
 
+def verify_sha256(file_path: Path, expected_hash: str) -> bool:
+    """Verify SHA256 checksum of a file."""
+    import hashlib
+    sha256 = hashlib.sha256()
+    with open(file_path, 'rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''):
+            sha256.update(chunk)
+    actual_hash = sha256.hexdigest()
+    return actual_hash == expected_hash
+
+
+def download_from_huggingface(hf_path: str, dest_path: Path, desc: str = "Downloading") -> bool:
+    """
+    Download file from HuggingFace Hub with resume support.
+    
+    Args:
+        hf_path: Path within the HuggingFace repo (e.g., "v2.2.0/file.tar.gz")
+        dest_path: Local destination path
+        desc: Description for logging
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    if not HF_AVAILABLE:
+        return False
+    
+    try:
+        print(f"📥 {desc} from HuggingFace Hub...")
+        print(f"   Repo: {HF_BINARIES_REPO}")
+        print(f"   File: {hf_path}")
+        
+        # hf_hub_download handles caching, resume, and progress automatically
+        downloaded_path = hf_hub_download(
+            repo_id=HF_BINARIES_REPO,
+            filename=hf_path,
+            repo_type="model",
+            local_dir=dest_path.parent,
+            local_dir_use_symlinks=False,
+        )
+        
+        # Move to expected location if needed
+        downloaded = Path(downloaded_path)
+        if downloaded != dest_path:
+            shutil.copy2(downloaded, dest_path)
+        
+        return True
+    except Exception as e:
+        print(f"   ⚠️  HuggingFace download failed: {e}")
+        return False
+
+
 def download_t4_binaries() -> None:
     """
     Download and install Kaggle 2× T4 optimized CUDA 12.5 binaries for llcuda v2.2.0.
 
+    Download sources (tried in order):
+    1. HuggingFace Hub (waqasm86/llcuda-binaries) - faster CDN, resume support
+    2. GitHub Releases - fallback
+    
     This version uses the v2.2.0 binaries built for Kaggle dual T4.
     Includes:
     - llama-server with multi-GPU support
@@ -299,8 +379,8 @@ def download_t4_binaries() -> None:
     print(f"🌐 Platform: {platform.capitalize()}")
     print()
 
-    # Download T4 binary bundle (primary bundle with fallback)
-    print("📦 Downloading Kaggle 2× T4 binaries (primary v2.2.0, fallback v2.1.0)...")
+    # Download T4 binary bundle (HuggingFace primary, GitHub fallback)
+    print("📦 Downloading Kaggle 2× T4 binaries (~961 MB)...")
     print("    Features: FlashAttention + Tensor Cores + Multi-GPU tensor-split")
     print()
 
@@ -311,23 +391,50 @@ def download_t4_binaries() -> None:
     for idx, bundle in enumerate(BINARY_BUNDLE_CANDIDATES):
         version = bundle["version"]
         bundle_name = bundle["filename"]
-        bundle_url = f"{GITHUB_RELEASE_URL}/v{version}/{bundle_name}"
+        source = bundle.get("source", "github")
         cache_tarball = CACHE_DIR / bundle_name
 
-        print(f"➡️  Attempt {idx + 1}: {bundle['label'].title()} bundle ({bundle_name})")
-        print(f"   Source: {bundle_url}")
+        print(f"➡️  Attempt {idx + 1}: {bundle['label']} ({bundle_name})")
 
+        # Download if not cached
         if not cache_tarball.exists():
-            print(f"📥 Downloading binaries v{version} (~961 MB)...")
-            try:
-                download_file(bundle_url, cache_tarball, f"Downloading T4 binaries v{version}")
-                print()
-            except Exception as e:
-                failures.append(f"Download failed for v{version}: {e}")
-                print(f"   ⚠️  Download error: {e}")
+            download_ok = False
+            
+            if source == "huggingface":
+                # Try HuggingFace first (faster CDN, resume support)
+                hf_path = bundle.get("hf_path", f"v{version}/{bundle_name}")
+                download_ok = download_from_huggingface(
+                    hf_path, cache_tarball, f"Downloading v{version}"
+                )
+            
+            if not download_ok:
+                # Fall back to GitHub
+                bundle_url = f"{GITHUB_RELEASE_URL}/v{version}/{bundle_name}"
+                print(f"   Source: {bundle_url}")
+                print(f"📥 Downloading binaries v{version} (~961 MB)...")
+                try:
+                    download_file(bundle_url, cache_tarball, f"Downloading T4 binaries v{version}")
+                    download_ok = True
+                except Exception as e:
+                    failures.append(f"Download failed for v{version} ({source}): {e}")
+                    print(f"   ⚠️  Download error: {e}")
+                    continue
+            
+            if not download_ok:
                 continue
         else:
             print(f"✅ Using cached archive: {cache_tarball}")
+
+        # Verify SHA256 checksum if available
+        expected_hash = BINARY_CHECKSUMS.get(bundle_name)
+        if expected_hash:
+            print(f"🔐 Verifying SHA256 checksum...")
+            if not verify_sha256(cache_tarball, expected_hash):
+                print(f"   ❌ Checksum mismatch! Deleting corrupted file.")
+                cache_tarball.unlink()
+                failures.append(f"SHA256 verification failed for {bundle_name}")
+                continue
+            print(f"   ✅ Checksum verified")
 
         temp_extract_dir = CACHE_DIR / f"extract_{version}"
         if temp_extract_dir.exists():
