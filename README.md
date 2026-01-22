@@ -90,16 +90,16 @@ server.wait_until_ready()
 ### Architecture
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│              KAGGLE DUAL T4 MULTI-GPU INFERENCE                │
+│              KAGGLE DUAL T4 MULTI-GPU INFERENCE                 │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│   GPU 0: Tesla T4 (15GB)    GPU 1: Tesla T4 (15GB)             │
-│   ├─ Model Layers 0-39      ├─ Model Layers 40-79              │
-│   └─ ~14GB VRAM             └─ ~14GB VRAM                      │
+│   GPU 0: Tesla T4 (15GB)    GPU 1: Tesla T4 (15GB)              │
+│   ├─ Model Layers 0-39      ├─ Model Layers 40-79               │
+│   └─ ~14GB VRAM             └─ ~14GB VRAM                       │
 │                                                                 │
-│           ← tensor-split 0.5,0.5 (native CUDA) →               │
+│           ← tensor-split 0.5,0.5 (native CUDA) →                │
 │                                                                 │
-│   Total: 30GB VRAM for models up to 70B (IQ3_XS)              │
+│   Total: 30GB VRAM for models up to 70B (IQ3_XS)                │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
