@@ -55,6 +55,12 @@ This directory contains 10 comprehensive tutorial notebooks covering all aspects
 | 09 | [Large Models](09-large-models-kaggle-llcuda-v2.2.0.ipynb) | Run 70B models on Kaggle dual T4 with I-quants | 30 min |
 | 10 | [Complete Workflow](10-complete-workflow-llcuda-v2.2.0.ipynb) | End-to-end: Unsloth → GGUF → Multi-GPU → Production | 45 min |
 
+### Advanced Visualization
+
+| # | Notebook | Description | Time |
+|---|----------|-------------|------|
+| 11 | [GGUF Neural Network Visualization](11-gguf-neural-network-graphistry-visualization.ipynb) | **MOST IMPORTANT**: Visualize GGUF model architecture as interactive Graphistry graphs | 60 min |
+
 ---
 
 ## Detailed Descriptions
@@ -332,10 +338,10 @@ End-to-end production workflow:
 Quick Start → Server Setup → Multi-GPU
 ```
 
-### Path 2: Full Course (3 hours)
+### Path 2: Full Course (4 hours)
 ```
-01 → 02 → 03 → 04 → 05 → 06 → 07 → 10
-All fundamentals through complete workflow
+01 → 02 → 03 → 04 → 05 → 06 → 07 → 10 → 11
+All fundamentals through visualization
 ```
 
 ### Path 3: Advanced Topics (2 hours)
@@ -348,6 +354,12 @@ Focus on multi-GPU and large models
 ```
 01 → 04 → 05 → 10
 Fine-tuning and deployment
+```
+
+### Path 5: Visualization & Analysis (2.5 hours) ⭐ RECOMMENDED
+```
+01 → 03 → 04 → 06 → 11
+Quick start → Multi-GPU → GGUF → Split-GPU → Architecture Visualization
 ```
 
 ---
@@ -378,11 +390,72 @@ Want to improve these notebooks? See the [Contributing Guide](../CONTRIBUTING.md
 
 ---
 
+### 11 - GGUF Neural Network Visualization ⭐ MOST IMPORTANT
+
+**File:** `11-gguf-neural-network-graphistry-visualization.ipynb`
+
+**The most comprehensive GGUF visualization tool available** - visualizes internal model architecture as interactive graphs:
+
+- **Complete architecture visualization** with 929 nodes, 981 edges
+- **Layer-by-layer breakdown** showing 5 transformer layers (35 nodes, 34 edges each)
+- **896 attention heads** visualized across 28 layers
+- **112 quantization blocks** showing Q4_K_M structure
+- **Interactive Graphistry dashboards** with cloud URLs
+- **GPU-accelerated analytics** using RAPIDS cuGraph (PageRank, centrality)
+- **Dual-GPU architecture** (LLM on GPU 0, visualization on GPU 1)
+
+**Prerequisites:** Complete notebooks 01-06
+**VRAM Required:** GPU 0: 10GB (LLM), GPU 1: 0.5GB (analytics)
+
+**What You'll Learn:**
+```
+1. Extract architecture from running GGUF models
+2. Build graph representations of neural networks
+3. Apply PageRank to identify important components
+4. Create interactive visualizations with Graphistry
+5. Understand quantization block structure
+6. Analyze information flow through transformer layers
+```
+
+**Key Visualizations:**
+- **Main Architecture** (929 nodes): Complete Llama-3.2-3B structure
+- **Layers 1-5** (35 nodes each): Transformer block internals
+- **Attention Heads** (896 nodes): Multi-head attention focus
+- **Quantization Blocks** (112 nodes): Q4_K_M memory layout
+- **Complete Dashboard**: All-in-one HTML with statistics
+
+**Novel Features:**
+- First tool to visualize GGUF quantization as graphs
+- Runtime model introspection (no binary file parsing)
+- Graph theory metrics applied to neural architectures
+- Dual-GPU split for concurrent inference + visualization
+
+**Outputs:**
+- 8 interactive Graphistry cloud URLs
+- `/kaggle/working/complete_dashboard.html` (downloadable)
+- `/kaggle/working/attention_dashboard.html`
+
+**Research Applications:**
+- Compare different quantization methods (Q4_K_M vs IQ3_XS)
+- Identify pruning opportunities (low-importance heads)
+- Understand information flow and bottlenecks
+- Validate GGUF conversions vs original models
+
+**Technical Stack:**
+- llcuda v2.2.0 (ServerManager, LlamaCppClient)
+- RAPIDS cuGraph (GPU-accelerated PageRank, centrality)
+- Graphistry (interactive cloud visualization)
+- Pandas, cuDF, PyArrow
+
+📘 **[Detailed Documentation →](../docs/GGUF_NEURAL_NETWORK_VISUALIZATION.md)**
+
+---
+
 ## Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
-| v2.2.0 | 2025 | Initial 10-notebook series |
+| v2.2.0 | 2026-01-22 | Initial 10-notebook series + notebook 11 (GGUF visualization) |
 
 ---
 

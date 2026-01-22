@@ -35,11 +35,12 @@ print(result.text)
 
 ### 2. Connect with Python
 ```python
-from llcuda.api import LlamaCppClient
+from llcuda.api.client import LlamaCppClient
 
 client = LlamaCppClient("http://localhost:8080")
 
-response = client.chat.completions.create(
+# Use OpenAI-compatible chat.create() API
+response = client.chat.create(
     messages=[{"role": "user", "content": "Hello!"}],
     max_tokens=100
 )

@@ -63,6 +63,12 @@ This directory contains everything you need to build CUDA 12 binaries for llcuda
 | **[BUILD_GUIDE.md](BUILD_GUIDE.md)** | Comprehensive build documentation | Need detailed explanations and troubleshooting |
 | **[QUICK_START.md](QUICK_START.md)** | Fast reference guide | Just want to get started quickly |
 
+### Visualization & Analysis ⭐ NEW
+
+| File | Purpose | When to Use |
+|------|---------|-------------|
+| **[GGUF_NEURAL_NETWORK_VISUALIZATION.md](GGUF_NEURAL_NETWORK_VISUALIZATION.md)** ⭐⭐⭐ | **MOST IMPORTANT**: Interactive GGUF architecture visualization | Understanding model internals, quantization structure, attention heads |
+
 ### Integration & Workflow
 
 | File | Purpose | When to Use |

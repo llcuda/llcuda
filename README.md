@@ -118,13 +118,27 @@ server.wait_until_ready()
 
 ### Python API
 ```python
-from llcuda.api import LlamaCppClient, kaggle_t4_dual_config
+from llcuda.server import ServerManager
+from llcuda.api.multigpu import kaggle_t4_dual_config
+from llcuda.api.client import LlamaCppClient
 
+# Get optimized configuration for Kaggle dual T4
 config = kaggle_t4_dual_config()
-print(config.to_cli_args())
 
+# Start server with multi-GPU configuration
+server = ServerManager()
+tensor_split_str = ",".join(str(x) for x in config.tensor_split)
+server.start_server(
+    model_path="model.gguf",
+    gpu_layers=config.n_gpu_layers,
+    tensor_split=tensor_split_str,
+    split_mode="layer",
+    flash_attn=1 if config.flash_attention else 0,
+)
+
+# Use OpenAI-compatible API
 client = LlamaCppClient("http://localhost:8080")
-response = client.chat.completions.create(
+response = client.chat.create(
     messages=[{"role": "user", "content": "Hello!"}],
     max_tokens=100
 )
@@ -209,6 +223,40 @@ config = SplitGPUConfig(llm_gpu=0, graph_gpu=1)
 
 ---
 
+## 🎨 GGUF Architecture Visualization ⭐ NEW
+
+**Visualize your GGUF models as interactive graphs** with Notebook 11:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│         GGUF NEURAL NETWORK ARCHITECTURE VISUALIZATION          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   📊 929 Nodes: Complete Llama-3.2-3B structure                 │
+│   🔗 981 Edges: All connections and data flows                  │
+│   🎯 896 Attention Heads: Multi-head attention visualized       │
+│   📦 112 Quantization Blocks: Q4_K_M structure revealed         │
+│   🌐 Interactive Graphistry Dashboards: Cloud + offline HTML    │
+│                                                                 │
+│   ✨ First comprehensive GGUF visualization tool                │
+│   ✨ GPU-accelerated graph analytics (PageRank, centrality)     │
+│   ✨ Dual-GPU architecture (inference + visualization)          │
+│   ✨ Multi-scale: From overview to individual attention heads   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**What You Can Visualize:**
+- Layer-by-layer transformer structure (35 nodes per layer)
+- Attention head importance and connectivity
+- Quantization block memory layout
+- Information flow through the network
+- Critical components via PageRank analysis
+
+📘 **[GGUF Visualization Guide →](docs/GGUF_NEURAL_NETWORK_VISUALIZATION.md)** | 📓 **[Notebook 11 →](notebooks/11-gguf-neural-network-graphistry-visualization.ipynb)**
+
+---
+
 ## ✨ Features
 
 | Feature | Description |
@@ -261,6 +309,7 @@ Comprehensive Kaggle-ready tutorials in [`notebooks/`](notebooks/):
 | 08 | [NCCL + PyTorch](notebooks/08-nccl-pytorch-llcuda-v2.2.0.ipynb) | Distributed training |
 | 09 | [Large Models](notebooks/09-large-models-kaggle-llcuda-v2.2.0.ipynb) | 70B on dual T4 |
 | 10 | [Complete Workflow](notebooks/10-complete-workflow-llcuda-v2.2.0.ipynb) | End-to-end tutorial |
+| 11 | [**GGUF Visualization**](notebooks/11-gguf-neural-network-graphistry-visualization.ipynb) | ⭐ Interactive architecture graphs |
 
 📘 **[Notebooks Index →](notebooks/README.md)**
 
@@ -357,14 +406,16 @@ Complete tutorial series for llcuda v2.2.0 on Kaggle dual T4 GPUs. Click the bad
 | 08 | [NCCL + PyTorch](notebooks/08-nccl-pytorch-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/08-nccl-pytorch-llcuda-v2.2.0.ipynb) | NCCL for distributed PyTorch |
 | 09 | [Large Models (70B)](notebooks/09-large-models-kaggle-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/09-large-models-kaggle-llcuda-v2.2.0.ipynb) | 70B models on Kaggle with IQ3_XS |
 | 10 | [Complete Workflow](notebooks/10-complete-workflow-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/10-complete-workflow-llcuda-v2.2.0.ipynb) | End-to-end production workflow |
+| 11 | [**GGUF Visualization** ⭐](notebooks/11-gguf-neural-network-graphistry-visualization.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/11-gguf-neural-network-graphistry-visualization.ipynb) | **MOST IMPORTANT**: Interactive architecture graphs |
 
 ### 🎯 Learning Paths
 
 | Path | Notebooks | Time | Focus |
 |------|-----------|------|-------|
 | **Quick Start** | 01 → 02 → 03 | 1 hour | Get running fast |
-| **Full Course** | 01 → 10 (all) | 3 hours | Complete mastery |
+| **Full Course** | 01 → 11 (all) | 4.5 hours | Complete mastery + visualization |
 | **Unsloth Focus** | 01 → 04 → 05 → 10 | 2 hours | Fine-tuning workflow |
 | **Large Models** | 01 → 03 → 09 | 1.5 hours | 70B on Kaggle |
+| **Visualization** ⭐ | 01 → 03 → 04 → 06 → 11 | 2.5 hours | Architecture analysis |
 
 📘 **[Full Notebook Guide →](notebooks/README.md)**

@@ -7,6 +7,126 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0-update] - 2026-01-22
+
+### 📊 GGUF Architecture Visualization + Documentation Updates
+
+Major documentation update featuring the **most comprehensive GGUF visualization tool** and corrected API examples.
+
+### ✨ Highlights
+- **Notebook 11**: GGUF Neural Network Architecture Visualization with Graphistry
+- **First-of-its-kind**: Interactive graph visualization of GGUF model internals
+- **Complete Documentation**: Extensive guides for all 11 notebooks
+- **API Corrections**: Fixed to use correct `client.chat.create()` method
+
+### Added
+
+#### 1. Notebook 11: GGUF Neural Network Visualization (`11-gguf-neural-network-graphistry-visualization.ipynb`)
+- **Interactive Graph Visualization**: 929 nodes, 981 edges showing complete Llama-3.2-3B architecture
+- **Layer-by-Layer Breakdown**: 5 detailed transformer layer visualizations (35 nodes, 34 edges each)
+- **Attention Head Analysis**: All 896 attention heads across 28 layers with importance metrics
+- **Quantization Block Visualization**: 112 Q4_K_M quantization blocks showing memory layout
+- **GPU-Accelerated Analytics**: RAPIDS cuGraph for PageRank, betweenness centrality, degree centrality
+- **Dual-GPU Architecture**: LLM inference on GPU 0, visualization on GPU 1
+- **Interactive Dashboards**: 8 Graphistry cloud URLs + downloadable HTML dashboards
+- **Runtime Introspection**: Extracts architecture from running llama-server (no binary parsing)
+- **Graph Theory Metrics**: First tool applying PageRank to neural network architectures
+
+**Key Statistics:**
+- Total Nodes: 929 (896 attention_head, 28 transformer, 5 other)
+- Total Edges: 981 (896 contains, 28 feeds_into, 56 uses)
+- Model: Llama-3.2-3B-Instruct-Q4_K_M (1.88 GB, ~2.8B params)
+- Outputs: Complete dashboard HTML, attention dashboard HTML, 8 cloud URLs
+
+#### 2. New Documentation
+
+**`docs/GGUF_NEURAL_NETWORK_VISUALIZATION.md`**:
+- Complete technical breakdown of notebook 11
+- 8 sections covering workflow, architecture, implementation, use cases
+- Detailed explanation of 5-layer visualization structure
+- Graph statistics and metrics reference
+- Interactive dashboard guide
+- Research, practitioner, and educational use cases
+
+**Updated Documentation**:
+- `README.md`: Added GGUF visualization section, updated API examples, added notebook 11
+- `notebooks/README.md`: Added notebook 11 description, updated learning paths
+- `QUICK_START.md`: Fixed API examples to use `client.chat.create()`
+- `CHANGELOG.md`: This entry documenting all changes
+
+### Changed
+
+**API Documentation Corrections**:
+- **Fixed**: All Python API examples now use `client.chat.create()` (OpenAI-compatible)
+- **Fixed**: Removed incorrect `client.chat.completions.create()` references
+- **Added**: Proper imports (`from llcuda.api.client import LlamaCppClient`)
+- **Clarified**: Multi-GPU tensor_split configuration in README
+
+**Notebook Organization**:
+- **Notebooks**: Now 11 total (was 10)
+- **New Category**: "Advanced Visualization" for notebook 11
+- **Learning Paths**: Updated to include visualization path (01 → 03 → 04 → 06 → 11)
+- **Version History**: Updated notebooks README to v2.2.0-update (2026-01-22)
+
+**Documentation Structure**:
+- **Index**: docs/ now contains 19 files (added GGUF_NEURAL_NETWORK_VISUALIZATION.md)
+- **Cross-References**: Added links between notebooks, docs, and main README
+- **Badges**: Added Kaggle open badge for notebook 11
+
+### Technical Details
+
+**Notebook 11 Architecture**:
+```
+GPU 0 (Tesla T4):
+  ├─ llama-server (tensor_split="1.0,0.0")
+  ├─ Model: Llama-3.2-3B-Instruct-Q4_K_M
+  ├─ VRAM: ~10 GB
+  └─ API: http://127.0.0.1:8090
+
+GPU 1 (Tesla T4):
+  ├─ RAPIDS cuGraph (PageRank, centrality)
+  ├─ Graphistry visualization
+  ├─ VRAM: ~0.5 GB
+  └─ Free: 15.8 GB
+```
+
+**Visualization Capabilities**:
+1. Main Architecture: 929 nodes (complete model)
+2. Layers 1-5: 35 nodes each (transformer block internals)
+3. Attention Heads: 896 nodes (all multi-head attention)
+4. Quantization Blocks: 112 nodes (Q4_K_M structure)
+5. Interactive Layer Switcher: Unified view with filtering
+6. Complete Dashboard: All 8 visualizations in one HTML
+
+**Novel Features**:
+- First tool to visualize GGUF quantization as graphs
+- Runtime model introspection (queries running server)
+- Graph theory metrics for neural networks
+- Dual-GPU resource isolation for concurrent workloads
+- Multi-scale exploration (macro → layer → component)
+
+### Why Notebook 11 Matters
+
+**For Researchers**:
+- Understand quantization impact on different layer types
+- Identify critical components via PageRank
+- Compare architectures (Llama vs Gemma vs Qwen)
+- Design pruning strategies based on centrality metrics
+
+**For Practitioners**:
+- Estimate memory requirements per layer
+- Optimize tensor-split ratios
+- Debug GGUF conversions
+- Plan deployment strategies
+
+**For Educators**:
+- Visual transformer architecture learning
+- Interactive exploration of attention mechanisms
+- Concrete understanding of model scale
+- Parameter counting and memory estimation
+
+---
+
 ## [2.2.0] - 2026-01-17
 
 ### 🎯 Unsloth Inference Backend + Kaggle Dual T4 Multi-GPU
