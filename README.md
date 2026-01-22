@@ -30,17 +30,19 @@
 
 ## 🚀 Installation
 
-### From GitHub (Recommended)
+### Quick Install (Kaggle Notebook)
 ```bash
-pip install git+https://github.com/llcuda/llcuda.git@v2.2.0
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llcuda/llcuda.git@v2.2.0
 ```
 
-### Development Install
-```bash
-git clone https://github.com/llcuda/llcuda.git
-cd llcuda
-pip install -e .
-```
+**Distribution Strategy:**
+- ✅ **GitHub** (Primary): Direct pip install from repository
+- ✅ **HuggingFace** (Mirror): Alternative at `waqasm86/llcuda`
+- ❌ **NOT on PyPI/piwheels** - We do not publish to PyPI
+
+**Package Details:**
+- Python code: ~62 KB (lightweight package)
+- Built-in binaries: ~961 MB (llama.cpp + NCCL, auto-downloaded on first import from GitHub Releases)
 
 ### Verify Installation
 ```python
@@ -48,7 +50,7 @@ import llcuda
 print(f"llcuda {llcuda.__version__}")  # 2.2.0
 ```
 
-📘 **[Full Installation Guide →](docs/INSTALLATION.md)**
+📘 **[Full Installation Guide →](docs/INSTALLATION.md)** | 🎯 **Platform:** Kaggle only (2× Tesla T4)
 
 ---
 

@@ -1,16 +1,16 @@
-# llcuda v2.2.0 - Complete Installation Guide
+# llcuda v2.2.0 - Installation Guide (Kaggle Only)
 
-This guide covers all installation methods for llcuda, the CUDA 12 inference backend for Unsloth.
+This guide covers installation for llcuda v2.2.0, the CUDA 12-first backend for Unsloth on Kaggle.
+
+**IMPORTANT:** llcuda v2.2.0 is **Kaggle-specific only**. It is optimized for dual Tesla T4 GPUs (15GB × 2, SM 7.5) and is not designed for Google Colab or local environments.
 
 ---
 
 ## Table of Contents
 
 - [Requirements](#requirements)
-- [Quick Install](#quick-install)
+- [Quick Install (Kaggle)](#quick-install-kaggle)
 - [Installation Methods](#installation-methods)
-- [Kaggle Installation](#kaggle-installation)
-- [Google Colab Installation](#google-colab-installation)
 - [Binary Management](#binary-management)
 - [Verification](#verification)
 - [Troubleshooting](#troubleshooting)
@@ -19,233 +19,226 @@ This guide covers all installation methods for llcuda, the CUDA 12 inference bac
 
 ## Requirements
 
-### Hardware
+### Platform (Required)
 | Component | Requirement |
 |-----------|-------------|
-| **GPU** | NVIDIA Tesla T4 or compatible (SM 7.5+) |
-| **VRAM** | 15GB (single T4) or 30GB (dual T4) |
-| **RAM** | 16GB+ recommended |
+| **Platform** | Kaggle notebooks ONLY (https://kaggle.com/code) |
+| **GPU** | 2× NVIDIA Tesla T4 (15GB VRAM each, SM 7.5) |
+| **Internet** | Enabled (for package installation) |
+| **Persistence** | Files only |
 
-### Software
+### Software (Pre-installed on Kaggle)
 | Component | Requirement |
 |-----------|-------------|
-| **Python** | 3.11 or higher |
-| **CUDA** | 12.x runtime |
-| **OS** | Linux (Ubuntu 20.04+, Kaggle, Colab) |
-| **pip** | 23.0+ |
+| **Python** | 3.11+ (pre-installed) |
+| **CUDA** | 12.x runtime (pre-installed) |
+| **pip** | Latest (pre-installed) |
 
-### Verify Requirements
-```bash
+### Verify Requirements (In Kaggle Notebook)
+```python
 # Check Python version
-python --version  # Should be 3.11+
+!python --version  # Should show 3.11+
 
-# Check CUDA
-nvidia-smi  # Should show CUDA 12.x
+# Check CUDA and GPUs
+!nvidia-smi  # Should show 2× Tesla T4 with CUDA 12.x
 
 # Check pip
-pip --version
+!pip --version
 ```
 
 ---
 
-## Quick Install
+## Quick Install (Kaggle)
 
-### One-Line Install
+### One-Line Install (Recommended)
 ```bash
-pip install git+https://github.com/llcuda/llcuda.git@v2.2.0
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llcuda/llcuda.git@v2.2.0
 ```
 
 ### With Verification
 ```python
 import llcuda
 print(f"✅ llcuda {llcuda.__version__} installed")
+!nvidia-smi --query-gpu=index,name,memory.total --format=csv
 ```
 
 ---
 
 ## Installation Methods
 
-### Method 1: From GitHub Release (Recommended)
+### Method 1: From GitHub (Recommended - Stable Release)
 
-Install the stable v2.2.0 release:
+Install the stable v2.2.0 release directly from GitHub:
 
 ```bash
-pip install git+https://github.com/llcuda/llcuda.git@v2.2.0
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llcuda/llcuda.git@v2.2.0
 ```
 
-**Pros:**
-- Stable, tested release
-- Reproducible builds
-- Best for production
+**Why This Method:**
+- ✅ Stable, tested release
+- ✅ Reproducible builds
+- ✅ Best for production
+- ✅ Automatic binary download from GitHub Releases
+- ✅ 62KB package + 961MB binaries (downloaded on first import)
 
-### Method 2: Latest Development
+### Method 2: From GitHub (Latest Development)
 
 Install the latest development version:
 
 ```bash
-pip install git+https://github.com/llcuda/llcuda.git
+!pip install -q git+https://github.com/llcuda/llcuda.git
 ```
 
-**Pros:**
-- Newest features
-- Bug fixes
-- Active development
+**Why This Method:**
+- ✅ Newest features and bug fixes
+- ⚠️ May have breaking changes
+- ⚠️ Less tested than stable release
 
-**Cons:**
-- May have breaking changes
-- Less tested
+### Method 3: From HuggingFace (Alternative Mirror)
 
-### Method 3: From PyPI (When Available)
+Download pre-built wheel from HuggingFace:
 
 ```bash
-pip install llcuda
+# Download wheel from HuggingFace
+!wget https://huggingface.co/waqasm86/llcuda/resolve/main/llcuda-2.2.0-py3-none-any.whl
+
+# Install
+!pip install llcuda-2.2.0-py3-none-any.whl
 ```
 
-### Method 4: Development Install
+**Why This Method:**
+- ✅ Alternative if GitHub is blocked
+- ✅ Same stable v2.2.0 release
+- ✅ Hosted on HuggingFace mirror
 
-For contributors and developers:
-
-```bash
-# Clone repository
-git clone https://github.com/llcuda/llcuda.git
-cd llcuda
-
-# Install in development mode
-pip install -e .
-
-# With development dependencies
-pip install -e ".[dev]"
-```
-
-**Pros:**
-- Editable installation
-- Full source access
-- Run tests locally
-
-### Method 5: With Specific Dependencies
-
-```bash
-# With Jupyter support
-pip install git+https://github.com/llcuda/llcuda.git@v2.2.0
-pip install -r requirements-jupyter.txt
-
-# With all optional dependencies
-pip install "llcuda[full] @ git+https://github.com/llcuda/llcuda.git@v2.2.0"
-```
+**Note:** llcuda is **NOT** available on PyPI. We distribute only via:
+1. **GitHub** (primary): `git+https://github.com/llcuda/llcuda.git@v2.2.0`
+2. **HuggingFace** (mirror): `https://huggingface.co/waqasm86/llcuda`
 
 ---
 
-## Kaggle Installation
+## Kaggle Installation (Complete Workflow)
 
-### Standard Kaggle Notebook
+### Standard Kaggle Notebook Setup
 
 ```python
-# Cell 1: Install llcuda
-!pip install -q git+https://github.com/llcuda/llcuda.git@v2.2.0
+# Cell 1: Configure Kaggle (Accelerator: GPU T4 × 2, Internet: Enabled)
 
-# Cell 2: Verify installation
+# Cell 2: Install llcuda
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llcuda/llcuda.git@v2.2.0
+
+# Cell 3: Verify installation
 import llcuda
 print(f"llcuda {llcuda.__version__}")
 
-# Cell 3: Check GPUs
-!nvidia-smi --query-gpu=index,name,memory.total --format=csv
+# Cell 4: Check GPUs
+!nvidia-smi --query-gpu=index,name,memory.total,compute_cap --format=csv
 ```
 
-### Kaggle with Hugging Face
+### Kaggle with HuggingFace Models (1B-5B GGUF)
 
 ```python
-!pip install -q git+https://github.com/llcuda/llcuda.git@v2.2.0
+# Cell 1: Install dependencies
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llcuda/llcuda.git@v2.2.0
 !pip install -q huggingface_hub
 
+# Cell 2: Download small GGUF model (1B-5B)
 from huggingface_hub import hf_hub_download
 
 model_path = hf_hub_download(
     repo_id="unsloth/gemma-3-1b-it-GGUF",
-    filename="gemma-3-1b-it-Q4_K_M.gguf",
+    filename="gemma-3-1b-it-Q4_K_M.gguf",  # 1.2 GB, fits in single T4
     local_dir="/kaggle/working/models"
+)
+
+# Cell 3: Start server with split-GPU architecture
+from llcuda.server import ServerManager
+
+server = ServerManager()
+server.start_server(
+    model_path=model_path,
+    gpu_layers=99,
+    tensor_split="1.0,0.0",  # GPU 0: LLM, GPU 1: free for Graphistry
+    flash_attn=1,
 )
 ```
 
-### Kaggle Environment Settings
+### Kaggle Settings (Required)
 
-For optimal performance on Kaggle:
-
-| Setting | Value |
-|---------|-------|
-| GPU | T4 × 2 |
-| Internet | Enabled |
-| Persistence | Files only |
-
----
-
-## Google Colab Installation
-
-### Standard Colab Notebook
-
-```python
-# Cell 1: Install llcuda
-!pip install -q git+https://github.com/llcuda/llcuda.git@v2.2.0
-
-# Cell 2: Check GPU
-!nvidia-smi
-
-# Cell 3: Import and verify
-import llcuda
-print(f"llcuda {llcuda.__version__}")
-```
-
-### Colab with Unsloth
-
-```python
-# Install Unsloth first
-!pip install unsloth
-
-# Then install llcuda
-!pip install -q git+https://github.com/llcuda/llcuda.git@v2.2.0
-```
+| Setting | Value | Why |
+|---------|-------|-----|
+| **Accelerator** | GPU T4 × 2 | llcuda v2.2.0 requires dual T4 |
+| **Internet** | Enabled | For pip install and binary download |
+| **Persistence** | Files only | Keep downloaded models |
+| **Python** | 3.11+ | Pre-installed on Kaggle |
 
 ---
 
 ## Binary Management
 
-llcuda uses pre-compiled CUDA binaries for llama.cpp. These are managed automatically.
+llcuda includes pre-compiled C++ libraries (llama.cpp llama-server + NVIDIA NCCL) for CUDA 12. These are managed automatically.
 
-### Automatic Download
+### Distribution Strategy
+
+```
+GitHub Repository (Code Only):
+├─ Python package: ~62 KB
+└─ Source code only
+
+GitHub Releases (Binary Package):
+├─ llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz
+├─ Size: ~961 MB
+├─ Contents: llama.cpp binaries + NCCL libraries
+└─ Downloaded automatically on first import
+
+HuggingFace Mirror (Alternative):
+├─ Wheel: llcuda-2.2.0-py3-none-any.whl
+└─ Same binaries downloaded from GitHub Releases
+```
+
+### Automatic Download (Default)
 
 On first import, llcuda downloads binaries (~961 MB) from GitHub Releases:
 
 ```python
-import llcuda  # Downloads to ~/.cache/llcuda/
+import llcuda  # Downloads to /kaggle/working/.cache/llcuda/ or ~/.cache/llcuda/
 ```
 
-### Manual Binary Download
+**What Gets Downloaded:**
+- llama.cpp binaries (llama-server, llama-cli, llama-quantize, etc.)
+- NVIDIA NCCL libraries (for multi-GPU support)
+- CUDA 12 runtime libraries
+- Total size: ~961 MB
 
-If automatic download fails:
+### Manual Binary Download (If Automatic Fails)
 
 ```bash
 # Download from GitHub Releases
-wget https://github.com/llcuda/llcuda/releases/download/v2.2.0/llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz
+!wget https://github.com/llcuda/llcuda/releases/download/v2.2.0/llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz
 
-# Extract to cache directory
-mkdir -p ~/.cache/llcuda
-tar -xzf llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz -C ~/.cache/llcuda/
+# Extract to Kaggle cache directory
+!mkdir -p /kaggle/working/.cache/llcuda
+!tar -xzf llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz -C /kaggle/working/.cache/llcuda/
 
-# Verify
-ls ~/.cache/llcuda/bin/
+# Verify binaries
+!ls /kaggle/working/.cache/llcuda/bin/
+!ls /kaggle/working/.cache/llcuda/lib/
 ```
 
-### Binary Contents
+### Binary Contents (Built-in C++ Libraries)
 
-| Binary | Description |
-|--------|-------------|
-| `llama-server` | HTTP server with OpenAI API |
-| `llama-cli` | Command-line interface |
-| `llama-quantize` | GGUF quantization tool |
-| `llama-gguf` | GGUF metadata tool |
-| `llama-embedding` | Embedding extraction |
-| `llama-perplexity` | Perplexity calculation |
+| Binary | Description | Source |
+|--------|-------------|--------|
+| `llama-server` | HTTP server with OpenAI API | llama.cpp |
+| `llama-cli` | Command-line interface | llama.cpp |
+| `llama-quantize` | GGUF quantization tool | llama.cpp |
+| `llama-gguf` | GGUF metadata tool | llama.cpp |
+| `llama-embedding` | Embedding extraction | llama.cpp |
+| `llama-perplexity` | Perplexity calculation | llama.cpp |
+| `libnccl.so.*` | Multi-GPU communication | NVIDIA NCCL |
+| `libcudart.so.*` | CUDA runtime | CUDA 12 |
 
-### Custom Binary Location
+### Custom Binary Location (Advanced)
 
 ```python
 import os
@@ -420,17 +413,30 @@ source llcuda-env/bin/activate
 pip install git+https://github.com/llcuda/llcuda.git@v2.2.0
 ```
 
-### Getting Help
+###Getting Help
 
 If issues persist:
 
 1. Check [GitHub Issues](https://github.com/llcuda/llcuda/issues)
 2. Review [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 3. Open a new issue with:
-   - Python version
-   - CUDA version
-   - Error message
-   - Platform (Kaggle/Colab/Local)
+   - Python version (`!python --version`)
+   - CUDA version (`!nvidia-smi`)
+   - Error message (full traceback)
+   - Kaggle notebook link (if possible)
+
+### Distribution Clarification
+
+**Where llcuda is Available:**
+- ✅ GitHub: `git+https://github.com/llcuda/llcuda.git@v2.2.0` (Primary)
+- ✅ HuggingFace: `https://huggingface.co/waqasm86/llcuda` (Mirror)
+
+**Where llcuda is NOT Available:**
+- ❌ PyPI (pypi.org) - We do not publish to PyPI
+- ❌ piwheels (piwheels.org) - Not listed on piwheels
+
+**Why Not PyPI?**
+llcuda v2.2.0 is Kaggle-specific with large binary dependencies (961 MB). GitHub Releases provides better distribution for large packages compared to PyPI's size limits.
 
 ---
 
