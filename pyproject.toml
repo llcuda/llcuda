@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "llcuda"
 version = "2.2.0"
-description = "CUDA 12 inference backend for Unsloth - lightweight Python package with auto-download binaries for Tesla T4 and Kaggle 2× T4 multi-GPU inference."
+description = "CUDA 12-first backend inference for Unsloth on Kaggle - Optimized for small GGUF models (1B-5B) on dual Tesla T4 (15GB × 2, SM 7.5). Split-GPU: LLM on GPU 0, Graphistry visualization on GPU 1. Built-in llama.cpp + NVIDIA NCCL."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -17,9 +17,10 @@ authors = [
     {name = "Waqas Muhammad", email = "waqasm86@gmail.com"}
 ]
 keywords = [
-    "llm", "cuda", "inference", "unsloth", "t4", "tesla-t4", "tensor-cores",
-    "flashattention", "nf4", "quantization", "gguf", "pytorch",
-    "deep-learning", "gpu", "colab", "tensor-api", "google-colab"
+    "llm", "cuda", "inference", "unsloth", "t4", "tesla-t4", "kaggle",
+    "flashattention", "quantization", "gguf", "graphistry", "nccl",
+    "deep-learning", "gpu", "llama-cpp", "split-gpu", "neural-network-visualization",
+    "1b-5b-models", "small-models", "gguf-visualization"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

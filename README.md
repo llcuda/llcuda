@@ -7,7 +7,7 @@
 [![Kaggle](https://img.shields.io/badge/Kaggle-2×T4-orange.svg)](https://kaggle.com)
 [![Documentation](https://img.shields.io/badge/docs-llcuda.github.io-blue.svg)](https://llcuda.github.io)
 
-**CUDA 12 inference backend for Unsloth** — lightweight Python package with auto-download binaries for Tesla T4 and multi-GPU inference on Kaggle.
+**CUDA 12-first backend inference for Unsloth on Kaggle** — Optimized for small GGUF models (1B-5B) on dual Tesla T4 GPUs (15GB each, SM 7.5). Built-in C++ libraries (llama.cpp llama-server, NVIDIA NCCL). Split-GPU architecture: GPU 0 for LLM inference, GPU 1 for Graphistry dashboard visualization of internal neural network architecture.
 
 🌐 **[Official Documentation](https://llcuda.github.io/)** | 📖 **[Tutorial Notebooks](https://llcuda.github.io/tutorials/index/)** | 🚀 **[Quick Start](https://llcuda.github.io/guides/quickstart/)** | 🔧 **[API Reference](https://llcuda.github.io/api/overview/)**
 
@@ -52,54 +52,95 @@ print(f"llcuda {llcuda.__version__}")  # 2.2.0
 
 ---
 
-## ⚡ Quick Start
+## ⚡ Quick Start (Kaggle Dual T4)
 
-### Basic Inference
+### Prerequisites
+- **Platform:** Kaggle notebook
+- **GPUs:** 2× Tesla T4 (15GB VRAM each, SM 7.5)
+- **Model Range:** 1B-5B parameters (GGUF Q4_K_M quantization)
+- **Settings:** Internet enabled, GPU T4 × 2 selected
+
+### Basic Inference (Single GPU 0)
 ```python
 import llcuda
+from huggingface_hub import hf_hub_download
 
+# Download small GGUF model (1B-5B range)
+model_path = hf_hub_download(
+    repo_id="unsloth/gemma-3-1b-it-GGUF",
+    filename="gemma-3-1b-it-Q4_K_M.gguf",
+    local_dir="/kaggle/working/models"
+)
+
+# Load on GPU 0 (15GB VRAM)
 engine = llcuda.InferenceEngine()
-engine.load_model("gemma-3-1b-Q4_K_M", silent=True)
+engine.load_model(model_path, silent=True)
 result = engine.infer("What is AI?", max_tokens=100)
 print(result.text)
 ```
 
-### Using llama-server
+### Split-GPU Architecture (GPU 0: LLM, GPU 1: Graphistry)
 ```python
-from llcuda.server import ServerManager, ServerConfig
+from llcuda.server import ServerManager
 
-config = ServerConfig(
-    model_path="model.gguf",
-    n_gpu_layers=99,
-    flash_attn=True,
+# Start llama-server on GPU 0 (100% allocation)
+server = ServerManager()
+server.start_server(
+    model_path=model_path,
+    gpu_layers=99,
+    tensor_split="1.0,0.0",  # 100% GPU 0, 0% GPU 1
+    flash_attn=1,
 )
 
-server = ServerManager()
-server.start_with_config(config)
-server.wait_until_ready()
-
-# Now use OpenAI API at http://127.0.0.1:8080
+# GPU 1 now available for Graphistry visualization
+# See Notebook 11 for complete visualization workflow
 ```
 
-📘 **[Quick Start Guide →](QUICK_START.md)**
+📘 **[Quick Start Guide →](QUICK_START.md)** | 📓 **[Notebook 01 →](notebooks/01-quickstart-llcuda-v2.2.0.ipynb)**
 
 ---
 
-## 🎯 Multi-GPU (Kaggle 2× T4)
+## 🎯 Split-GPU Architecture (Kaggle 2× T4)
 
-### Architecture
+### Recommended: GPU 0 for LLM, GPU 1 for Graphistry
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│              KAGGLE DUAL T4 MULTI-GPU INFERENCE                 │
+│         KAGGLE DUAL T4 SPLIT-GPU ARCHITECTURE (Optimized)       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   GPU 0: Tesla T4 (15GB VRAM, SM 7.5)                           │
+│   ├─ llama.cpp llama-server (C++)                               │
+│   ├─ GGUF Model: 1B-5B params (Q4_K_M)                          │
+│   ├─ VRAM Usage: ~2-6 GB                                        │
+│   ├─ Built-in: FlashAttention, CUDA Graphs                      │
+│   └─ tensor-split: "1.0,0.0" (100% GPU 0)                       │
+│                                                                 │
+│   GPU 1: Tesla T4 (15GB VRAM, SM 7.5)                           │
+│   ├─ Graphistry[ai] Python SDK                                  │
+│   ├─ RAPIDS cuGraph (GPU-accelerated PageRank)                  │
+│   ├─ Neural Network Visualization (929 nodes)                   │
+│   ├─ VRAM Usage: ~0.5-2 GB                                      │
+│   └─ Free VRAM: ~13 GB for analytics                            │
+│                                                                 │
+│   Built-in C++ Libraries: llama.cpp + NVIDIA NCCL               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Alternative: Tensor-Split for Large Models (Advanced)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│       KAGGLE DUAL T4 TENSOR-SPLIT (For models >15GB VRAM)       │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │   GPU 0: Tesla T4 (15GB)    GPU 1: Tesla T4 (15GB)              │
 │   ├─ Model Layers 0-39      ├─ Model Layers 40-79               │
 │   └─ ~14GB VRAM             └─ ~14GB VRAM                       │
 │                                                                 │
-│           ← tensor-split 0.5,0.5 (native CUDA) →                │
+│           ← tensor-split 0.5,0.5 (NCCL-based) →                 │
 │                                                                 │
 │   Total: 30GB VRAM for models up to 70B (IQ3_XS)                │
+│   Note: Not recommended for 1B-5B models (use split-GPU)        │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -261,35 +302,51 @@ config = SplitGPUConfig(llm_gpu=0, graph_gpu=1)
 
 | Feature | Description |
 |---------|-------------|
-| **FlashAttention** | Enabled for all quantization types |
-| **Multi-GPU** | Native `--tensor-split` for Kaggle 2× T4 |
-| **Split-GPU** | LLM + RAPIDS/Graphistry workloads |
+| **Kaggle-Optimized** | Built specifically for Kaggle dual Tesla T4 (15GB × 2, SM 7.5) |
+| **Small Models** | Optimized for 1B-5B params GGUF (Q4_K_M) on single T4 |
+| **Split-GPU** | GPU 0: LLM inference, GPU 1: Graphistry visualization |
+| **Built-in C++ Libraries** | llama.cpp llama-server + NVIDIA NCCL (no compilation needed) |
+| **FlashAttention** | Built-in for all quantizations (2× speedup) |
+| **Unsloth Backend** | CUDA 12-first inference for Unsloth-trained models |
+| **Graphistry Dashboards** | Interactive neural network visualization (929 nodes) |
 | **OpenAI API** | Full llama.cpp server compatibility |
-| **GGUF Tools** | Parse, quantize, convert models |
-| **Auto-download** | 62KB package, binaries fetched on first run |
-| **70B Support** | IQ3_XS quantization fits dual T4 |
-| **Streaming** | Server-sent events for real-time output |
+| **GGUF Tools** | Parse, quantize, analyze GGUF files |
+| **Auto-download** | 62KB package, 961MB binaries from GitHub Releases |
 
 ---
 
-## 📊 Performance
+## 📊 Performance (Kaggle Single Tesla T4)
 
-| Platform | GPU | Model | Quantization | Tokens/sec |
-|----------|-----|-------|--------------|------------|
-| Colab | T4 | Gemma 3-1B | Q4_K_M | ~45 tok/s |
-| Kaggle | 2× T4 | Gemma 2-2B | Q4_K_M | ~60 tok/s |
-| Kaggle | 2× T4 | Qwen2.5-7B | Q4_K_M | ~35 tok/s |
-| Kaggle | 2× T4 | Llama-3.1-70B | IQ3_XS | ~8-12 tok/s |
+### Optimized for 1B-5B Models
 
-### VRAM Requirements
+| Model | Size | Quantization | VRAM | Tokens/sec | Recommended |
+|-------|------|--------------|------|------------|-------------|
+| Gemma-3 1B | 1.0B | Q4_K_M | ~1.2 GB | ~50 tok/s | ⭐ Best for fast inference |
+| Llama-3.2 1B | 1.2B | Q4_K_M | ~1.3 GB | ~48 tok/s | ⭐ Excellent quality |
+| Gemma-2 2B | 2.0B | Q4_K_M | ~1.8 GB | ~45 tok/s | ⭐ Balanced |
+| Qwen2.5 3B | 3.0B | Q4_K_M | ~2.3 GB | ~40 tok/s | ⭐ High quality |
+| Llama-3.2 3B | 3.2B | Q4_K_M | ~2.5 GB | ~38 tok/s | ⭐ Very capable |
+| Gemma-3 4B | 4.0B | Q4_K_M | ~3.0 GB | ~35 tok/s | ⭐ Best quality |
 
-| Model Size | Quantization | VRAM | Fits Kaggle? |
-|------------|--------------|------|--------------|
-| 1-3B | Q4_K_M | 2-3 GB | ✅ Single T4 |
-| 7-8B | Q4_K_M | 5-6 GB | ✅ Single T4 |
-| 13B | Q4_K_M | 8-9 GB | ✅ Single T4 |
-| 32-34B | Q4_K_M | 20-22 GB | ✅ Dual T4 |
-| 70B | IQ3_XS | 25-27 GB | ✅ Dual T4 |
+**All tested on single Tesla T4 (15GB VRAM, SM 7.5) with FlashAttention enabled**
+
+### VRAM Availability (Split-GPU Architecture)
+
+```
+Configuration: GPU 0 for LLM, GPU 1 for Graphistry
+
+GPU 0 Usage:
+├─ 1B model: ~1.2 GB → 13.8 GB free
+├─ 2B model: ~1.8 GB → 13.2 GB free
+├─ 3B model: ~2.5 GB → 12.5 GB free
+├─ 4B model: ~3.0 GB → 12.0 GB free
+└─ 5B model: ~3.8 GB → 11.2 GB free
+
+GPU 1 Available:
+├─ Graphistry: ~0.5-2 GB
+├─ RAPIDS cuGraph: ~0.3 GB
+└─ Free for analytics: ~13 GB
+```
 
 ---
 
@@ -344,15 +401,24 @@ Comprehensive Kaggle-ready tutorials in [`notebooks/`](notebooks/):
 
 ## 📋 Requirements
 
-- **Python:** 3.11+
-- **CUDA:** 12.x
-- **GPU:** Tesla T4 or compatible (SM 7.5+)
-- **Platform:** Linux (Kaggle, Colab, or local)
+### Platform (Required)
+- **Platform:** Kaggle notebooks (https://kaggle.com/code)
+- **GPUs:** 2× Tesla T4 (15GB VRAM each, Compute Capability SM 7.5)
+- **Python:** 3.11+ (pre-installed on Kaggle)
+- **CUDA:** 12.x (pre-installed on Kaggle)
 
-### Recommended Kaggle Settings
-- GPU: T4 × 2
-- Internet: Enabled
-- Persistence: Enabled (for builds)
+### Kaggle Settings (Required)
+- **Accelerator:** GPU T4 × 2 (must select dual T4)
+- **Internet:** Enabled (for package installation)
+- **Persistence:** Enabled (for downloaded models)
+
+### Model Requirements
+- **Size:** 1B-5B parameters recommended
+- **Format:** GGUF (from HuggingFace)
+- **Quantization:** Q4_K_M (best quality/speed balance)
+- **Source:** Unsloth-compatible models preferred
+
+**Note:** llcuda v2.2.0 is designed and tested exclusively for Kaggle dual T4 environment. Other platforms (Colab, local) are not officially supported.
 
 ---
 

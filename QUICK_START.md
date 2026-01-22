@@ -1,25 +1,62 @@
-# llcuda v2.2.0 - Quick Start Guide
+# llcuda v2.2.0 - Quick Start Guide (Kaggle Only)
 
-Get started with llcuda in 5 minutes.
+Get started with llcuda on Kaggle dual T4 in 5 minutes.
 
-## Installation
+## Prerequisites
+
+**Platform:** Kaggle notebooks (https://kaggle.com/code)
+**Required Settings:**
+- Accelerator: GPU T4 × 2
+- Internet: Enabled
+- Python: 3.11+
+
+**Model Requirements:**
+- Size: 1B-5B parameters
+- Format: GGUF (Q4_K_M quantization)
+- Source: HuggingFace (Unsloth-compatible)
+
+## Installation (Kaggle Notebook)
 
 ```bash
-pip install git+https://github.com/llcuda/llcuda.git@v2.2.0
+# In Kaggle notebook cell
+!pip install -q --no-cache-dir --force-reinstall git+https://github.com/llcuda/llcuda.git@v2.2.0
 ```
 
-## Single GPU Usage (Colab/Kaggle T4)
+## Split-GPU Usage (Recommended: GPU 0 for LLM, GPU 1 for Graphistry)
+
+### Step 1: Download Small GGUF Model (1B-5B)
 
 ```python
-import llcuda
+from huggingface_hub import hf_hub_download
 
-engine = llcuda.InferenceEngine()
-engine.load_model("gemma-3-1b-Q4_K_M", silent=True)
-result = engine.infer("What is AI?", max_tokens=100)
-print(result.text)
+# Download small model optimized for single T4
+model_path = hf_hub_download(
+    repo_id="unsloth/gemma-3-1b-it-GGUF",
+    filename="gemma-3-1b-it-Q4_K_M.gguf",  # 1.2 GB, fits in ~1.5GB VRAM
+    local_dir="/kaggle/working/models"
+)
 ```
 
-## Multi-GPU Server (Kaggle 2× T4)
+### Step 2: Start Server on GPU 0 (Split-GPU Architecture)
+
+```python
+from llcuda.server import ServerManager
+
+# Start llama-server on GPU 0 only (tensor_split="1.0,0.0")
+server = ServerManager()
+server.start_server(
+    model_path=model_path,
+    host="127.0.0.1",
+    port=8080,
+    gpu_layers=99,           # All layers on GPU
+    tensor_split="1.0,0.0",  # 100% GPU 0, 0% GPU 1 (IMPORTANT!)
+    flash_attn=1,            # FlashAttention enabled
+)
+
+# GPU 1 is now free for Graphistry visualization (see Notebook 11)
+```
+
+## Tensor-Split for Large Models (Advanced: Kaggle 2× T4)
 
 ### 1. Start Server
 ```bash
@@ -47,30 +84,56 @@ response = client.chat.create(
 print(response.choices[0].message.content)
 ```
 
-## Unsloth Workflow
+## Unsloth → llcuda Workflow (Kaggle)
 
 ```python
-# 1. Fine-tune with Unsloth
+# 1. Fine-tune with Unsloth (1B-3B models recommended)
 from unsloth import FastLanguageModel
-model, tokenizer = FastLanguageModel.from_pretrained("unsloth/Llama-3.2-1B-Instruct")
+model, tokenizer = FastLanguageModel.from_pretrained(
+    "unsloth/Llama-3.2-1B-Instruct",
+    max_seq_length=2048,
+    load_in_4bit=True
+)
 
-# 2. Export to GGUF
-model.save_pretrained_gguf("my_model", tokenizer, quantization_method="q4_k_m")
+# 2. Export to GGUF (Q4_K_M recommended for quality/speed)
+model.save_pretrained_gguf(
+    "/kaggle/working/my_model",
+    tokenizer,
+    quantization_method="q4_k_m"
+)
 
-# 3. Serve with llcuda
-# ./bin/llama-server -m my_model-Q4_K_M.gguf -ngl 99 --tensor-split 0.5,0.5
+# 3. Serve with llcuda on GPU 0 (split-GPU architecture)
+from llcuda.server import ServerManager
+server = ServerManager()
+server.start_server(
+    model_path="/kaggle/working/my_model-Q4_K_M.gguf",
+    gpu_layers=99,
+    tensor_split="1.0,0.0",  # GPU 0 only, leave GPU 1 for Graphistry
+    flash_attn=1
+)
 ```
 
-## Key APIs
+## Key Modules (Kaggle-Specific)
 
-| Module | Purpose |
-|--------|---------|
-| `llcuda.api.client` | Full llama.cpp server client |
-| `llcuda.api.multigpu` | Multi-GPU configuration |
-| `llcuda.api.gguf` | GGUF parsing & quantization |
+| Module | Purpose | Kaggle-Optimized |
+|--------|---------|------------------|
+| `llcuda.api.client` | OpenAI-compatible client | ✅ |
+| `llcuda.api.multigpu` | Split-GPU configuration | ✅ tensor_split="1.0,0.0" |
+| `llcuda.server` | llama-server manager | ✅ Built-in binaries |
+| `llcuda.graphistry` | Visualization connector | ✅ GPU 1 integration |
 
-## Links
+## Recommended Models (HuggingFace)
 
-- [Full Documentation](README.md)
-- [Build Notebook](notebooks/build_llcuda_v2_2_0_kaggle_t4x2_complete.ipynb)
-- [GitHub Releases](https://github.com/llcuda/llcuda/releases)
+| Model | Size | Repo | File |
+|-------|------|------|------|
+| Gemma-3 1B | 1.0B | `unsloth/gemma-3-1b-it-GGUF` | `gemma-3-1b-it-Q4_K_M.gguf` |
+| Llama-3.2 1B | 1.2B | `unsloth/Llama-3.2-1B-Instruct-GGUF` | `Llama-3.2-1B-Instruct-Q4_K_M.gguf` |
+| Gemma-2 2B | 2.0B | `unsloth/gemma-2-2b-it-GGUF` | `gemma-2-2b-it-Q4_K_M.gguf` |
+| Qwen2.5 3B | 3.0B | `unsloth/Qwen2.5-3B-Instruct-GGUF` | `Qwen2.5-3B-Instruct-Q4_K_M.gguf` |
+
+## Next Steps
+
+- 📓 **[Notebook 01](notebooks/01-quickstart-llcuda-v2.2.0.ipynb)** - Complete quickstart on Kaggle
+- 📓 **[Notebook 11](notebooks/11-gguf-neural-network-graphistry-visualization.ipynb)** - GGUF visualization
+- 📖 **[Full Documentation](README.md)** - All features and guides
+- 🔗 **[GitHub Releases](https://github.com/llcuda/llcuda/releases)** - Download binaries

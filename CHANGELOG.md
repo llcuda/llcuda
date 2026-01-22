@@ -7,6 +7,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0-kaggle] - 2026-01-22
+
+### 🎯 Kaggle-Specific Positioning + Split-GPU Architecture Clarification
+
+**IMPORTANT:** llcuda v2.2.0 is **Kaggle-specific only** and optimized for **small GGUF models (1B-5B parameters)**.
+
+### Corrected Positioning
+
+**What llcuda v2.2.0 Actually Is:**
+- **Platform:** Kaggle notebooks exclusively (not Colab, not local)
+- **GPUs:** Dual Tesla T4 (15GB VRAM × 2, Compute Capability SM 7.5)
+- **Model Range:** 1B-5B parameters (GGUF Q4_K_M quantization)
+- **Architecture:** Split-GPU (GPU 0: LLM inference, GPU 1: Graphistry visualization)
+- **Built-in:** llama.cpp llama-server (C++) + NVIDIA NCCL
+
+### Key Clarifications
+
+**1. Split-GPU Architecture (Recommended)**
+```
+GPU 0 (15GB Tesla T4):
+  ├─ llama.cpp llama-server
+  ├─ GGUF Model: 1B-5B params
+  ├─ VRAM: ~1-4 GB (model) + overhead
+  ├─ tensor-split: "1.0,0.0" (100% GPU 0)
+  └─ Built-in: FlashAttention, CUDA Graphs
+
+GPU 1 (15GB Tesla T4):
+  ├─ Graphistry[ai] Python SDK
+  ├─ RAPIDS cuGraph (PageRank, centrality)
+  ├─ Neural Network Visualization
+  ├─ VRAM: ~0.5-2 GB
+  └─ Free: ~13 GB for analytics
+```
+
+**2. Small Models Focus (1B-5B)**
+
+| Model | Size | VRAM | Tokens/sec | Use Case |
+|-------|------|------|------------|----------|
+| Gemma-3 1B | 1.0B | ~1.2 GB | ~50 tok/s | Fast inference |
+| Llama-3.2 1B | 1.2B | ~1.3 GB | ~48 tok/s | High quality |
+| Gemma-2 2B | 2.0B | ~1.8 GB | ~45 tok/s | Balanced |
+| Qwen2.5 3B | 3.0B | ~2.3 GB | ~40 tok/s | Best quality |
+| Llama-3.2 3B | 3.2B | ~2.5 GB | ~38 tok/s | Very capable |
+| Gemma-3 4B | 4.0B | ~3.0 GB | ~35 tok/s | Excellent |
+
+**All tested on single Tesla T4 with FlashAttention**
+
+**3. Built-in C++ Libraries**
+- **llama.cpp llama-server**: No compilation needed, pre-built binaries (961 MB)
+- **NVIDIA NCCL**: For multi-GPU support (included in binaries)
+- **CUDA 12.5**: SM 7.5 optimized for Tesla T4
+
+### Changed
+
+**Documentation Updates:**
+- `README.md`: Updated to emphasize Kaggle-specific, 1B-5B focus, split-GPU architecture
+- `pyproject.toml`: Updated description and keywords to reflect accurate positioning
+- Removed all references to "auto-configuration" or "auto-detection" of platforms
+- Removed mentions of Colab/local support
+- Updated performance benchmarks to focus on 1B-5B range
+
+**Requirements Section:**
+- Now explicitly states "Kaggle notebooks only"
+- Requires dual T4 setup (not single T4)
+- No longer mentions Colab or local installations
+
+### Removed
+
+- Claims of "intelligent auto-configuration"
+- References to Colab/local environment detection
+- Support for platforms other than Kaggle
+- References to 70B models in primary documentation (moved to advanced section)
+
+---
+
 ## [2.2.0-update] - 2026-01-22
 
 ### 📊 GGUF Architecture Visualization + Documentation Updates
