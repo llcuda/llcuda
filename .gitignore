@@ -159,3 +159,12 @@ llcuda/lib/
 llcuda/binaries/
 llcuda/models/*.gguf
 
+
+# Executed notebooks - personal execution outputs
+notebooks-executed/
+
+# Local notebooks - personal/development notebooks (not for GitHub)
+notebooks-local/
+
+# Other notebooks practice - local practice files
+llcuda-other-notebooks-practice/
