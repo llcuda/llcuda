@@ -296,7 +296,7 @@ config = SplitGPUConfig(llm_gpu=0, graph_gpu=1)
 - Information flow through the network
 - Critical components via PageRank analysis
 
-📘 **[GGUF Visualization Guide →](docs/GGUF_NEURAL_NETWORK_VISUALIZATION.md)** | 📓 **[Notebook 11 →](notebooks/11-gguf-neural-network-graphistry-visualization.ipynb)**
+📘 **[GGUF Visualization Guide →](docs/GGUF_NEURAL_NETWORK_VISUALIZATION.md)** | 📓 **[Notebook 11 →](notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb)**
 
 ---
 
@@ -364,11 +364,11 @@ Comprehensive Kaggle-ready tutorials in [`notebooks/`](notebooks/):
 | 04 | [GGUF Quantization](notebooks/04-gguf-quantization-llcuda-v2.2.0.ipynb) | Complete quantization guide |
 | 05 | [Unsloth Integration](notebooks/05-unsloth-integration-llcuda-v2.2.0.ipynb) | Train → Export → Deploy |
 | 06 | [Split-GPU + Graphistry](notebooks/06-split-gpu-graphistry-llcuda-v2.2.0.ipynb) | LLM + RAPIDS analytics |
-| 07 | [OpenAI API Client](notebooks/07-openai-api-client-llcuda-v2.2.0.ipynb) | Full API reference |
-| 08 | [NCCL + PyTorch](notebooks/08-nccl-pytorch-llcuda-v2.2.0.ipynb) | Distributed training |
-| 09 | [Large Models](notebooks/09-large-models-kaggle-llcuda-v2.2.0.ipynb) | 70B on dual T4 |
-| 10 | [Complete Workflow](notebooks/10-complete-workflow-llcuda-v2.2.0.ipynb) | End-to-end tutorial |
-| 11 | [**GGUF Visualization**](notebooks/11-gguf-neural-network-graphistry-visualization.ipynb) | ⭐ Interactive architecture graphs |
+| 07 | [Knowledge Graph Extraction](notebooks/07-knowledge-graph-extraction-graphistry-v2.2.0.ipynb) | LLM-powered entity extraction + Graphistry |
+| 08 | [Document Network Analysis](notebooks/08-document-network-analysis-graphistry-llcuda-v2-2-0.ipynb) | Document similarity + GPU analytics |
+| 09 | [Large Models](notebooks/09-large-models-kaggle-llcuda-v2-2-0.ipynb) | Deploy 13B+ on dual T4 |
+| 10 | [Complete Workflow](notebooks/10-complete-workflow-llcuda-v2-2-0.ipynb) | Production end-to-end pipeline |
+| 11 | [**GGUF Visualization**](notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb) | ⭐ Interactive architecture graphs |
 
 📘 **[Notebooks Index →](notebooks/README.md)**
 
@@ -470,11 +470,11 @@ Complete tutorial series for llcuda v2.2.0 on Kaggle dual T4 GPUs. Click the bad
 | 04 | [GGUF Quantization](notebooks/04-gguf-quantization-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/04-gguf-quantization-llcuda-v2.2.0.ipynb) | K-quants, I-quants, GGUF parsing |
 | 05 | [Unsloth Integration](notebooks/05-unsloth-integration-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/05-unsloth-integration-llcuda-v2.2.0.ipynb) | Fine-tune → GGUF → Deploy |
 | 06 | [Split-GPU + Graphistry](notebooks/06-split-gpu-graphistry-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/06-split-gpu-graphistry-llcuda-v2.2.0.ipynb) | LLM on GPU 0 + RAPIDS on GPU 1 |
-| 07 | [OpenAI API Client](notebooks/07-openai-api-client-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/07-openai-api-client-llcuda-v2.2.0.ipynb) | Drop-in OpenAI SDK replacement |
-| 08 | [NCCL + PyTorch](notebooks/08-nccl-pytorch-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/08-nccl-pytorch-llcuda-v2.2.0.ipynb) | NCCL for distributed PyTorch |
-| 09 | [Large Models (70B)](notebooks/09-large-models-kaggle-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/09-large-models-kaggle-llcuda-v2.2.0.ipynb) | 70B models on Kaggle with IQ3_XS |
-| 10 | [Complete Workflow](notebooks/10-complete-workflow-llcuda-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/10-complete-workflow-llcuda-v2.2.0.ipynb) | End-to-end production workflow |
-| 11 | [**GGUF Visualization** ⭐](notebooks/11-gguf-neural-network-graphistry-visualization.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/11-gguf-neural-network-graphistry-visualization.ipynb) | **MOST IMPORTANT**: Interactive architecture graphs |
+| 07 | [Knowledge Graph Extraction](notebooks/07-knowledge-graph-extraction-graphistry-v2.2.0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/07-knowledge-graph-extraction-graphistry-v2.2.0.ipynb) | LLM entity extraction + graph visualization |
+| 08 | [Document Network Analysis](notebooks/08-document-network-analysis-graphistry-llcuda-v2-2-0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/08-document-network-analysis-graphistry-llcuda-v2-2-0.ipynb) | Document similarity networks with GPU analytics |
+| 09 | [Large Models (13B+)](notebooks/09-large-models-kaggle-llcuda-v2-2-0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/09-large-models-kaggle-llcuda-v2-2-0.ipynb) | Deploy large models on dual T4 with tensor-split |
+| 10 | [Complete Workflow](notebooks/10-complete-workflow-llcuda-v2-2-0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/10-complete-workflow-llcuda-v2-2-0.ipynb) | Production end-to-end: Setup → Model → Server → Analytics → API |
+| 11 | [**GGUF Visualization** ⭐](notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb) | **MOST IMPORTANT**: Dual-GPU architecture visualization with 8 interactive dashboards |
 
 ### 🎯 Learning Paths
 
