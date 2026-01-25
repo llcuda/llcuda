@@ -215,28 +215,28 @@ llcuda v2.2.0 introduces a novel \textbf{split-GPU architecture pattern} optimiz
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}[
-    node distance=1.5cm,
+    node distance=1.8cm,
     box/.style={rectangle, draw, thick, rounded corners, minimum width=3.5cm, minimum height=0.9cm, align=center, font=\small},
     gpu0/.style={box, fill=gpu0color!30, draw=gpu0color!80, line width=1.5pt},
     gpu1/.style={box, fill=gpu1color!30, draw=gpu1color!80, line width=1.5pt},
-    external/.style={box, fill=primaryblue!15, draw=primaryblue!60, line width=1pt},
+    external/.style={box, fill=primaryblue!15, draw=primaryblue!60, line width=1pt, minimum width=3.5cm},
     arrow/.style={->, >=stealth, thick, line width=1.2pt}
 ]
 
 % Title
-\node[above, font=\Large\bfseries] at (0,7.5) {Kaggle Dual Tesla T4 Architecture};
+\node[above, font=\Large\bfseries] at (0,8.5) {Kaggle Dual Tesla T4 Architecture};
 
 % GPU 0 Column (Left)
-\node[above, font=\large\bfseries, gpu0color] at (-3.5,6.5) {GPU 0 (15GB VRAM)};
-\node[gpu0] (llama) at (-3.5,5.5) {llama-server\\Port 8090};
-\node[gpu0] (model) at (-3.5,4) {Llama-3.2-3B\\Q4\_K\_M};
-\node[gpu0] (inference) at (-3.5,2.5) {LLM Inference\\tensor\_split: 1.0};
+\node[above, font=\large\bfseries, gpu0color] at (-4,7) {GPU 0 (15GB VRAM)};
+\node[gpu0] (llama) at (-4,6) {llama-server\\Port 8090};
+\node[gpu0] (model) at (-4,4.3) {Llama-3.2-3B\\Q4\_K\_M};
+\node[gpu0] (inference) at (-4,2.6) {LLM Inference\\tensor\_split: 1.0};
 
 % GPU 1 Column (Right)
-\node[above, font=\large\bfseries, gpu1color] at (3.5,6.5) {GPU 1 (15GB VRAM)};
-\node[gpu1] (rapids) at (3.5,5.5) {RAPIDS\\cuDF \& cuGraph};
-\node[gpu1] (graphistry) at (3.5,4) {Graphistry\\Visualization};
-\node[gpu1] (analytics) at (3.5,2.5) {PageRank\\Analytics};
+\node[above, font=\large\bfseries, gpu1color] at (4,7) {GPU 1 (15GB VRAM)};
+\node[gpu1] (rapids) at (4,6) {RAPIDS\\cuDF \& cuGraph};
+\node[gpu1] (graphistry) at (4,4.3) {Graphistry\\Visualization};
+\node[gpu1] (analytics) at (4,2.6) {PageRank\\Analytics};
 
 % Vertical arrows within columns
 \draw[arrow, gpu0color!80] (llama) -- (model);
@@ -244,59 +244,26 @@ llcuda v2.2.0 introduces a novel \textbf{split-GPU architecture pattern} optimiz
 \draw[arrow, gpu1color!80] (rapids) -- (graphistry);
 \draw[arrow, gpu1color!80] (graphistry) -- (analytics);
 
-% Cross-GPU data flow
-\draw[arrow, primaryblue] (inference.east) -- ++(0.8,0) |- node[above, pos=0.25, font=\tiny] {Extract} (rapids.west);
+% External connections - positioned lower to avoid overlaps
+\node[external] (hf) at (-4,0.5) {HuggingFace Hub};
+\node[external] (cloud) at (4,0.5) {Graphistry Cloud};
 
-% External connections
-\node[external] (hf) at (-3.5,0.8) {HuggingFace Hub};
-\node[external] (cloud) at (3.5,0.8) {Graphistry Cloud};
+% HuggingFace Hub arrow - routed to LEFT side to avoid overlaps
+\draw[arrow, primaryblue!60] (hf.north) -- (hf.north |- model.south) -- (model.south);
 
-\draw[arrow, primaryblue!60] (hf) -- (model);
-\draw[arrow, primaryblue!60] (analytics) -- (cloud);
+% Cross-GPU data flow - routed ABOVE to avoid overlapping nodes
+\draw[arrow, primaryblue] (inference.east) -- ++(1.5,0) node[above, pos=0.5, font=\tiny] {Extract} |- (rapids.west);
 
-% Bottom labels
-\node[below, text width=3cm, align=center, font=\footnotesize] at (-3.5,0) {\textbf{1.88 GB model}\\28 layers, 896 heads};
-\node[below, text width=3cm, align=center, font=\footnotesize] at (3.5,0) {\textbf{929 nodes}\\981 edges};
+% Graphistry Cloud arrow - straight down
+\draw[arrow, primaryblue!60] (analytics.south) -- (analytics.south |- cloud.north) -- (cloud.north);
+
+% Bottom labels - positioned below external nodes
+\node[below, text width=3.5cm, align=center, font=\footnotesize] at (-4,-0.5) {\textbf{1.88 GB model}\\28 layers, 896 heads};
+\node[below, text width=3.5cm, align=center, font=\footnotesize] at (4,-0.5) {\textbf{929 nodes}\\981 edges};
 
 \end{tikzpicture}
 \caption{llcuda v2.2.0 Split-GPU Architecture on Kaggle Dual T4}
 \end{figure}
-
-\subsection{Design Principles}
-
-\begin{enumerate}
-    \item \textbf{GPU Isolation via CUDA\_VISIBLE\_DEVICES}: Processes explicitly assigned to specific GPUs to prevent memory conflicts
-    \item \textbf{Memory Efficiency}: LLM uses 2-5GB on GPU 0, leaving GPU 1 entirely free for visualization workloads
-    \item \textbf{API-Driven Communication}: llama-server exposes OpenAI-compatible REST API for architecture queries
-    \item \textbf{Production-Ready Error Handling}: Automatic GPU detection, health monitoring, graceful degradation
-\end{enumerate}
-
-\subsection{Technology Stack}
-
-\begin{table}[h]
-\centering
-\begin{tabularx}{\textwidth}{|l|X|}
-\hline
-\rowcolor{primaryblue!20}
-\textbf{Layer} & \textbf{Technologies} \\
-\hline
-\textbf{Compute} & CUDA 12.x, Tesla T4 (SM 7.5), FlashAttention, Tensor Cores \\
-\hline
-\textbf{LLM Backend} & llama.cpp (build 7760), llama-server, GGUF format, NVIDIA NCCL \\
-\hline
-\textbf{GPU Analytics} & RAPIDS cuDF 25.6, cuGraph (PageRank, Betweenness Centrality), CuPy \\
-\hline
-\textbf{Visualization} & Graphistry 0.50.4, PyGraphistry API, cloud rendering \\
-\hline
-\textbf{ML Ecosystem} & Unsloth, HuggingFace Hub, transformers, PyTorch \\
-\hline
-\textbf{SDK} & Python 3.11+, OpenAI-compatible client, type hints, asyncio \\
-\hline
-\textbf{Platform} & Kaggle notebooks (12-hour sessions), GitHub Actions CI/CD \\
-\hline
-\end{tabularx}
-\caption{llcuda v2.2.0 Comprehensive Technology Stack}
-\end{table}
 
 \newpage
 
