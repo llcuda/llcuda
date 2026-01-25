@@ -215,7 +215,7 @@ llcuda v2.2.0 introduces a novel \textbf{split-GPU architecture pattern} optimiz
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}[
-    node distance=1.8cm,
+    node distance=2cm,
     box/.style={rectangle, draw, thick, rounded corners, minimum width=3.5cm, minimum height=0.9cm, align=center, font=\small},
     gpu0/.style={box, fill=gpu0color!30, draw=gpu0color!80, line width=1.5pt},
     gpu1/.style={box, fill=gpu1color!30, draw=gpu1color!80, line width=1.5pt},
@@ -224,42 +224,42 @@ llcuda v2.2.0 introduces a novel \textbf{split-GPU architecture pattern} optimiz
 ]
 
 % Title
-\node[above, font=\Large\bfseries] at (0,8.5) {Kaggle Dual Tesla T4 Architecture};
+\node[above, font=\Large\bfseries] at (0,9) {Kaggle Dual Tesla T4 Architecture};
 
-% GPU 0 Column (Left)
-\node[above, font=\large\bfseries, gpu0color] at (-4,7) {GPU 0 (15GB VRAM)};
-\node[gpu0] (llama) at (-4,6) {llama-server\\Port 8090};
-\node[gpu0] (model) at (-4,4.3) {Llama-3.2-3B\\Q4\_K\_M};
-\node[gpu0] (inference) at (-4,2.6) {LLM Inference\\tensor\_split: 1.0};
+% GPU 0 Column (Left) - x=-4.5 for wider spacing
+\node[above, font=\large\bfseries, gpu0color] at (-4.5,7.5) {GPU 0 (15GB VRAM)};
+\node[gpu0] (llama) at (-4.5,6.3) {llama-server\\Port 8090};
+\node[gpu0] (model) at (-4.5,4.4) {Llama-3.2-3B\\Q4\_K\_M};
+\node[gpu0] (inference) at (-4.5,2.5) {LLM Inference\\tensor\_split: 1.0};
 
-% GPU 1 Column (Right)
-\node[above, font=\large\bfseries, gpu1color] at (4,7) {GPU 1 (15GB VRAM)};
-\node[gpu1] (rapids) at (4,6) {RAPIDS\\cuDF \& cuGraph};
-\node[gpu1] (graphistry) at (4,4.3) {Graphistry\\Visualization};
-\node[gpu1] (analytics) at (4,2.6) {PageRank\\Analytics};
+% GPU 1 Column (Right) - x=4.5 for wider spacing
+\node[above, font=\large\bfseries, gpu1color] at (4.5,7.5) {GPU 1 (15GB VRAM)};
+\node[gpu1] (rapids) at (4.5,6.3) {RAPIDS\\cuDF \& cuGraph};
+\node[gpu1] (graphistry) at (4.5,4.4) {Graphistry\\Visualization};
+\node[gpu1] (analytics) at (4.5,2.5) {PageRank\\Analytics};
 
-% Vertical arrows within columns
-\draw[arrow, gpu0color!80] (llama) -- (model);
-\draw[arrow, gpu0color!80] (model) -- (inference);
-\draw[arrow, gpu1color!80] (rapids) -- (graphistry);
-\draw[arrow, gpu1color!80] (graphistry) -- (analytics);
+% Vertical arrows within columns - use .south and .north for precise connections
+\draw[arrow, gpu0color!80] (llama.south) -- (model.north);
+\draw[arrow, gpu0color!80] (model.south) -- (inference.north);
+\draw[arrow, gpu1color!80] (rapids.south) -- (graphistry.north);
+\draw[arrow, gpu1color!80] (graphistry.south) -- (analytics.north);
 
-% External connections - positioned lower to avoid overlaps
-\node[external] (hf) at (-4,0.5) {HuggingFace Hub};
-\node[external] (cloud) at (4,0.5) {Graphistry Cloud};
+% External connections - positioned lower
+\node[external] (hf) at (-4.5,0.3) {HuggingFace Hub};
+\node[external] (cloud) at (4.5,0.3) {Graphistry Cloud};
 
-% HuggingFace Hub arrow - routed to LEFT side to avoid overlaps
-\draw[arrow, primaryblue!60] (hf.north) -- (hf.north |- model.south) -- (model.south);
+% HuggingFace Hub arrow - UPWARD (bottom to top direction)
+\draw[arrow, primaryblue!60] (hf.north) -- (inference.south);
 
-% Cross-GPU data flow - routed ABOVE to avoid overlapping nodes
-\draw[arrow, primaryblue] (inference.east) -- ++(1.5,0) node[above, pos=0.5, font=\tiny] {Extract} |- (rapids.west);
+% Cross-GPU data flow - pure horizontal path
+\draw[arrow, primaryblue] (inference.east) -- ++(2,0) node[above, pos=0.5, font=\small] {Extract} -- (rapids.west);
 
-% Graphistry Cloud arrow - straight down
-\draw[arrow, primaryblue!60] (analytics.south) -- (analytics.south |- cloud.north) -- (cloud.north);
+% Graphistry Cloud arrow - DOWNWARD (top to bottom direction) - FIXED DIRECTION
+\draw[arrow, primaryblue!60] (analytics.south) -- (cloud.north);
 
-% Bottom labels - positioned below external nodes
-\node[below, text width=3.5cm, align=center, font=\footnotesize] at (-4,-0.5) {\textbf{1.88 GB model}\\28 layers, 896 heads};
-\node[below, text width=3.5cm, align=center, font=\footnotesize] at (4,-0.5) {\textbf{929 nodes}\\981 edges};
+% Bottom labels
+\node[below, text width=3.5cm, align=center, font=\footnotesize] at (-4.5,-0.7) {\textbf{1.88 GB model}\\28 layers, 896 heads};
+\node[below, text width=3.5cm, align=center, font=\footnotesize] at (4.5,-0.7) {\textbf{929 nodes}\\981 edges};
 
 \end{tikzpicture}
 \caption{llcuda v2.2.0 Split-GPU Architecture on Kaggle Dual T4}
@@ -279,49 +279,46 @@ llcuda v2.2.0 includes 11 comprehensive Kaggle notebooks that progressively buil
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}[
-    node distance=0.5cm and 1cm,
-    level/.style={rectangle, draw, thick, rounded corners, minimum width=2.5cm, minimum height=0.8cm, align=center, fill=white},
-    beginner/.style={level, fill=gpu0color!15},
-    intermediate/.style={level, fill=gpu1color!15},
-    advanced/.style={level, fill=primaryblue!15}
+    node distance=1.5cm and 2.5cm,
+    level/.style={rectangle, draw, thick, rounded corners, minimum width=3cm, minimum height=0.9cm, align=center, fill=white, font=\small},
+    beginner/.style={level, fill=gpu0color!15, draw=gpu0color!60, line width=1pt},
+    intermediate/.style={level, fill=gpu1color!15, draw=gpu1color!60, line width=1pt},
+    advanced/.style={level, fill=primaryblue!15, draw=primaryblue!60, line width=1pt},
+    arrow/.style={->, >=stealth, thick, line width=1.2pt}
 ]
 
 % Title
-\node[above] at (0,5.5) {\Large\textbf{11-Notebook Tutorial Progression}};
+\node[above, font=\Large\bfseries] at (0,7) {11-Notebook Tutorial Progression};
 
-% Beginner Level
-\node[above, font=\large\bfseries] at (-3.5,4.5) {Beginner};
-\node[beginner] (nb01) at (-3.5,4) {\small 01: Quick Start};
-\node[beginner] (nb02) at (-3.5,3) {\small 02: Server Setup};
-\node[beginner] (nb03) at (-3.5,2) {\small 03: Multi-GPU};
+% Beginner Level - Left Column
+\node[above, font=\large\bfseries, gpu0color] at (-5,6) {Beginner};
+\node[beginner] (nb01) at (-5,4.8) {01: Quick Start};
+\node[beginner] (nb02) at (-5,3.3) {02: Server Setup};
+\node[beginner] (nb03) at (-5,1.8) {03: Multi-GPU};
 
-% Intermediate Level
-\node[above, font=\large\bfseries] at (0,4.5) {Intermediate};
-\node[intermediate] (nb04) at (0,4) {\small 04: GGUF Quant};
-\node[intermediate] (nb05) at (0,3) {\small 05: Unsloth};
-\node[intermediate] (nb06) at (0,2) {\small 06: Split-GPU};
-\node[intermediate] (nb07) at (0,1) {\small 07: Knowledge Graph};
+% Intermediate Level - Middle Column
+\node[above, font=\large\bfseries, gpu1color] at (0,6) {Intermediate};
+\node[intermediate] (nb04) at (0,4.8) {04: GGUF Quant};
+\node[intermediate] (nb05) at (0,3.3) {05: Unsloth};
+\node[intermediate] (nb06) at (0,1.8) {06: Split-GPU};
+\node[intermediate] (nb07) at (0,0.3) {07: Knowledge Graph};
 
-% Advanced Level
-\node[above, font=\large\bfseries] at (3.5,4.5) {Advanced};
-\node[advanced] (nb08) at (3.5,4) {\small 08: Doc Network};
-\node[advanced] (nb09) at (3.5,3) {\small 09: Large Models};
-\node[advanced] (nb10) at (3.5,2) {\small 10: Complete Flow};
+% Advanced Level - Right Column
+\node[above, font=\large\bfseries, primaryblue] at (5,6) {Advanced};
+\node[advanced] (nb08) at (5,4.8) {08: Doc Network};
+\node[advanced] (nb09) at (5,3.3) {09: Large Models};
+\node[advanced] (nb10) at (5,1.8) {10: Complete Flow};
+\node[advanced] (nb11) at (5,0.3) {11: GGUF Visualization\\FLAGSHIP};
 
-% Flagship
-\node[advanced, fill=accentblue!30, minimum width=3.5cm, minimum height=1.2cm, line width=1.5pt] (nb11) at (0,-0.5) {\textbf{11: GGUF Visualization}\\FLAGSHIP};
-
-% Arrows
-\draw[->, thick, gpu0color] (nb01) -- (nb02);
-\draw[->, thick, gpu0color] (nb02) -- (nb03);
-\draw[->, thick, gpu1color] (nb03) -- (nb04);
-\draw[->, thick, gpu1color] (nb04) -- (nb05);
-\draw[->, thick, gpu1color] (nb05) -- (nb06);
-\draw[->, thick, gpu1color] (nb06) -- (nb07);
-\draw[->, thick, primaryblue] (nb07) -- (nb08);
-\draw[->, thick, primaryblue] (nb08) -- (nb09);
-\draw[->, thick, primaryblue] (nb09) -- (nb10);
-\draw[->, thick, accentblue, line width=2pt] (nb10) -- (nb11);
+% Vertical arrows within columns (direct connections)
+\draw[arrow, gpu0color] (nb01.south) -- (nb02.north);
+\draw[arrow, gpu0color] (nb02.south) -- (nb03.north);
+\draw[arrow, gpu1color] (nb04.south) -- (nb05.north);
+\draw[arrow, gpu1color] (nb05.south) -- (nb06.north);
+\draw[arrow, gpu1color] (nb06.south) -- (nb07.north);
+\draw[arrow, primaryblue] (nb08.south) -- (nb09.north);
+\draw[arrow, primaryblue] (nb09.south) -- (nb10.north);
+\draw[arrow, primaryblue] (nb10.south) -- (nb11.north);
 
 \end{tikzpicture}
 \caption{Progressive Learning Path Through 11 Tutorial Notebooks}
@@ -506,8 +503,8 @@ Output Layer & 394M params (12.6\%) \\
 \begin{figure}[h]
 \centering
 \begin{tikzpicture}[
-    node distance=1.5cm,
-    box/.style={rectangle, draw, thick, rounded corners, minimum width=4cm, minimum height=1cm, align=center, font=\small},
+    node distance=2cm,
+    box/.style={rectangle, draw, thick, rounded corners, minimum width=4.2cm, minimum height=1.1cm, align=center, font=\small},
     setup/.style={box, fill=gray!20, draw=gray!60, line width=1.5pt},
     gpu0/.style={box, fill=gpu0color!30, draw=gpu0color!80, line width=1.5pt},
     gpu1/.style={box, fill=gpu1color!30, draw=gpu1color!80, line width=1.5pt},
@@ -517,37 +514,37 @@ Output Layer & 394M params (12.6\%) \\
 ]
 
 % Title
-\node[above, font=\Large\bfseries] at (0,8) {Notebook 11: Six-Phase Workflow};
+\node[above, font=\Large\bfseries] at (0,9) {Notebook 11: Six-Phase Workflow};
 
 % Phase 1: Setup (centered at top)
-\node[setup] (phase1) at (0,6.5) {\textbf{Phase 1}\\Setup \& GPU Detection};
+\node[setup] (phase1) at (0,7.5) {\textbf{Phase 1}\\Setup \& GPU Detection};
 
-% Left column: GPU 0 workflow
-\node[above, font=\large\bfseries, gpu0color] at (-3.5,5.3) {GPU 0 Processing};
-\node[gpu0] (phase2) at (-3.5,4) {\textbf{Phase 2}\\Model Serving\\llama-server};
+% Left column: GPU 0 Processing
+\node[above, font=\large\bfseries, gpu0color] at (-4.5,6) {GPU 0 Processing};
+\node[gpu0] (phase2) at (-4.5,4.5) {\textbf{Phase 2}\\Model Serving\\llama-server};
 
-% Right column: Extraction and Analytics
-\node[above, font=\large\bfseries, primaryblue] at (3.5,5.3) {Data Pipeline};
-\node[process] (phase3) at (3.5,4) {\textbf{Phase 3}\\Architecture\\Extraction (929 nodes)};
-\node[gpu1] (phase4) at (3.5,2.3) {\textbf{Phase 4}\\GPU Analytics (GPU 1)\\PageRank \& Centrality};
-\node[process] (phase5) at (3.5,0.6) {\textbf{Phase 5}\\Generate 8 Graphistry\\Dashboards};
+% Right column: Data Pipeline
+\node[above, font=\large\bfseries, primaryblue] at (4.5,6) {Data Pipeline};
+\node[process] (phase3) at (4.5,4.5) {\textbf{Phase 3}\\Architecture\\Extraction (929 nodes)};
+\node[gpu1] (phase4) at (4.5,2.4) {\textbf{Phase 4}\\GPU Analytics (GPU 1)\\PageRank \& Centrality};
+\node[process] (phase5) at (4.5,0.3) {\textbf{Phase 5}\\Generate 8 Graphistry\\Dashboards};
 
 % Phase 6: Output (centered at bottom)
-\node[output] (phase6) at (0,-1) {\textbf{Phase 6}\\HTML Dashboard + Statistics};
+\node[output] (phase6) at (0,-1.5) {\textbf{Phase 6}\\HTML Dashboard + Statistics};
 
-% Vertical arrows within columns
-\draw[arrow, primaryblue] (phase3) -- (phase4);
-\draw[arrow, primaryblue] (phase4) -- (phase5);
+% Arrows from Phase 1 - simple straight lines
+\draw[arrow, gray!60] (phase1.south) -- (phase2.north);
+\draw[arrow, gray!60] (phase1.south) -- (phase3.north);
 
-% Arrows from Phase 1
-\draw[arrow, gray!60] (phase1) -- (phase2);
-\draw[arrow, gray!60] (phase1) -- (phase3);
+% Vertical arrows within right column - direct connections
+\draw[arrow, primaryblue] (phase3.south) -- (phase4.north);
+\draw[arrow, primaryblue] (phase4.south) -- (phase5.north);
 
-% Cross-column data flow
-\draw[arrow, gpu0color!80] (phase2.east) -- ++(0.5,0) |- (phase3.west);
+% Cross-column data flow - simple straight horizontal line
+\draw[arrow, gpu0color!80] (phase2.east) -- (phase3.west);
 
-% Arrows to Phase 6
-\draw[arrow, primaryblue] (phase5) -- (phase6);
+% Convergence to Phase 6 - simple straight line
+\draw[arrow, primaryblue] (phase5.south) -- (phase6.north);
 
 \end{tikzpicture}
 \caption{Notebook 11: Complete Workflow from Model Loading to Visualization}
