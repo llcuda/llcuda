@@ -168,3 +168,21 @@ notebooks-local/
 
 # Other notebooks practice - local practice files
 llcuda-other-notebooks-practice/
+
+# ============================================================================
+# PORTFOLIO FOLDER - LaTeX build artifacts
+# ============================================================================
+# Allow portfolio PDF and source, but ignore LaTeX build artifacts
+llcuda-pdf-portfolio/*.aux
+llcuda-pdf-portfolio/*.log
+llcuda-pdf-portfolio/*.out
+llcuda-pdf-portfolio/*.toc
+llcuda-pdf-portfolio/*.lof
+llcuda-pdf-portfolio/*.lot
+llcuda-pdf-portfolio/*.fls
+llcuda-pdf-portfolio/*.fdb_latexmk
+llcuda-pdf-portfolio/*.synctex.gz
+llcuda-pdf-portfolio/*.bbl
+llcuda-pdf-portfolio/*.blg
+llcuda-pdf-portfolio/*.bcf
+llcuda-pdf-portfolio/*.run.xml
