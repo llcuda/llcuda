@@ -186,3 +186,9 @@ llcuda-pdf-portfolio/*.bbl
 llcuda-pdf-portfolio/*.blg
 llcuda-pdf-portfolio/*.bcf
 llcuda-pdf-portfolio/*.run.xml
+
+# ============================================================================
+# CLAUDE CHAT HISTORY - Personal AI assistant conversation logs
+# ============================================================================
+# Keep local chat history private (not for GitHub)
+claude-chat-history/
