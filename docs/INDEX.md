@@ -2,42 +2,32 @@
 
 ## Overview
 
-This directory contains everything you need to build CUDA 12 binaries for llcuda, package them for GitHub Releases, and publish to PyPI - all while keeping package sizes under 100MB.
+Complete documentation for llcuda v2.2.0 — CUDA 12-first inference for GGUF models on Kaggle dual Tesla T4 GPUs. Covers installation, API reference, configuration, visualization guides, and the full 13-notebook tutorial series.
 
-**Target GPUs:**
-- NVIDIA GeForce 940M (Compute Capability 5.0) - Your local Xubuntu 22 system
-- NVIDIA Tesla T4 (Compute Capability 7.5) - Google Colab
+**Target Platform:**
+- NVIDIA Tesla T4 × 2 (Compute Capability 7.5) — Kaggle notebooks
 
 ---
 
 ## 📋 Quick Start
 
-**🎉 PACKAGES CREATED! Ready to upload to GitHub Releases & PyPI:**
+**Get running in 5 minutes on Kaggle:**
 
-1. **Read the release summary:**
-   - [RELEASE_V1.2.2_SUMMARY.md](RELEASE_V1.2.2_SUMMARY.md) ⭐⭐⭐ **START HERE**
-   - Everything complete, bootstrap updated, ready to publish
-   - Step-by-step upload instructions included
-
-2. **Packages created and ready:**
-   ```
-   release-packages/llcuda-binaries-cuda12-940m.tar.gz (26 MB) ✅
-   release-packages/llcuda-binaries-cuda12-t4.tar.gz (264 MB) ✅
+1. **Install llcuda v2.2.0:**
+   ```python
+   !pip install -q --no-cache-dir git+https://github.com/llcuda/llcuda.git@v2.2.0
    ```
 
-3. **Follow the upload workflow:**
-   - Upload to GitHub Releases (see summary doc)
-   - Commit & push llcuda package changes
-   - Upload to PyPI
-   - Test on both platforms
+2. **Start inference:**
+   ```python
+   from llcuda.server import ServerManager
+   server = ServerManager()
+   server.start_server(model_path="model.gguf", gpu_layers=99, tensor_split="1.0,0.0")
+   ```
 
-**If starting from scratch:**
+3. **Follow the tutorials:** Start with [Notebook 01](../notebooks/01-quickstart-llcuda-v2.2.0.ipynb)
 
-1. Read the CMake command reference for your GPU:
-   - [cmake_build_940m.sh](cmake_build_940m.sh) - GeForce 940M commands
-   - [cmake_build_t4.sh](cmake_build_t4.sh) - Tesla T4 commands
-
-2. Run the commands manually (scripts show commands, don't execute them)
+**Full tutorial series:** 13 notebooks from basics to advanced visualization — see [notebooks/README.md](../notebooks/README.md)
 
 ---
 
@@ -63,11 +53,12 @@ This directory contains everything you need to build CUDA 12 binaries for llcuda
 | **[BUILD_GUIDE.md](BUILD_GUIDE.md)** | Comprehensive build documentation | Need detailed explanations and troubleshooting |
 | **[QUICK_START.md](QUICK_START.md)** | Fast reference guide | Just want to get started quickly |
 
-### Visualization & Analysis ⭐ NEW
+### Visualization & Analysis ⭐
 
 | File | Purpose | When to Use |
 |------|---------|-------------|
-| **[GGUF_NEURAL_NETWORK_VISUALIZATION.md](GGUF_NEURAL_NETWORK_VISUALIZATION.md)** ⭐⭐⭐ | **MOST IMPORTANT**: Interactive GGUF architecture visualization | Understanding model internals, quantization structure, attention heads |
+| **[GGUF_NEURAL_NETWORK_VISUALIZATION.md](GGUF_NEURAL_NETWORK_VISUALIZATION.md)** ⭐ | Interactive GGUF architecture visualization (Notebook 11) | Understanding model internals, quantization structure |
+| **[NOTEBOOKS_GUIDE.md](NOTEBOOKS_GUIDE.md)** | Complete 13-notebook tutorial guide | Overview of all tutorials including attention (12) and embeddings (13) |
 
 ### Integration & Workflow
 
@@ -299,18 +290,24 @@ test_llcuda_integration.py
 
 ## 🎓 Learning Path
 
-**New to the project?** Follow this order:
+**New to llcuda?** Start here:
 
-1. **[QUICK_START.md](QUICK_START.md)** - Get oriented
-2. **[cmake_build_940m.sh](cmake_build_940m.sh)** - See build commands
-3. **[BUILD_GUIDE.md](BUILD_GUIDE.md)** - Understand CMake options
-4. **[INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md)** - Learn path detection
-5. **[FINAL_WORKFLOW_GUIDE.md](FINAL_WORKFLOW_GUIDE.md)** - Complete process
+1. **[../notebooks/01-quickstart](../notebooks/01-quickstart-llcuda-v2.2.0.ipynb)** — 5-minute quickstart on Kaggle
+2. **[QUICK_START_GUIDE.md](QUICK_START_GUIDE.md)** — Quick reference card
+3. **[API_REFERENCE.md](API_REFERENCE.md)** — Full Python API
+4. **[NOTEBOOKS_GUIDE.md](NOTEBOOKS_GUIDE.md)** — All 13 tutorials
 
-**Ready to publish?**
+**Visualization deep-dive:**
 
-1. **[GITHUB_RELEASE_GUIDE.md](GITHUB_RELEASE_GUIDE.md)** - Upload binaries
-2. **[PYPI_PACKAGE_GUIDE.md](PYPI_PACKAGE_GUIDE.md)** - Publish package
+1. Notebook 11 — GGUF architecture graphs (929 nodes, 8 dashboards)
+2. Notebook 12 — Attention mechanism Q-K-V patterns
+3. Notebook 13 — Token embedding 3D UMAP exploration
+
+**Building or releasing?**
+
+1. **[BUILD_GUIDE.md](BUILD_GUIDE.md)** - CMake build options
+2. **[GITHUB_RELEASE_GUIDE.md](GITHUB_RELEASE_GUIDE.md)** - Upload binaries
+3. **[PYPI_PACKAGE_GUIDE.md](PYPI_PACKAGE_GUIDE.md)** - Publish package
 
 ---
 

@@ -296,7 +296,7 @@ config = SplitGPUConfig(llm_gpu=0, graph_gpu=1)
 - Information flow through the network
 - Critical components via PageRank analysis
 
-📘 **[GGUF Visualization Guide →](docs/GGUF_NEURAL_NETWORK_VISUALIZATION.md)** | 📓 **[Notebook 11 →](notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb)**
+📘 **[GGUF Visualization Guide →](docs/GGUF_NEURAL_NETWORK_VISUALIZATION.md)** | 📓 **[Notebook 11 →](notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb)** | 📓 **[Notebook 12 →](notebooks/12-gguf-attention-mechanism-explorer-executed.ipynb)** | 📓 **[Notebook 13 →](notebooks/13-gguf-token-embedding-visualizer-executed-3.ipynb)**
 
 ---
 
@@ -354,7 +354,7 @@ GPU 1 Available:
 
 ## 📓 Tutorial Notebooks
 
-Comprehensive Kaggle-ready tutorials in [`notebooks/`](notebooks/):
+13 comprehensive Kaggle-ready tutorials in [`notebooks/`](notebooks/):
 
 | # | Notebook | Description |
 |---|----------|-------------|
@@ -369,6 +369,8 @@ Comprehensive Kaggle-ready tutorials in [`notebooks/`](notebooks/):
 | 09 | [Large Models](notebooks/09-large-models-kaggle-llcuda-v2-2-0.ipynb) | Deploy 13B+ on dual T4 |
 | 10 | [Complete Workflow](notebooks/10-complete-workflow-llcuda-v2-2-0.ipynb) | Production end-to-end pipeline |
 | 11 | [**GGUF Visualization**](notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb) | ⭐ Interactive architecture graphs |
+| 12 | [Attention Mechanism Explorer](notebooks/12-gguf-attention-mechanism-explorer-executed.ipynb) | Q-K-V attention patterns + Graphistry |
+| 13 | [Token Embedding Visualizer](notebooks/13-gguf-token-embedding-visualizer-executed-3.ipynb) | 3D embedding space + Plotly UMAP |
 
 📘 **[Notebooks Index →](notebooks/README.md)**
 
@@ -458,7 +460,7 @@ MIT — see [LICENSE](LICENSE)
 
 ---
 
-## 📓 Tutorial Notebooks (10 notebooks)
+## 📓 Tutorial Notebooks (13 notebooks)
 
 Complete tutorial series for llcuda v2.2.0 on Kaggle dual T4 GPUs. Click the badges to open directly in Kaggle or view on GitHub.
 
@@ -475,15 +477,17 @@ Complete tutorial series for llcuda v2.2.0 on Kaggle dual T4 GPUs. Click the bad
 | 09 | [Large Models (13B+)](notebooks/09-large-models-kaggle-llcuda-v2-2-0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/09-large-models-kaggle-llcuda-v2-2-0.ipynb) | Deploy large models on dual T4 with tensor-split |
 | 10 | [Complete Workflow](notebooks/10-complete-workflow-llcuda-v2-2-0.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/10-complete-workflow-llcuda-v2-2-0.ipynb) | Production end-to-end: Setup → Model → Server → Analytics → API |
 | 11 | [**GGUF Visualization** ⭐](notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/11-gguf-neural-network-graphistry-vis-executed-2.ipynb) | **MOST IMPORTANT**: Dual-GPU architecture visualization with 8 interactive dashboards |
+| 12 | [Attention Mechanism Explorer](notebooks/12-gguf-attention-mechanism-explorer-executed.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/12-gguf-attention-mechanism-explorer-executed.ipynb) | Q-K-V attention patterns across all heads with Graphistry dashboards |
+| 13 | [Token Embedding Visualizer](notebooks/13-gguf-token-embedding-visualizer-executed-3.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/llcuda/llcuda/blob/main/notebooks/13-gguf-token-embedding-visualizer-executed-3.ipynb) | 3D embedding space exploration with GPU-accelerated UMAP + Plotly |
 
 ### 🎯 Learning Paths
 
 | Path | Notebooks | Time | Focus |
 |------|-----------|------|-------|
 | **Quick Start** | 01 → 02 → 03 | 1 hour | Get running fast |
-| **Full Course** | 01 → 11 (all) | 4.5 hours | Complete mastery + visualization |
+| **Full Course** | 01 → 13 (all) | 5.5 hours | Complete mastery + visualization |
 | **Unsloth Focus** | 01 → 04 → 05 → 10 | 2 hours | Fine-tuning workflow |
 | **Large Models** | 01 → 03 → 09 | 1.5 hours | 70B on Kaggle |
-| **Visualization** ⭐ | 01 → 03 → 04 → 06 → 11 | 2.5 hours | Architecture analysis |
+| **Visualization** ⭐ | 01 → 03 → 04 → 06 → 11 → 12 → 13 | 3.5 hours | Architecture + attention + embeddings |
 
 📘 **[Full Notebook Guide →](notebooks/README.md)**

@@ -6,7 +6,7 @@ Complete tutorial notebook series for llcuda on Kaggle with dual Tesla T4 GPUs.
 
 ## Overview
 
-This directory contains **11 comprehensive tutorial notebooks** covering all aspects of llcuda v2.2.0, culminating in the flagship **Neural Network Visualization** notebook demonstrating cutting-edge GGUF architecture analysis:
+This directory contains **13 comprehensive tutorial notebooks** covering all aspects of llcuda v2.2.0, culminating in the flagship **Neural Network Visualization** trilogy (notebooks 11–13) demonstrating cutting-edge GGUF architecture, attention, and embedding analysis:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -20,10 +20,14 @@ This directory contains **11 comprehensive tutorial notebooks** covering all asp
 │   03 Multi-GPU          06 Split-GPU          09 Large Models        │
 │                         07 Knowledge Graph    10 Complete Workflow   │
 │                                                                      │
-│                         ⭐ FLAGSHIP VISUALIZATION ⭐                  │
+│                         ⭐ VISUALIZATION TRILOGY ⭐                   │
 │                         ─────────────────────────                    │
 │                         11 Neural Network Graphistry                 │
 │                            (8 Interactive Dashboards)                │
+│                         12 Attention Mechanism Explorer              │
+│                            (Q-K-V + Graphistry)                      │
+│                         13 Token Embedding Visualizer                │
+│                            (3D UMAP + Plotly)                        │
 │                                                                      │
 │   ────────────────────────────────────────────────────────────────▶  │
 │          Beginner                              Expert                │
@@ -64,7 +68,9 @@ This directory contains **11 comprehensive tutorial notebooks** covering all asp
 
 | # | Notebook | Description | Time |
 |---|----------|-------------|------|
-| 11 | [GGUF Neural Network Graphistry Visualization](11-gguf-neural-network-graphistry-vis-executed-2.ipynb) | **MOST IMPORTANT**: Dual-GPU architecture visualization with 8 interactive Graphistry dashboards | 60 min |
+| 11 | [GGUF Neural Network Graphistry Visualization](11-gguf-neural-network-graphistry-vis-executed-2.ipynb) | **FLAGSHIP**: Dual-GPU architecture visualization with 8 interactive Graphistry dashboards | 60 min |
+| 12 | [GGUF Attention Mechanism Explorer](12-gguf-attention-mechanism-explorer-executed.ipynb) | Visualize Q-K-V attention patterns across all heads with Graphistry | 20 min |
+| 13 | [GGUF Token Embedding Visualizer](13-gguf-token-embedding-visualizer-executed-3.ipynb) | 3D embedding space exploration with GPU-accelerated UMAP and Plotly | 15 min |
 
 ---
 
@@ -339,6 +345,71 @@ End-to-end production workflow:
 
 ---
 
+### 12 - GGUF Attention Mechanism Explorer
+
+**File:** `12-gguf-attention-mechanism-explorer-executed.ipynb`
+
+Visualize how quantized GGUF models process attention — complementary to [Transformers-Explainer](https://poloclub.github.io/transformer-explainer/) which shows FP32 GPT-2 in a browser:
+
+- **Q-K-V decomposition** across all 896 attention heads (28 layers × 32 heads)
+- **Attention matrix extraction** via llama.cpp inference on GPU 0
+- **Causal masking and softmax** pattern analysis per layer
+- **Layer-depth sharpness** — early layers attend broadly, later layers sharpen
+- **Interactive Graphistry dashboards** on GPU 1 (token → head → weight graphs)
+- **Quantization impact** — how Q4_K_M affects attention scores vs FP32
+
+**Prerequisites:** Complete notebooks 01, 03, 06
+**VRAM Required:** GPU 0: 3-4 GB, GPU 1: 1-2 GB
+
+**Key Workflow:**
+```
+GPU 0: llama-server → inference → attention matrix simulation
+GPU 1: RAPIDS cuDF → Graphistry attention graph dashboards
+```
+
+**Complementarity with Transformers-Explainer:**
+| Aspect | Transformers-Explainer | Notebook 12 |
+|--------|------------------------|-------------|
+| Model | GPT-2 (FP32, 124M) | Llama 3.2 3B (Q4_K_M) |
+| Runtime | Browser (WebAssembly) | Kaggle dual T4 |
+| Attention view | 4-stage fixed UI | Multi-head Graphistry graphs |
+| Customization | None | Fully editable Jupyter |
+
+---
+
+### 13 - GGUF Token Embedding Visualizer
+
+**File:** `13-gguf-token-embedding-visualizer-executed-3.ipynb`
+
+Explore the semantic structure of GGUF model embedding spaces using GPU-accelerated dimensionality reduction — complementary to Transformers-Explainer's 2D rectangle view:
+
+- **Real embeddings** extracted via `/v1/embeddings` API (3072D vectors from Llama 3.2 3B)
+- **42 test words** across 7 semantic categories (colors, animals, technology, emotions, numbers, verbs, countries)
+- **GPU-accelerated UMAP** on GPU 1 via RAPIDS cuML (3072D → 3D in seconds)
+- **Cosine similarity analysis** — intra-category vs cross-category clustering
+- **Interactive 3D/2D Plotly visualizations** — rotate, zoom, hover for details
+- **Combined dashboard** with side-by-side 3D and 2D UMAP projections
+- **Quantization impact** — Q4_K_M preserves semantic structure at 7.8× compression
+
+**Prerequisites:** Complete notebooks 01, 03, 04
+**VRAM Required:** GPU 0: 3-4 GB (llama-server), GPU 1: 1-2 GB (cuML UMAP)
+
+**Key Workflow:**
+```
+GPU 0: llama-server → /v1/embeddings → 42 × 3072D vectors
+GPU 1: cuML UMAP → 3D projection → Plotly 3D/2D scatter plots
+```
+
+**Complementarity with Transformers-Explainer:**
+| Aspect | Transformers-Explainer | Notebook 13 |
+|--------|------------------------|-------------|
+| Embedding view | 768D colored rectangles | 3D interactive UMAP |
+| Model | GPT-2 (50K vocab) | Llama 3.2 3B (128K vocab) |
+| Semantic analysis | Not shown | Cosine similarity + clustering |
+| Interactivity | Static | Rotate, zoom, filter by category |
+
+---
+
 ## Running on Kaggle
 
 ### Setup Steps
@@ -375,10 +446,10 @@ End-to-end production workflow:
 Quick Start → Server Setup → Multi-GPU
 ```
 
-### Path 2: Full Course (5 hours) ⭐ RECOMMENDED
+### Path 2: Full Course (5.5 hours) ⭐ RECOMMENDED
 ```
-01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11
-Complete journey from basics to cutting-edge visualization
+01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11 → 12 → 13
+Complete journey from basics to cutting-edge visualization trilogy
 ```
 
 ### Path 3: Advanced Topics (2 hours)
@@ -393,10 +464,10 @@ Focus on multi-GPU and large models
 Fine-tuning and deployment
 ```
 
-### Path 5: Visualization & Analysis (3 hours) 🎨 VISUALIZATION TRACK
+### Path 5: Visualization & Analysis (3.5 hours) 🎨 VISUALIZATION TRACK
 ```
-01 → 03 → 04 → 06 → 07 → 08 → 11
-Quick start → Multi-GPU → GGUF → Split-GPU → Knowledge Graph → Document Network → Neural Network Visualization
+01 → 03 → 04 → 06 → 11 → 12 → 13
+Quick start → Multi-GPU → GGUF → Split-GPU → Neural Network → Attention → Embeddings
 ```
 
 ---
@@ -660,12 +731,14 @@ HTML Dashboard (Local)
 
 | Version | Date | Changes |
 |---------|------|---------|
-| v2.2.0 | 2026-01-25 | Complete 11-notebook series with cutting-edge neural network visualization |
+| v2.2.0 | 2026-02-01 | Complete 13-notebook series with visualization trilogy |
 | | | - Notebooks 01-06: Core fundamentals and split-GPU architecture |
 | | | - Notebooks 07-08: Knowledge graphs and document network analysis |
 | | | - Notebook 09: Large model deployment on dual T4 |
 | | | - Notebook 10: Production end-to-end workflow |
 | | | - Notebook 11: ⭐ FLAGSHIP - 8 interactive Graphistry dashboards for GGUF architecture visualization |
+| | | - Notebook 12: Attention Mechanism Explorer — Q-K-V patterns with Graphistry |
+| | | - Notebook 13: Token Embedding Visualizer — 3D UMAP with Plotly (real /v1/embeddings) |
 
 ---
 

@@ -1,63 +1,38 @@
-# llcuda + Unsloth - Quick Reference Card
+# llcuda v2.2.0 - Quick Reference Card
 
 **Version**: 2.2.0
 **Target**: Kaggle 2× Tesla T4 (SM 7.5)
 **Build**: CUDA 12.5, llama.cpp b7760 (388ce82)
-**Date**: January 17, 2026
+**Date**: February 1, 2026
 
 ---
 
-## 📚 Files Created
+## 🚀 Quick Start (30 seconds on Kaggle)
 
-```
-✅ llcuda_unsloth_t4_complete_build.ipynb    (25 KB) - Build from source
-✅ llcuda_unsloth_tutorial.ipynb              (17 KB) - Usage tutorial
-✅ NOTEBOOKS_GUIDE.md                         (11 KB) - Complete guide
-✅ QUICK_REFERENCE.md                          (This file)
-```
+1. **Set accelerator**: Settings → Accelerator → GPU T4 × 2
+2. **Install**: `!pip install -q --no-cache-dir git+https://github.com/llcuda/llcuda.git@v2.2.0`
+3. **Run**: Open [Notebook 01](../notebooks/01-quickstart-llcuda-v2.2.0.ipynb) and execute all cells
+4. **Done!** First inference in under 5 minutes
 
 ---
 
-## 🚀 Quick Start (30 seconds)
+## 📓 Tutorial Notebooks (13 total)
 
-### Open in Google Colab:
-
-1. **Upload** `llcuda_unsloth_tutorial.ipynb` to Colab
-2. **Runtime** → Change runtime type → GPU (T4)
-3. **Run All** → Wait 5 minutes
-4. **Done!** Test with Unsloth models
-
----
-
-## 📦 What Each Notebook Does
-
-### 1. Build Notebook (25 KB)
-```python
-# Creates: llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz (~961 MB)
-
-Contains:
-- llama.cpp binaries (llama-server + 12 more tools)
-- CUDA libraries with FlashAttention
-- llcuda Python wheel
-- Installation scripts
-```
-
-**When**: Need complete package or custom build
-**Time**: ~15-20 minutes
-
-### 2. Tutorial Notebook (17 KB)
-```python
-# Uses: pip install llcuda (auto-downloads binaries ~961 MB)
-
-Demonstrates:
-- Load Unsloth GGUF models
-- Run fast inference (~45 tok/s)
-- Batch processing
-- Performance metrics
-```
-
-**When**: Want to use llcuda with Unsloth
-**Time**: ~5-10 minutes
+| # | Notebook | Focus | Time |
+|---|----------|-------|------|
+| 01 | Quick Start | Install + first inference | 5 min |
+| 02 | Server Setup | Configuration + lifecycle | 15 min |
+| 03 | Multi-GPU | Dual T4 tensor-split | 20 min |
+| 04 | GGUF Quantization | K-quants, I-quants | 20 min |
+| 05 | Unsloth Integration | Fine-tune → Export → Deploy | 30 min |
+| 06 | Split-GPU Graphistry | LLM + RAPIDS on separate GPUs | 30 min |
+| 07 | Knowledge Graph | LLM entity extraction | 30 min |
+| 08 | Document Network | Similarity + community detection | 35 min |
+| 09 | Large Models | 13B+ on dual T4 | 30 min |
+| 10 | Complete Workflow | Production end-to-end | 50 min |
+| 11 | **GGUF Visualization** ⭐ | Architecture (929 nodes, 8 dashboards) | 60 min |
+| 12 | **Attention Explorer** | Q-K-V patterns + Graphistry | 20 min |
+| 13 | **Embedding Visualizer** | 3D UMAP + Plotly | 15 min |
 
 ---
 
@@ -65,30 +40,52 @@ Demonstrates:
 
 ### Installation
 ```python
-# Method 1: Auto-download (easiest)
-pip install llcuda
-
-# Method 2: From built package
-pip install /path/to/llcuda-2.0.1-py3-none-any.whl
+# Kaggle (recommended)
+!pip install -q --no-cache-dir git+https://github.com/llcuda/llcuda.git@v2.2.0
 ```
 
-### Basic Usage
+### Basic Inference
 ```python
 import llcuda
+from huggingface_hub import hf_hub_download
+
+model_path = hf_hub_download(
+    repo_id="unsloth/gemma-3-1b-it-GGUF",
+    filename="gemma-3-1b-it-Q4_K_M.gguf",
+    local_dir="/kaggle/working/models"
+)
 
 engine = llcuda.InferenceEngine()
-engine.load_model("gemma-3-1b-Q4_K_M")
-
+engine.load_model(model_path, silent=True)
 result = engine.infer("What is AI?", max_tokens=100)
 print(result.text)
-print(f"Speed: {result.tokens_per_sec:.1f} tok/s")
 ```
 
-### Unsloth GGUF Model
+### Split-GPU (LLM + Visualization)
 ```python
-engine.load_model(
-    "unsloth/gemma-3-1b-it-GGUF:gemma-3-1b-it-Q4_K_M.gguf"
+from llcuda.server import ServerManager
+
+server = ServerManager()
+server.start_server(
+    model_path=model_path,
+    gpu_layers=99,
+    tensor_split="1.0,0.0",  # GPU 0 only
 )
+# GPU 1 free for RAPIDS / Graphistry / Plotly
+```
+
+### Unsloth Workflow
+```python
+# 1. Fine-tune
+from unsloth import FastLanguageModel
+model, tokenizer = FastLanguageModel.from_pretrained("unsloth/gemma-3-1b-it", load_in_4bit=True)
+# ... add LoRA, train ...
+
+# 2. Export
+model.save_pretrained_gguf("my_model", tokenizer, quantization_method="q4_k_m")
+
+# 3. Deploy
+server.start_server(model_path="my_model-Q4_K_M.gguf", gpu_layers=99)
 ```
 
 ---
@@ -106,105 +103,55 @@ engine.load_model(
 
 ## 🔧 Troubleshooting
 
-### Wrong Version Installed (1.2.2)
-```bash
-pip uninstall llcuda
-pip install llcuda --no-cache-dir --force-reinstall
-```
-
-### Binaries Not Found
-```python
-import os
-os.environ['LLAMA_SERVER_PATH'] = '/path/to/llama-server'
-os.environ['LD_LIBRARY_PATH'] = '/path/to/lib'
-```
-
-### GPU Not T4
-```
-Runtime → Change runtime type → Hardware accelerator: GPU
-Then pray you get T4 (not K80 or P100)
-```
+| Issue | Solution |
+|-------|----------|
+| GPU not detected | Settings → Accelerator → GPU T4 × 2 |
+| Out of memory | Reduce `ctx_size`, use smaller model or lower quantization |
+| Server won't start | Check logs: `server.get_logs()` |
+| Slow inference | Enable `flash_attn=True` in `start_server()` |
+| Import errors | Restart kernel after `pip install` |
+| Binaries not found | First import triggers auto-download (~961 MB) |
 
 ---
 
-## 🎯 Unsloth Workflow
+## 📊 Performance (Single Tesla T4)
 
-```
-1. Fine-tune → Unsloth (2x faster training)
-2. Export → save_pretrained_gguf(quantization="q4_k_m")
-3. Deploy → llcuda.InferenceEngine().load_model()
-4. Profit → ~45 tok/s on T4!
-```
+| Model | Size | Quantization | VRAM | Tokens/sec |
+|-------|------|--------------|------|------------|
+| Gemma-3 1B | 1.0B | Q4_K_M | ~1.2 GB | ~50 tok/s |
+| Llama-3.2 3B | 3.2B | Q4_K_M | ~2.5 GB | ~38 tok/s |
+| Gemma-3 4B | 4.0B | Q4_K_M | ~3.0 GB | ~35 tok/s |
+| Qwen2.5 7B | 7.0B | Q4_K_M | ~5.0 GB | ~18 tok/s |
+| Llama-3.1 8B | 8.0B | Q4_K_M | ~5.5 GB | ~15 tok/s |
 
 ---
 
-## 📝 Key Files
+## 🎯 Learning Paths
 
-### On Your System
-```
-C:\Users\CS-AprilVenture\Documents\Project-Waqas\
-  Project-Waqas-Programming\Project-Nvidia\
-
-  ✅ llcuda_unsloth_t4_complete_build.ipynb    Build notebook
-  ✅ llcuda_unsloth_tutorial.ipynb              Tutorial notebook
-  ✅ NOTEBOOKS_GUIDE.md                         Complete guide
-  ✅ QUICK_REFERENCE.md                         This file
-```
-
-### After Running Build Notebook
-```
-/content/
-  └── llcuda-complete-cuda12-t4.tar.gz        (~350 MB)
-      └── llcuda-complete-t4/
-          ├── bin/           # Binaries
-          ├── lib/           # CUDA libraries
-          ├── python/        # Python wheel
-          ├── install.sh     # Installer
-          └── README.md
-```
+| Path | Notebooks | Time |
+|------|-----------|------|
+| Quick Start | 01 → 02 → 03 | 1 hour |
+| Full Course ⭐ | 01 → 13 (all) | 5.5 hours |
+| Unsloth Focus | 01 → 04 → 05 → 10 | 2 hours |
+| Large Models | 01 → 03 → 09 | 1.5 hours |
+| Visualization | 01 → 03 → 04 → 06 → 11 → 12 → 13 | 3.5 hours |
 
 ---
 
 ## 🔗 Links
 
 - **llcuda**: https://github.com/llcuda/llcuda
+- **Documentation**: https://llcuda.github.io/
 - **Unsloth**: https://github.com/unslothai/unsloth
-- **Unsloth GGUF**: https://unsloth.ai/docs/basics/inference-and-deployment/saving-to-gguf
 - **llama.cpp**: https://github.com/ggml-org/llama.cpp
+- **Graphistry**: https://hub.graphistry.com
 
 ---
 
-## ✅ Quick Checklist
+## ✅ Pre-flight Checklist
 
-Before running notebooks:
-- [ ] Kaggle account (or Google Colab)
-- [ ] Runtime set to GPU T4 × 2 (Kaggle) or T4 (Colab)
-- [ ] Notebook uploaded
-
-After running build notebook:
-- [ ] Downloaded tar file (~961 MB)
-- [ ] Extracted package
-- [ ] Ran install.sh (if deploying elsewhere)
-
-After running tutorial:
-- [ ] llcuda v2.2.0 installed
-- [ ] Tested with Gemma 3-1B
-- [ ] Speed ~60 tok/s on Kaggle 2× T4
-
----
-
-## 🎉 That's It!
-
-**You now have**:
-- ✅ Complete build notebook
-- ✅ Usage tutorial
-- ✅ Unified binary package
-- ✅ Unsloth integration
-
-**Next**: Open tutorial notebook in Colab and run it!
-
----
-
-**Questions?** Check NOTEBOOKS_GUIDE.md for detailed info
-
-**Built with**: Claude Code | llcuda v2.0.1 | Tesla T4 | Unsloth
+- [ ] Kaggle account created
+- [ ] Accelerator set to GPU T4 × 2
+- [ ] Internet enabled in notebook settings
+- [ ] Secrets added: `HF_TOKEN`, `Graphistry_Personal_Key_ID`, `Graphistry_Personal_Secret_Key`
+- [ ] Notebook 01 opened and all cells executed successfully

@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0-visualization-trilogy] - 2026-02-01
+
+### 📚 Visualization Trilogy + Documentation Sync
+
+Extended notebook series from 11 to 13 notebooks with two new advanced visualization notebooks complementary to [Transformers-Explainer](https://poloclub.github.io/transformer-explainer/). Updated all docs, README, guides, and learning paths accordingly.
+
+### Added
+
+**Notebook 12 — GGUF Attention Mechanism Explorer:**
+- Q-K-V decomposition across all 896 attention heads (28 layers × 32 heads)
+- Attention matrix extraction and causal mask analysis via llama.cpp on GPU 0
+- Layer-depth sharpness analysis (early vs late layer attention patterns)
+- Interactive Graphistry dashboards on GPU 1
+- Quantization impact comparison (Q4_K_M vs FP32 attention)
+- Complementary to Transformers-Explainer's browser-based GPT-2 attention view
+
+**Notebook 13 — GGUF Token Embedding Visualizer:**
+- Real token embeddings extracted via `/v1/embeddings` API (3072D vectors)
+- 42 test words across 7 semantic categories
+- GPU-accelerated UMAP on GPU 1 via RAPIDS cuML (3072D → 3D)
+- Cosine similarity analysis (intra-category vs cross-category clustering)
+- Interactive 3D/2D Plotly visualizations (rotate, zoom, hover)
+- Combined dashboard with side-by-side 3D and 2D projections
+- Plotly-only visualization (no Graphistry dependency)
+
+### Changed
+
+**Documentation updates:**
+- `README.md`: Added notebooks 12–13 to both notebook tables, updated learning paths and counts (11 → 13)
+- `notebooks/README.md`: Added detailed descriptions, index entries, updated tutorial path diagram to show Visualization Trilogy, updated learning paths and version history
+- `docs/INDEX.md`: Modernized stale v1.2.2 build references to v2.2.0 Kaggle workflow, added visualization trilogy to learning path
+- `docs/NOTEBOOKS_GUIDE.md`: Added notebooks 12–13 entries
+- `docs/QUICK_REFERENCE.md`: Added notebooks 12–13 to quick reference tables
+- `CHANGELOG.md`: This entry
+
+**Learning paths updated:**
+- Full Course: 01 → 13 (all), 5.5 hours
+- Visualization Track: 01 → 03 → 04 → 06 → 11 → 12 → 13, 3.5 hours
+
+---
+
 ## [2.2.0-notebooks-update] - 2026-01-25
 
 ### 📚 Notebook Series Completion + Documentation Synchronization
