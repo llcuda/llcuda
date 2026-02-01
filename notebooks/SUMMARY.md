@@ -106,7 +106,7 @@ I've created **5 advanced Kaggle notebooks** as complementary educational tools 
 | **Runtime** | Browser (WebAssembly) | **Kaggle Dual T4 GPUs** |
 | **Speed** | 2-5s | **<1s (GPU-accelerated)** |
 | **Quantization** | Not visualized | **Core focus of all notebooks** |
-| **Customization** | Fixed web UI | **Fully editable Jupyter** |
+| **Customization** | Fixed web UI | **Fully editable Kaggle notebooks** |
 | **Visualization** | D3.js | **Graphistry + RAPIDS** |
 | **Models** | GPT-2 only | **Gemma, Llama, Qwen, etc.** |
 | **Educational Level** | Beginner (fixed) | **Intermediate-Advanced (customizable)** |
@@ -291,7 +291,7 @@ After completing all notebooks, users will understand:
 ✅ Graphistry visualization: RAPIDS on GPU 1
 ✅ GGUF models: 1GB-5GB support
 ✅ Transformers-explainer: Feature-by-feature complementarity
-✅ Customizable: Jupyter notebooks, editable code
+✅ Customizable: Kaggle notebooks notebooks, editable code
 ✅ Educational: Clear progression, explanations
 ✅ Production-ready: Real models, quantization focus
 

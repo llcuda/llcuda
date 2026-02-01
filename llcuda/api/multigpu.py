@@ -426,14 +426,13 @@ def kaggle_t4_dual_config(model_size_gb: float = 7.0) -> MultiGPUConfig:
 
 def colab_t4_single_config() -> MultiGPUConfig:
     """
-    Get configuration for Google Colab's single Tesla T4 GPU.
-    
-    Colab provides:
-    - 1× NVIDIA Tesla T4 GPU (15 GB VRAM)
-    - SM 7.5 (Turing architecture)
-    
+    Legacy single-T4 configuration (pre-2.2.0).
+
+    llcuda v2.2.0 targets Kaggle dual T4 only. This helper remains for
+    legacy compatibility with single-T4 environments.
+
     Returns:
-        MultiGPUConfig for Colab T4
+        MultiGPUConfig for a single Tesla T4
     """
     return MultiGPUConfig(
         n_gpu_layers=-1,

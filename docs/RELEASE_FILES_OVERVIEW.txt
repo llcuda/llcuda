@@ -8,151 +8,36 @@
 │ 🎯 MAIN RELEASE FILE (v2.2.0)                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-  📦 llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz      [961 MB]
-     ├─ SHA256: 489f3df54... (full hash in .sha256 file)
-     ├─ Contents: bin/ (llama-server + 12 more tools)
-     └─ Contents: lib/ (CUDA libraries with FlashAttention)
-     
+  📦 llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz      [~961 MB]
+     ├─ SHA256: 489f3df54bac24d3801af3149c346402bea099d2bd8793897aa606c5c8af0025
+     ├─ Contents: bin/ (llama-server + tools)
+     └─ Contents: lib/ (CUDA libraries)
+
      Build Info:
      ├─ CUDA: 12.5
      ├─ Compute: SM 7.5 (Turing)
      ├─ llama.cpp: b7760 (388ce82)
      └─ Build Date: 2026-01-16
-     
-     ✅ UPLOADED TO GitHub Releases v2.2.0
-     👉 https://github.com/llcuda/llcuda/releases/tag/v2.2.0
-
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ 📄 DOCUMENTATION FILES (Use during upload)                                  │
+│ ✅ RELEASE CHECKLIST                                                        │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-  📋 GITHUB_RELEASE_DESCRIPTION_v2.0.1.md         [~5 KB]
-     Purpose: Copy-paste this into GitHub release description field
-     Contains: Quick start, benchmarks, requirements
-     
-  📋 RELEASE_NOTES_v2.0.1.md                      [~15 KB]
-     Purpose: Full detailed release notes
-     Optional: Upload as additional asset to release
-     
-  📋 UPLOAD_INSTRUCTIONS.md                       [~12 KB]
-     Purpose: Step-by-step guide for uploading release
-     👉 READ THIS FIRST - It tells you exactly what to do
-     
-  📋 RELEASE_SUMMARY.md                           [~8 KB]
-     Purpose: Quick overview of what was prepared
-     For reference: Shows checklist and technical details
-     
-  📋 RELEASE_FILES_OVERVIEW.txt                   [This file]
-     Purpose: Visual guide to all files
-     
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ 🔧 MODIFIED PROJECT FILES (Need to commit)                                  │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-  📂 llcuda/llcuda/_internal/bootstrap.py         [MODIFIED]
-     Changed: GITHUB_RELEASE_URL from v2.0.0 → v2.0.1
-     Action needed: git commit + git push
-     
-     Commands:
-       cd llcuda/
-       git add llcuda/_internal/bootstrap.py
-       git commit -m "Release v2.0.1: Update bootstrap to v2.0.1 binaries"
-       git push origin main
-       git tag v2.0.1
-       git push origin v2.0.1
-
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ 🗂️ BUILD ARTIFACTS (Can be kept or deleted)                                │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-  📦 build_t4_colab.tar.gz                        [Original from Colab]
-     Status: Original cmake build output
-     Keep: For reference or rebuilding
-     
-  📁 build_t4/                                    [Extracted, 486 MB]
-     Status: Extracted cmake build directory
-     Keep: Optional, can delete after release
-     
-  📁 llcuda-t4-release/                           [Staged, 371 MB]
-     Status: Intermediate staging directory
-     Keep: Optional, can delete after release
-
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ ✅ UPLOAD CHECKLIST                                                         │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-Before upload:
-  [✓] Binary package created
-  [✓] Checksum verified
-  [✓] Bootstrap.py updated
-  [✓] Documentation prepared
-  
-During upload:
-  [ ] Go to: https://github.com/waqasm86/llcuda/releases
-  [ ] Click "Draft a new release"
-  [ ] Tag: v2.0.1
-  [ ] Title: llcuda v2.0.1 - Tesla T4 CUDA 12 Binaries
-  [ ] Description: Copy from GITHUB_RELEASE_DESCRIPTION_v2.0.1.md
-  [ ] Attach: llcuda-binaries-cuda12-t4.tar.gz
-  [ ] Check: "Set as the latest release"
-  [ ] Click: "Publish release"
-  
-After upload:
-  [ ] Commit bootstrap.py changes
-  [ ] Create and push v2.0.1 git tag
-  [ ] Test in Google Colab
-  [ ] Verify download URL works
-
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ 🚀 QUICK START                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-1. Read: UPLOAD_INSTRUCTIONS.md (detailed steps)
-2. Upload: llcuda-binaries-cuda12-t4.tar.gz to GitHub Releases
-3. Copy: GITHUB_RELEASE_DESCRIPTION_v2.0.1.md as release description
-4. Commit: Modified bootstrap.py file
-5. Test: In fresh Google Colab notebook
-
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ 📊 PACKAGE DETAILS                                                          │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-Package name:       llcuda-binaries-cuda12-t4.tar.gz
-Compressed size:    140 MB
-Extracted size:     371 MB
-SHA256:             54bb904f213b38aec4a2c85baa2fab8256200966aa994bb9fa4a77640d699aa4
-
-Target GPU:         Tesla T4 (SM 7.5)
-CUDA version:       12.4/12.6
-FlashAttention:     ✅ Enabled
-CUDA Graphs:        ✅ Enabled
-Tensor Cores:       ✅ Optimized
-
-Performance:
-  - Gemma 3-1B:     45 tokens/sec
-  - Llama 3.2-3B:   30 tokens/sec  
-  - Qwen 2.5-7B:    18 tokens/sec
-  - Llama 3.1-8B:   15 tokens/sec
-
+[ ] Create GitHub Release (tag v2.2.0)
+[ ] Upload llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz
+[ ] Verify installation on Kaggle dual T4
+[ ] Confirm binaries auto-download on first import
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ 📞 SUPPORT                                                                  │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-GitHub:  https://github.com/waqasm86/llcuda
-PyPI:    https://pypi.org/project/llcuda/
-Issues:  https://github.com/waqasm86/llcuda/issues
+GitHub:  https://github.com/llcuda/llcuda
+Issues:  https://github.com/llcuda/llcuda/issues
 Email:   waqasm86@gmail.com
-
 
 ═══════════════════════════════════════════════════════════════════════════════
 
-🎯 READY TO UPLOAD! Follow UPLOAD_INSTRUCTIONS.md for detailed steps.
+🎯 READY TO UPLOAD! Use docs/GITHUB_RELEASE_GUIDE.md for full steps.
 
 ═══════════════════════════════════════════════════════════════════════════════

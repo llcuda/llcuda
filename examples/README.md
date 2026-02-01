@@ -2,10 +2,10 @@
 
 This directory contains example scripts and notebooks for using llcuda.
 
-## Google Colab / Kaggle Examples
+## Kaggle Examples (v2.2.0)
 
 ### Gemma 3-1B + Unsloth Tutorial
-Complete tutorial for using llcuda v2.1.0 with Gemma 3-1B model on Google Colab.
+Complete tutorial for using llcuda v2.2.0 with Gemma 3-1B on Kaggle dual Tesla T4.
 
 **Features demonstrated:**
 - Binary auto-download on first import
@@ -22,11 +22,11 @@ Complete tutorial for using llcuda v2.1.0 with Gemma 3-1B model on Google Colab.
 
 **Recommended Runtime:**
 - Python 3.11+
-- Tesla T4 GPU (Google Colab)
+- Dual Tesla T4 GPUs (Kaggle)
 
 **Usage:**
-1. Open in Google Colab: [Open Tutorial](https://colab.research.google.com/github/waqasm86/llcuda/blob/main/notebooks/llcuda_v2_1_0_gemma3_1b_unsloth_colab.ipynb)
-2. Select Runtime → Change runtime type → T4 GPU
+1. Open the notebook from `notebooks/` in Kaggle
+2. Select Accelerator → GPU T4 x2
 3. Run all cells
 
 ### Legacy Examples (v1.x)
@@ -44,6 +44,5 @@ Have an example you'd like to share? Submit a pull request!
 ---
 
 **Links:**
-- [llcuda on PyPI](https://pypi.org/project/llcuda/)
 - [llcuda on GitHub](https://github.com/llcuda/llcuda)
-- [Documentation](https://waqasm86.github.io/)
+- [Documentation](https://llcuda.github.io/)

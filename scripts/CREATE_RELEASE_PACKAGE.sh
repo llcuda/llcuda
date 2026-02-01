@@ -2,16 +2,16 @@
 ################################################################################
 # Create GitHub Release Package for llcuda
 #
-# This script creates a single universal CUDA 12 binary package that works
-# for both GeForce 940M and Tesla T4 GPUs.
+# Legacy packaging script. llcuda v2.2.0 targets Kaggle dual Tesla T4 only.
+# This script may include older multi-target packaging logic.
 #
 # The package will be uploaded to GitHub Releases page (NOT main repo)
-# to keep the main repository under 100MB for PyPI compatibility.
+# to keep the main repository small and avoid large binary commits.
 #
 # Package contents:
 #   - llama-server and tools (compiled for CUDA 12)
 #   - Shared libraries (.so files)
-#   - Compatible with CC 5.0+ GPUs (Maxwell, Pascal, Volta, Turing, Ampere)
+#   - For v2.2.0, binaries are optimized for Tesla T4 (SM 7.5)
 #
 # Usage:
 #   1. Build llama.cpp with cmake (manually)
@@ -72,13 +72,13 @@ echo -e "${CYAN}Package Configuration:${NC}"
 echo "  Version:     v${VERSION}"
 echo "  Output dir:  ${OUTPUT_DIR}"
 echo "  CUDA:        12.x"
-echo "  Targets:     GeForce 940M (CC 5.0) & Tesla T4 (CC 7.5)"
+echo "  Targets:     Legacy 940M (CC 5.0) & Tesla T4 (CC 7.5)"
 echo ""
 
 # Ask which build to package
 echo -e "${YELLOW}Which build do you want to package?${NC}"
-echo "  1) GeForce 940M (CC 5.0) - for your local system"
-echo "  2) Tesla T4 (CC 7.5) - for Google Colab"
+echo "  1) GeForce 940M (CC 5.0) - legacy/local"
+echo "  2) Tesla T4 (CC 7.5) - Kaggle T4 build"
 echo "  3) Both (create separate packages)"
 echo ""
 read -p "Enter choice (1/2/3): " choice
@@ -398,7 +398,7 @@ echo ""
 
 echo -e "${RED}IMPORTANT:${NC}"
 echo "  - These binaries go to GitHub RELEASES page (not main repo)"
-echo "  - Main repo stays under 100MB for PyPI"
+echo "  - Main repo stays small; binaries live in GitHub Releases"
 echo "  - NEVER upload .gguf model files anywhere"
 echo ""
 

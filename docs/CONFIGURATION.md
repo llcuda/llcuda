@@ -399,25 +399,7 @@ import llcuda
 
 ## Configuration Examples
 
-### Example 1: Single GPU (Colab T4)
-
-```python
-from llcuda.server import ServerManager, ServerConfig
-
-config = ServerConfig(
-    model_path="gemma-3-1b-Q4_K_M.gguf",
-    host="127.0.0.1",
-    port=8080,
-    n_gpu_layers=99,
-    context_size=4096,
-    flash_attn=True,
-)
-
-server = ServerManager()
-server.start_with_config(config)
-```
-
-### Example 2: Dual GPU (Kaggle 2× T4)
+### Example: Dual GPU (Kaggle 2× T4)
 
 ```python
 from llcuda.server import ServerManager, ServerConfig

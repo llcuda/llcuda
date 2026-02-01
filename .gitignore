@@ -54,6 +54,15 @@ share/python-wheels/
 *.pt
 *.pth
 *.onnx
+*.ckpt
+*.pkl
+*.npz
+*.npy
+*.parquet
+*.arrow
+*.feather
+*.csv
+*.tsv
 
 # Build artifacts
 build/
@@ -129,6 +138,21 @@ desktop.ini
 *.temp
 *.bak
 *.log
+
+# Large media / exports
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.mp3
+*.wav
+*.flac
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.pdf
 
 # Old version files (v2.1.x and earlier) - archived, not committed
 archive/

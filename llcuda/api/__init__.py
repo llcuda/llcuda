@@ -16,7 +16,7 @@ Features:
     - Slot management and KV cache control
     - Model loading/unloading
     - Health monitoring and metrics
-    - Multi-GPU support (Kaggle 2× T4, Colab T4)
+    - Multi-GPU support (Kaggle 2× T4)
     - GGUF model utilities (parsing, quantization, conversion)
 
 Example:

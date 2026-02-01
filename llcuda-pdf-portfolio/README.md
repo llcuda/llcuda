@@ -128,11 +128,7 @@ The flagship achievement section includes:
 
 https://www.kaggle.com/code/waqasm86/11-gguf-neural-network-graphistry-vis-executed-2
 
-## Version History
-
-- **v2.2.0** (January 25, 2026) - Clean vertical diagram redesign matching website style
-- **v2.1.0** (January 25, 2026) - Improved diagram spacing and clarity
-- **v2.0.0** (January 25, 2026) - Initial portfolio creation with 5 TikZ diagrams
+## Version\n+\n+- **v2.2.0** (January 25, 2026) - Clean vertical diagram redesign matching website style
 
 ## Notes
 

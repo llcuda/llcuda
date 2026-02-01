@@ -1,11 +1,11 @@
 """
-llcuda - Clean, Ultra-Lightweight CUDA-Accelerated LLM Inference for Python 3.11+
+llcuda - Clean, Ultra-Lightweight CUDA 12 LLM Inference for Python 3.11+
 
 Streamlined PyTorch-style package with hybrid bootstrap architecture.
-62KB package with auto-download of CUDA binaries and libraries.
+Lightweight Python package with auto-download of CUDA binaries and libraries.
 No manual setup required - just pip install and use!
 
-Version 1.2.2 - Fixed llama-server detection and added silent mode.
+Version 2.2.0 - Kaggle dual Tesla T4 (SM 7.5) optimized release.
 
 Examples:
     Basic usage (auto-download model from registry):
@@ -21,11 +21,11 @@ Examples:
     >>> result = engine.infer("What is AI?")
 
 Key Features:
-    - Ultra-lightweight 62KB package
+    - Lightweight Python package with auto-download of CUDA binaries
     - Python 3.11+ optimized
-    - Universal GPU support (SM 5.0-8.9)
-    - Hybrid bootstrap (auto-download binaries/models)
-    - Works on Colab/Kaggle/local GPUs
+    - Kaggle-only runtime target (2x Tesla T4, SM 7.5)
+    - Split-GPU workflow (GPU 0: LLM, GPU 1: Graphistry/RAPIDS)
+    - Optimized for small GGUF models (1B-5B)
     - Clean, maintainable codebase
 """
 

@@ -530,11 +530,11 @@ echo "  3. Test inference:"
 echo "     python3 -c \"import llcuda; print(llcuda.__version__)\""
 echo ""
 
-echo -e "${CYAN}For Google Colab:${NC}"
+echo -e "${CYAN}For Kaggle:${NC}"
 echo "  - Build with: ./build_cuda12_tesla_t4_colab.sh"
 echo "  - Create tar.gz: tar -czf llcuda-binaries-t4.tar.gz -C ${LLCUDA_PKG_DIR} binaries lib"
 echo "  - Upload to GitHub releases"
-echo "  - Bootstrap will auto-download in Colab"
+echo "  - Bootstrap will auto-download in Kaggle"
 echo ""
 
 show_success "All done! Run the test script to verify integration."

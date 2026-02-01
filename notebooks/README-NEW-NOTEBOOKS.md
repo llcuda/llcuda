@@ -16,7 +16,7 @@ These 5 new notebooks extend the flagship **Notebook 11 (GGUF Neural Network Vis
 | **Models** | GPT-2 only (FP32) | 1B-8B GGUF (Q4_K_M/Q5_K_M) |
 | **Speed** | 2-5s inference | <1s GPU-accelerated |
 | **Quantization** | Not shown | **Visible in all analyses** |
-| **Customization** | Fixed UI | **Fully editable Jupyter** |
+| **Customization** | Fixed UI | **Fully editable Kaggle notebooks** |
 | **Visualization** | D3.js in browser | **Graphistry + RAPIDS** |
 | **Scale** | 124M parameters | **1B-8B parameters** |
 

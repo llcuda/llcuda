@@ -2,7 +2,7 @@
 
 This guide covers installation for llcuda v2.2.0, the CUDA 12-first backend for Unsloth on Kaggle.
 
-**IMPORTANT:** llcuda v2.2.0 is **Kaggle-specific only**. It is optimized for dual Tesla T4 GPUs (15GB × 2, SM 7.5) and is not designed for Google Colab or local environments.
+**IMPORTANT:** llcuda v2.2.0 is **Kaggle-specific only**. It is optimized for dual Tesla T4 GPUs (15GB × 2, SM 7.5) and is not designed for other environments.
 
 ---
 
@@ -364,7 +364,7 @@ pip install git+https://github.com/llcuda/llcuda.git@v2.2.0
 # Check CUDA installation
 nvidia-smi
 
-# On Kaggle/Colab, ensure GPU is enabled in settings
+# On Kaggle, ensure GPU is enabled in settings
 ```
 
 #### 3. Binary Download Failed
@@ -374,9 +374,9 @@ nvidia-smi
 **Solution:**
 ```bash
 # Manual download
-wget https://github.com/llcuda/llcuda/releases/download/v2.2.0/llcuda-binaries-cuda12-t4x2-v2.2.0.tar.gz
+wget https://github.com/llcuda/llcuda/releases/download/v2.2.0/llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz
 mkdir -p ~/.cache/llcuda
-tar -xzf llcuda-binaries-cuda12-t4x2-v2.2.0.tar.gz -C ~/.cache/llcuda/
+tar -xzf llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz -C ~/.cache/llcuda/
 ```
 
 #### 4. Permission Denied

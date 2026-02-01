@@ -44,7 +44,6 @@ class ServerManager:
     _BINARY_RELEASE_BASE = "https://github.com/llcuda/llcuda/releases/download"
     _BINARY_BUNDLES = [
         {"version": "2.2.0", "filename": "llcuda-v2.2.0-cuda12-kaggle-t4x2.tar.gz", "label": "primary"},
-        {"version": "2.1.1", "filename": "llcuda-binaries-cuda12-t4-v2.1.1.tar.gz", "label": "fallback"},
     ]
 
     def __init__(self, server_url: str = "http://127.0.0.1:8090"):
@@ -176,7 +175,7 @@ class ServerManager:
 
     def _detect_platform(self):
         """
-        Detect the current platform (colab, kaggle, or local).
+        Detect the current platform (kaggle or local).
 
         Returns:
             Dictionary with platform information
@@ -187,60 +186,15 @@ class ServerManager:
             "compute_capability": None,
         }
 
-        # Check for Google Colab
-        if "COLAB_GPU" in os.environ:
-            platform_info["platform"] = "colab"
-            # Try to get GPU info in Colab
-            try:
-                result = subprocess.run(
-                    [
-                        "nvidia-smi",
-                        "--query-gpu=name,compute_cap",
-                        "--format=csv,noheader",
-                    ],
-                    capture_output=True,
-                    text=True,
-                )
-                if result.stdout:
-                    lines = result.stdout.strip().split("\n")
-                    if lines:
-                        parts = lines[0].split(",")
-                        platform_info["gpu_name"] = parts[0].strip()
-                        if len(parts) > 1:
-                            platform_info["compute_capability"] = float(
-                                parts[1].strip()
-                            )
-            except:
-                pass
-            return platform_info
-
         # Check for Kaggle
-        if "KAGGLE_KERNEL_RUN_TYPE" in os.environ:
+        if "KAGGLE_KERNEL_RUN_TYPE" in os.environ or os.path.exists("/kaggle"):
             platform_info["platform"] = "kaggle"
-            # Kaggle typically uses T4 GPUs
             platform_info["gpu_name"] = "Tesla T4"
             platform_info["compute_capability"] = 7.5
             return platform_info
 
-        # Check for local NVIDIA GPU
-        try:
-            # Get GPU name and compute capability
-            result = subprocess.run(
-                ["nvidia-smi", "--query-gpu=name,compute_cap", "--format=csv,noheader"],
-                capture_output=True,
-                text=True,
-            )
-            if result.stdout:
-                lines = result.stdout.strip().split("\n")
-                if lines:
-                    parts = lines[0].split(",")
-                    platform_info["gpu_name"] = parts[0].strip()
-                    if len(parts) > 1:
-                        platform_info["compute_capability"] = float(parts[1].strip())
-        except:
-            pass
-
         return platform_info
+
 
     def _download_llama_server(self):
         """

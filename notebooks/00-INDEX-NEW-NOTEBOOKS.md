@@ -55,7 +55,7 @@ GPU 0: llama-server (inference)  →  GPU 1: Graphistry (visualization)
 |---------|------------------------|-------------|
 | Model | GPT-2 (FP32) | Gemma/Llama/Qwen (Q4_K_M) |
 | Attention Detail | 4-stage Q·K^T breakdown | Post-quantization patterns |
-| Interactivity | Web UI (fixed) | Jupyter + Graphistry (custom) |
+| Interactivity | Web UI (fixed) | Kaggle notebooks + Graphistry (custom) |
 
 ### Use Cases
 - Debug attention in fine-tuned models
@@ -303,7 +303,7 @@ IQ3_XS vs Q4_K_M: ~5-10% loss,   32% smaller
 | **Layers** | One at a time | All simultaneously |
 | **Heads** | Sequential | Parallel comparison |
 | **Quantization** | Not shown | Core focus |
-| **Customization** | None | Full Jupyter |
+| **Customization** | None | Full Kaggle notebooks |
 | **GPU Accel** | No | Yes (RAPIDS) |
 | **Code Access** | No | Yes |
 
@@ -420,7 +420,7 @@ IQ3_XS vs Q4_K_M: ~5-10% loss,   32% smaller
 **All notebooks** serve as **complementary educational tools** to transformers-explainer, focusing on:
 - **Production models** (not just GPT-2)
 - **Quantization** (core feature, not shown in transformers-explainer)
-- **Customization** (full Jupyter notebooks)
+- **Customization** (full Kaggle notebooks notebooks)
 - **GPU acceleration** (RAPIDS + Graphistry)
 
 **Together with transformers-explainer**, these notebooks provide a **complete education** from basics to production deployment! 🚀

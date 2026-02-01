@@ -30,10 +30,9 @@ except ImportError:
     HF_AVAILABLE = False
 
 
-# Configuration for llcuda v2.2.0 (Kaggle dual T4 with fallback to v2.1.0)
+# Configuration for llcuda v2.2.0 (Kaggle dual T4)
 BINARY_VERSION = "2.2.0"
 PRIMARY_BINARY_BUNDLE = f"llcuda-v{BINARY_VERSION}-cuda12-kaggle-t4x2.tar.gz"
-FALLBACK_BINARY_BUNDLE = "llcuda-binaries-cuda12-t4-v2.1.0.tar.gz"
 GITHUB_RELEASE_URL = "https://github.com/llcuda/llcuda/releases/download"
 
 # HuggingFace repos (faster CDN, better for large files)
@@ -60,19 +59,13 @@ BINARY_BUNDLE_CANDIDATES = [
         "label": "GitHub",
         "source": "github",
     },
-    {
-        "version": "2.1.0",
-        "filename": FALLBACK_BINARY_BUNDLE,
-        "label": "GitHub-fallback",
-        "source": "github",
-    },
 ]
 
 # Legacy constant retained for downstream tooling/documentation
 T4_BINARY_BUNDLE = PRIMARY_BINARY_BUNDLE
 T4_NATIVE_BUNDLE = "llcuda-v2-native-t4.tar.gz"        # ~100 MB
 
-# Minimum compute capability for llcuda v2.1
+# Minimum compute capability for llcuda v2.2.0
 MIN_COMPUTE_CAPABILITY = 7.5  # Tesla T4, RTX 20xx+, A100, H100
 
 # Paths
@@ -117,7 +110,7 @@ def detect_platform() -> str:
     Returns:
         Platform name: "colab", "kaggle", or "local"
     """
-    # Check for Colab
+    # Legacy environment check (not supported in v2.2.0 runtime)
     try:
         import google.colab
 
@@ -134,7 +127,7 @@ def detect_platform() -> str:
 
 def verify_gpu_compatibility(gpu_name: str, compute_cap: str) -> bool:
     """
-    Verify GPU is compatible with llcuda v2.0 (SM 7.5+).
+    Verify GPU is compatible with llcuda v2.2.0 (SM 7.5).
 
     Args:
         gpu_name: GPU name from nvidia-smi
@@ -163,25 +156,25 @@ def verify_gpu_compatibility(gpu_name: str, compute_cap: str) -> bool:
         print(f"  Your GPU: {gpu_name} (SM {compute_cap})")
         print(f"  Required: Tesla T4 (SM 7.5)")
         print()
-        print("  llcuda v2.1 is designed exclusively for Tesla T4 GPU")
+        print("  llcuda v2.2.0 is designed exclusively for Tesla T4 (SM 7.5)")
         print()
         print("  Compatible environment:")
-        print("    - Google Colab (free tier with Tesla T4)")
+        print("    - Kaggle notebooks (dual Tesla T4)")
         print()
-        print("  For other GPUs, use llcuda v1.2.2:")
+        print("  llcuda v2.2.0 requires Kaggle dual Tesla T4 (SM 7.5)")
         print()
         print("=" * 70)
         raise RuntimeError(f"GPU compute capability {compute_cap} < {MIN_COMPUTE_CAPABILITY} (minimum required)")
 
     # Tesla T4 verification
     if cc_float == 7.5 and "t4" in gpu_lower:
-        print(f"  ✅ Tesla T4 detected - Perfect for llcuda v2.1!")
+        print(f"  ✅ Tesla T4 detected - Perfect for llcuda v2.2.0!")
     elif cc_float == 7.5:
         print(f"  ⚠️  {gpu_name} (SM {compute_cap}) - May work but not tested")
-        print(f"      llcuda v2.1 is optimized exclusively for Tesla T4")
+        print(f"      llcuda v2.2.0 is optimized exclusively for Tesla T4")
     else:
         print(f"  ⚠️  {gpu_name} (SM {compute_cap}) - Not tested")
-        print(f"      llcuda v2.1 is designed for Tesla T4 (SM 7.5)")
+        print(f"      llcuda v2.2.0 is designed for Tesla T4 (SM 7.5)")
 
     return True
 
@@ -373,7 +366,7 @@ def download_t4_binaries() -> None:
     else:
         print("❌ No NVIDIA GPU detected")
         print()
-        print("llcuda v2.1 requires an NVIDIA GPU with SM 7.5+ (Tesla T4 or newer)")
+        print("llcuda v2.2.0 requires Tesla T4 (SM 7.5) on Kaggle dual-GPU")
         raise RuntimeError("No compatible NVIDIA GPU found")
 
     print(f"🌐 Platform: {platform.capitalize()}")
@@ -540,10 +533,10 @@ def download_default_model() -> None:
 
 def bootstrap() -> None:
     """
-    Main bootstrap function for llcuda v2.1.0 - called on first import.
+    Main bootstrap function for llcuda v2.2.0 - called on first import.
 
     Downloads T4-optimized binaries from GitHub Releases on first import.
-    Uses v2.0.6 binaries (100% compatible with v2.1.0 pure Python APIs).
+    Uses v2.2.0 binaries for Kaggle dual T4.
     Models are downloaded on-demand when load_model() is called.
 
     Raises:

@@ -422,7 +422,7 @@ GPU 1 Available:
 - **Quantization:** Q4_K_M (best quality/speed balance)
 - **Source:** Unsloth-compatible models preferred
 
-**Note:** llcuda v2.2.0 is designed and tested exclusively for Kaggle dual T4 environment. Other platforms (Colab, local) are not officially supported.
+**Note:** llcuda v2.2.0 is designed and tested exclusively for Kaggle dual T4 environment. Other platforms are not officially supported.
 
 ---
 

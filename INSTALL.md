@@ -4,12 +4,13 @@
 
 - **Python:** 3.11+
 - **CUDA:** 12.x runtime
-- **GPU:** NVIDIA Tesla T4 (single or multi-GPU)
-- **Platform:** Linux (Google Colab, Kaggle, or local)
+- **GPU:** 2x NVIDIA Tesla T4 (15GB each, SM 7.5)
+- **Platform:** Kaggle notebooks only (dual T4)
+- **Internet:** Enabled (for package + binary download)
 
 ## Installation Methods
 
-### Method 1: From GitHub Release (Recommended)
+### Method 1: From GitHub (Recommended)
 ```bash
 pip install git+https://github.com/llcuda/llcuda.git@v2.2.0
 ```
@@ -25,6 +26,7 @@ git clone https://github.com/llcuda/llcuda.git
 cd llcuda
 pip install -e .
 ```
+**Note:** llcuda v2.2.0 is not published to PyPI. GitHub is the primary distribution channel.
 
 ## Binary Download
 

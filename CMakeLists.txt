@@ -25,8 +25,8 @@ if(NOT pybind11_FOUND)
 endif()
 
 # ============================================================================
-# llcuda v2.0 - Tesla T4 Only (SM 7.5) - CUDA 12 Optimized
-# Designed for Google Colab and modern GPUs with Tensor Core support
+# llcuda v2.2.0 - Tesla T4 Only (SM 7.5) - CUDA 12 Optimized
+# Runtime target: Kaggle dual T4 environment (builds can be produced elsewhere)
 # ============================================================================
 
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)

@@ -1,7 +1,7 @@
 #!/bin/bash
 ################################################################################
 # Manual CMake Build Script for NVIDIA Tesla T4 (CC 7.5)
-# System: Google Colab, CUDA 12.4/12.6, Python 3.12
+# System: Kaggle, CUDA 12.4/12.6, Python 3.12
 #
 # This script contains the exact CMake commands you need to run manually.
 # It does NOT execute them automatically - you run each command yourself.
@@ -15,11 +15,11 @@ CMake Build Commands for NVIDIA Tesla T4 (Compute Capability 7.5)
 Target GPU:    Tesla T4
 Architecture:  Turing
 Compute Cap:   7.5
-CUDA Version:  12.4/12.6 (Colab)
-System:        Google Colab (Python 3.12)
+CUDA Version:  12.4/12.6 (Kaggle)
+System:        Kaggle (Python 3.12)
 
 ================================================================================
-STEP 1: Setup (in Google Colab)
+STEP 1: Setup (in Kaggle)
 ================================================================================
 
 # Clone llama.cpp if not already present
@@ -68,7 +68,7 @@ CMake Options Explained:
   → CRITICAL for Tesla T4
 
 -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
-  → Use Colab's CUDA compiler
+  → Use Kaggle's CUDA compiler
 
 -DGGML_NATIVE=OFF
   → Build for CC 7.5, not the build machine's GPU
@@ -100,13 +100,13 @@ CMake Options Explained:
 STEP 3: Build (run this command)
 ================================================================================
 
-This will take 5-15 minutes in Colab:
+This will take 5-15 minutes in Kaggle:
 
 !cmake --build build_cuda12_t4 --config Release -j$(nproc)
 
 Explanation:
   --config Release  : Build in release mode (optimized)
-  -j$(nproc)        : Use all CPU cores (Colab has 2 cores usually)
+  -j$(nproc)        : Use all CPU cores (Kaggle has 2 cores usually)
 
 ================================================================================
 STEP 4: Verify Build Success
@@ -121,7 +121,7 @@ Expected outputs:
   libggml-*.so     : Multiple library files
 
 ================================================================================
-STEP 5: Test Binary (in Colab)
+STEP 5: Test Binary (in Kaggle)
 ================================================================================
 
 import os
@@ -132,7 +132,7 @@ os.environ['LD_LIBRARY_PATH'] = '/content/llama.cpp/build_cuda12_t4/bin'
 Should display help text without errors.
 
 ================================================================================
-STEP 6: Create Package (in Colab)
+STEP 6: Create Package (in Kaggle)
 ================================================================================
 
 # Create directory structure
@@ -156,10 +156,10 @@ from google.colab import files
 files.download('/content/llcuda-binaries-cuda12-t4.tar.gz')
 
 ================================================================================
-ALTERNATIVE: Use Local Script (after downloading from Colab)
+ALTERNATIVE: Use Local Script (after downloading from Kaggle)
 ================================================================================
 
-If you build in Colab and download the build directory, you can use:
+If you build in Kaggle and download the build directory, you can use:
 
 cd /media/waqasm86/External1/Project-Nvidia
 ./CREATE_RELEASE_PACKAGE.sh
@@ -200,22 +200,22 @@ FlashAttention Benefits:
 Troubleshooting
 ================================================================================
 
-If CMake fails in Colab:
+If CMake fails in Kaggle:
   1. Check CUDA: !nvcc --version
   2. Verify T4: !nvidia-smi
   3. Update cmake: !pip install cmake --upgrade
 
 If build fails:
-  1. Check Colab GPU is allocated (Runtime → Change runtime type → T4)
+  1. Check Kaggle GPU is allocated (Runtime → Change runtime type → T4)
   2. Clear output and restart: Runtime → Factory reset runtime
   3. Check disk space: !df -h
 
 If llama-server crashes:
   1. Library path: Set LD_LIBRARY_PATH correctly
-  2. CUDA version mismatch: Colab CUDA != Build CUDA
+  2. CUDA version mismatch: Kaggle CUDA != Build CUDA
   3. Wrong CC: Built for wrong GPU (should be 75 for T4)
 
-Colab-specific issues:
+Kaggle-specific issues:
   1. Session timeout: Save build artifacts to Google Drive
   2. Runtime disconnect: Build in multiple steps
   3. GPU not allocated: Select T4 GPU in runtime settings
@@ -238,9 +238,9 @@ Performance Comparison: T4 vs 940M
 After Build: Upload to GitHub Releases
 ================================================================================
 
-1. Download the .tar.gz file from Colab
+1. Download the .tar.gz file from Kaggle
 2. Go to: https://github.com/waqasm86/llcuda/releases
-3. Create new release: v1.2.0
+3. Create new release: v2.2.0
 4. Upload: llcuda-binaries-cuda12-t4.tar.gz
 5. Add release notes describing T4 optimizations
 
